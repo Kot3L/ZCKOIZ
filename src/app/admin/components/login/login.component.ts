@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { SupabaseService } from '../../../core/services/supabase.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 
 @Component({
   selector: 'app-login',
@@ -12,9 +12,11 @@ import { SupabaseService } from '../../../core/services/supabase.service';
       <div class="relative z-10 w-full max-w-md">
         <div class="comic-card !p-8 bg-surface">
           <div class="flex justify-center mb-6">
-            <div class="w-16 h-16 bg-orange-primary border-3 border-ink rounded-xl flex items-center justify-center font-heading text-white font-bold text-3xl shadow-[4px_4px_0_var(--color-ink)]">
-              Z
-            </div>
+            <img
+              src="/wlepka100szary.png"
+              alt="ZCKOiZ Zabrze"
+              class="w-16 h-16 object-contain rounded-xl border-3 border-ink bg-white shadow-[4px_4px_0_var(--color-ink)]"
+            />
           </div>
           <h1 class="text-center text-2xl text-ink mb-1">ZCKOiZ Zabrze</h1>
           <p class="text-center text-gray-500 text-sm mb-8">Zaloguj się do panelu administracyjnego</p>
@@ -75,7 +77,7 @@ export class LoginComponent {
   loading = signal(false);
 
   constructor(
-    private supabase: SupabaseService,
+    private fb: FirebaseService,
     private router: Router,
   ) {}
 
@@ -84,7 +86,7 @@ export class LoginComponent {
     this.error.set(null);
     this.loading.set(true);
     try {
-      await this.supabase.signIn(this.email, this.password);
+      await this.fb.signIn(this.email, this.password);
       this.router.navigate(['/admin']);
     } catch (e: any) {
       this.error.set(e?.message ?? 'Nie udało się zalogować.');

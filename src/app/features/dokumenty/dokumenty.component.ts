@@ -1,6 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { SupabaseService } from '../../core/services/supabase.service';
+import { FirebaseService } from '../../core/services/firebase.service';
 import { Document } from '../../core/models/database.types';
 
 @Component({
@@ -59,13 +59,10 @@ export class DokumentyComponent implements OnInit {
   documentsByCategory = (category: string) =>
     this.documents().filter(d => d.category === category);
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const { data } = await this.supabase.supabase
-      .from('documents')
-      .select('*')
-      .order('created_at', { ascending: false });
-    this.documents.set((data as Document[]) ?? []);
+    const data = await this.fb.listDocuments();
+    this.documents.set(data);
   }
 }

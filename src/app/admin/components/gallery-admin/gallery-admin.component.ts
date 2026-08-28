@@ -1,6 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SupabaseService } from '../../../core/services/supabase.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types';
 
 @Component({
@@ -79,26 +79,18 @@ export class GalleryAdminComponent implements OnInit {
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
     await Promise.all([this.loadAlbums(), this.loadImages()]);
   }
 
   async loadAlbums() {
-    const { data } = await this.supabase.supabase
-      .from('gallery_albums')
-      .select('*')
-      .order('display_order', { ascending: true });
-    this.albums.set((data as GalleryAlbum[]) ?? []);
+    this.albums.set(await this.fb.listAlbums());
   }
 
   async loadImages() {
-    const { data } = await this.supabase.supabase
-      .from('gallery_images')
-      .select('*')
-      .order('display_order', { ascending: true });
-    this.images.set((data as GalleryImage[]) ?? []);
+    this.images.set(await this.fb.listAllImages());
   }
 
   imagesByAlbum = (albumId: string) => this.images().filter(i => i.album_id === albumId);
@@ -107,27 +99,34 @@ export class GalleryAdminComponent implements OnInit {
     event.preventDefault();
     if (!this.newAlbumTitle.trim()) return;
     const slug = this.newAlbumTitle.toLowerCase().replace(/[^a-z0-9ąęśćżźół]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-    const { error } = await this.supabase.supabase.from('gallery_albums').insert([{
-      title: this.newAlbumTitle,
-      slug,
-      description: this.newAlbumDesc || null,
-      display_order: this.albums().length + 1,
-    }]);
-    if (error) { this.setMessage('Błąd: ' + error.message, 'error'); }
-    else {
+    try {
+      await this.fb.saveAlbum({
+        title: this.newAlbumTitle,
+        slug,
+        description: this.newAlbumDesc || null,
+        display_order: this.albums().length + 1,
+      });
       this.newAlbumTitle = '';
       this.newAlbumDesc = '';
       this.setMessage('Album utworzony.', 'success');
       await this.loadAlbums();
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e.message ?? e), 'error');
     }
   }
 
   async deleteAlbum(album: GalleryAlbum) {
     if (!confirm(`Usunąć album "${album.title}" wraz ze zdjęciami?`)) return;
-    await this.supabase.supabase.from('gallery_images').delete().eq('album_id', album.id);
-    const { error } = await this.supabase.supabase.from('gallery_albums').delete().eq('id', album.id);
-    if (error) this.setMessage('Błąd: ' + error.message, 'error');
-    else { this.setMessage('Usunięto.', 'success'); await Promise.all([this.loadAlbums(), this.loadImages()]); }
+    try {
+      for (const img of this.imagesByAlbum(album.id)) {
+        await this.fb.deleteImage(img.id);
+      }
+      await this.fb.deleteAlbum(album.id);
+      this.setMessage('Usunięto.', 'success');
+      await Promise.all([this.loadAlbums(), this.loadImages()]);
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e.message ?? e), 'error');
+    }
   }
 
   async uploadImages(input: HTMLInputElement, albumId: string) {
@@ -137,14 +136,16 @@ export class GalleryAdminComponent implements OnInit {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const path = `gallery/${albumId}/${Date.now()}-${i}.${file.name.split('.').pop()}`;
-      const { error } = await this.supabase.supabase.storage.from('media').upload(path, file);
-      if (error) { uploadError = error; continue; }
-      const { data } = this.supabase.supabase.storage.from('media').getPublicUrl(path);
-      await this.supabase.supabase.from('gallery_images').insert([{
-        album_id: albumId,
-        image_url: data.publicUrl,
-        display_order: i,
-      }]);
+      try {
+        const url = await this.fb.uploadFile(path, file);
+        await this.fb.saveImage({
+          album_id: albumId,
+          image_url: url,
+          display_order: i,
+        });
+      } catch (e: any) {
+        uploadError = e;
+      }
     }
     if (uploadError) this.setMessage('Część zdjęć nie została przesłana.', 'error');
     else this.setMessage('Zdjęcia dodane.', 'success');
@@ -153,9 +154,13 @@ export class GalleryAdminComponent implements OnInit {
   }
 
   async deleteImage(img: GalleryImage) {
-    const { error } = await this.supabase.supabase.from('gallery_images').delete().eq('id', img.id);
-    if (error) this.setMessage('Błąd: ' + error.message, 'error');
-    else { this.setMessage('Usunięto.', 'success'); await this.loadImages(); }
+    try {
+      await this.fb.deleteImage(img.id);
+      this.setMessage('Usunięto.', 'success');
+      await this.loadImages();
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e.message ?? e), 'error');
+    }
   }
 
   setMessage(msg: string, type: 'success' | 'error') {

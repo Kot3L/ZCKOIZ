@@ -1,6 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SupabaseService } from '../../../core/services/supabase.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 import { SiteSettings } from '../../../core/models/database.types';
 
 @Component({
@@ -45,19 +45,17 @@ export class SettingsAdminComponent implements OnInit {
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const { data } = await this.supabase.supabase.from('site_settings').select('*');
-    if (data) {
-      const map: Record<string, string> = {};
-      (data as SiteSettings[]).forEach(s => map[s.key] = s.value);
-      this.form = {
-        contact_address: map['contact_address'] ?? '',
-        contact_email: map['contact_email'] ?? '',
-        contact_phone: map['contact_phone'] ?? '',
-      };
-    }
+    const data = await this.fb.listSettings();
+    const map: Record<string, string> = {};
+    data.forEach(s => map[s.key] = s.value);
+    this.form = {
+      contact_address: map['contact_address'] ?? '',
+      contact_email: map['contact_email'] ?? '',
+      contact_phone: map['contact_phone'] ?? '',
+    };
   }
 
   async save(event: Event) {
@@ -67,15 +65,16 @@ export class SettingsAdminComponent implements OnInit {
       { key: 'contact_email', value: this.form.contact_email },
       { key: 'contact_phone', value: this.form.contact_phone },
     ];
-    for (const entry of entries) {
-      const { data: existing } = await this.supabase.supabase.from('site_settings').select('id').eq('key', entry.key).maybeSingle();
-      if (existing) {
-        await this.supabase.supabase.from('site_settings').update({ value: entry.value, updated_at: new Date().toISOString() }).eq('key', entry.key);
-      } else {
-        await this.supabase.supabase.from('site_settings').insert([{ key: entry.key, value: entry.value }]);
+    try {
+      const settings = await this.fb.listSettings();
+      for (const entry of entries) {
+        const existing = settings.find(s => s.key === entry.key);
+        await this.fb.saveSetting({ key: entry.key, value: entry.value }, existing?.id);
       }
+      this.setMessage('Ustawienia zapisane.', 'success');
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e.message ?? e), 'error');
     }
-    this.setMessage('Ustawienia zapisane.', 'success');
   }
 
   setMessage(msg: string, type: 'success' | 'error') {

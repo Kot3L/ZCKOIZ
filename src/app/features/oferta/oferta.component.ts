@@ -1,7 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ProgramCardComponent } from '../../shared/components/program-card/program-card.component';
-import { SupabaseService } from '../../core/services/supabase.service';
+import { FirebaseService } from '../../core/services/firebase.service';
 import { Program } from '../../core/models/database.types';
 
 @Component({
@@ -54,14 +54,10 @@ export class OfertaComponent implements OnInit {
     return this.programs().filter(p => p.school_type === f);
   };
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const { data } = await this.supabase.supabase
-      .from('programs')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
-    this.programs.set((data as Program[]) ?? []);
+    const data = await this.fb.listActivePrograms();
+    this.programs.set(data);
   }
 }

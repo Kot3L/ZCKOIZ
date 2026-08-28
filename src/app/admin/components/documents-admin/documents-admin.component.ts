@@ -1,6 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SupabaseService } from '../../../core/services/supabase.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 import { Document } from '../../../core/models/database.types';
 
 @Component({
@@ -102,15 +102,14 @@ export class DocumentsAdminComponent implements OnInit {
 
   form = { id: '', title: '', description: '', file_url: '', category: 'Rekrutacja' };
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
     await this.load();
   }
 
   async load() {
-    const { data } = await this.supabase.supabase.from('documents').select('*').order('created_at', { ascending: false });
-    this.items.set((data as Document[]) ?? []);
+    this.items.set(await this.fb.listDocuments());
   }
 
   toggleEditor(item: Document | null) {
@@ -129,22 +128,25 @@ export class DocumentsAdminComponent implements OnInit {
   async saveItem(event: Event) {
     event.preventDefault();
     const payload = { title: this.form.title, description: this.form.description || null, file_url: this.form.file_url, category: this.form.category };
-    const { error } = this.form.id
-      ? await this.supabase.supabase.from('documents').update(payload).eq('id', this.form.id)
-      : await this.supabase.supabase.from('documents').insert([payload]);
-    if (error) this.setMessage('Błąd: ' + error.message, 'error');
-    else {
+    try {
+      await this.fb.saveDocument(payload as Document, this.form.id || undefined);
       this.setMessage('Zapisano.', 'success');
       this.editing.set(false);
       await this.load();
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e.message ?? e), 'error');
     }
   }
 
   async deleteItem(item: Document) {
     if (!confirm(`Usunąć dokument "${item.title}"?`)) return;
-    const { error } = await this.supabase.supabase.from('documents').delete().eq('id', item.id);
-    if (error) this.setMessage('Błąd: ' + error.message, 'error');
-    else { this.setMessage('Usunięto.', 'success'); await this.load(); }
+    try {
+      await this.fb.deleteDocument(item.id);
+      this.setMessage('Usunięto.', 'success');
+      await this.load();
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e.message ?? e), 'error');
+    }
   }
 
   async uploadFile(event: Event) {
@@ -152,10 +154,11 @@ export class DocumentsAdminComponent implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
     const path = `documents/${Date.now()}.pdf`;
-    const { error } = await this.supabase.supabase.storage.from('media').upload(path, file);
-    if (error) { this.setMessage('Upload failed: ' + error.message, 'error'); return; }
-    const { data } = this.supabase.supabase.storage.from('media').getPublicUrl(path);
-    this.form.file_url = data.publicUrl;
+    try {
+      this.form.file_url = await this.fb.uploadFile(path, file);
+    } catch (e: any) {
+      this.setMessage('Upload failed: ' + (e.message ?? e), 'error');
+    }
   }
 
   setMessage(msg: string, type: 'success' | 'error') {

@@ -2,7 +2,7 @@ import { Component, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
-import { SupabaseService } from '../../../core/services/supabase.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -72,27 +72,26 @@ export class DashboardComponent implements OnInit {
   stats = signal({ news: 0, programs: 0, albums: 0, images: 0, documents: 0, staff: 0 });
   recentNews = signal<any[]>([]);
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const [newsRes, programsRes, albumsRes, imagesRes, docsRes, staffRes, recentRes] = await Promise.all([
-      this.supabase.supabase.from('news').select('id', { count: 'exact' }),
-      this.supabase.supabase.from('programs').select('id', { count: 'exact' }),
-      this.supabase.supabase.from('gallery_albums').select('id', { count: 'exact' }),
-      this.supabase.supabase.from('gallery_images').select('id', { count: 'exact' }),
-      this.supabase.supabase.from('documents').select('id', { count: 'exact' }),
-      this.supabase.supabase.from('staff').select('id', { count: 'exact' }),
-      this.supabase.supabase.from('news').select('*').order('created_at', { ascending: false }).limit(5),
+    const [news, programs, albums, images, docs, staff] = await Promise.all([
+      this.fb.listNews(),
+      this.fb.listPrograms(),
+      this.fb.listAlbums(),
+      this.fb.listAllImages(),
+      this.fb.listDocuments(),
+      this.fb.listStaff(),
     ]);
 
     this.stats.set({
-      news: newsRes.count ?? 0,
-      programs: programsRes.count ?? 0,
-      albums: albumsRes.count ?? 0,
-      images: imagesRes.count ?? 0,
-      documents: docsRes.count ?? 0,
-      staff: staffRes.count ?? 0,
+      news: news.length,
+      programs: programs.length,
+      albums: albums.length,
+      images: images.length,
+      documents: docs.length,
+      staff: staff.length,
     });
-    this.recentNews.set(recentRes.data ?? []);
+    this.recentNews.set(news.slice(0, 5));
   }
 }

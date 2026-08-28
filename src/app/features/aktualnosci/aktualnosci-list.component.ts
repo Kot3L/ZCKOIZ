@@ -1,7 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { NewsCardComponent } from '../../shared/components/news-card/news-card.component';
-import { SupabaseService } from '../../core/services/supabase.service';
+import { FirebaseService } from '../../core/services/firebase.service';
 import { News } from '../../core/models/database.types';
 
 @Component({
@@ -29,14 +29,10 @@ import { News } from '../../core/models/database.types';
 export class AktualnosciListComponent implements OnInit {
   news = signal<News[]>([]);
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const { data } = await this.supabase.supabase
-      .from('news')
-      .select('*')
-      .eq('status', 'published')
-      .order('published_at', { ascending: false });
-    this.news.set((data as News[]) ?? []);
+    const data = await this.fb.listPublishedNews();
+    this.news.set(data);
   }
 }

@@ -1,7 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { SupabaseService } from '../../core/services/supabase.service';
+import { FirebaseService } from '../../core/services/firebase.service';
 import { Program } from '../../core/models/database.types';
 
 @Component({
@@ -64,18 +64,14 @@ export class ProgramDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private supabase: SupabaseService,
+    private fb: FirebaseService,
   ) {}
 
   async ngOnInit() {
     const slug = this.route.snapshot.paramMap.get('slug');
     if (!slug) return;
 
-    const { data } = await this.supabase.supabase
-      .from('programs')
-      .select('*')
-      .eq('slug', slug)
-      .single();
-    this.program.set(data as Program | null);
+    const data = await this.fb.getProgramBySlug(slug);
+    this.program.set(data);
   }
 }

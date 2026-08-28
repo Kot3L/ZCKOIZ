@@ -1,6 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SupabaseService } from '../../../core/services/supabase.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 import { Staff } from '../../../core/models/database.types';
 
 @Component({
@@ -120,15 +120,14 @@ export class StaffAdminComponent implements OnInit {
     display_order: 0, is_management: false,
   };
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
     await this.load();
   }
 
   async load() {
-    const { data } = await this.supabase.supabase.from('staff').select('*').order('display_order', { ascending: true });
-    this.items.set((data as Staff[]) ?? []);
+    this.items.set(await this.fb.listStaff());
   }
 
   toggleEditor(item: Staff | null) {
@@ -146,7 +145,7 @@ export class StaffAdminComponent implements OnInit {
 
   async saveItem(event: Event) {
     event.preventDefault();
-    const payload = {
+    const payload: any = {
       full_name: this.form.full_name,
       position: this.form.position,
       department: this.form.department || null,
@@ -156,18 +155,26 @@ export class StaffAdminComponent implements OnInit {
       display_order: this.form.display_order,
       is_management: this.form.is_management,
     };
-    const { error } = this.form.id
-      ? await this.supabase.supabase.from('staff').update(payload).eq('id', this.form.id)
-      : await this.supabase.supabase.from('staff').insert([payload]);
+    let error: any;
+    try {
+      await this.fb.saveStaff(payload, this.form.id || undefined);
+    } catch (e) {
+      error = e;
+    }
     if (error) this.setMessage('Błąd: ' + error.message, 'error');
     else { this.setMessage('Zapisano.', 'success'); this.editing.set(false); await this.load(); }
   }
 
   async deleteItem(item: Staff) {
     if (!confirm(`Usunąć pracownika "${item.full_name}"?`)) return;
-    const { error } = await this.supabase.supabase.from('staff').delete().eq('id', item.id);
-    if (error) this.setMessage('Błąd: ' + error.message, 'error');
-    else { this.setMessage('Usunięto.', 'success'); await this.load(); }
+    try {
+      await this.fb.deleteStaff(item.id);
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + e.message, 'error');
+      return;
+    }
+    this.setMessage('Usunięto.', 'success');
+    await this.load();
   }
 
   async uploadPhoto(event: Event) {
@@ -175,10 +182,11 @@ export class StaffAdminComponent implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
     const path = `staff/${Date.now()}.${file.name.split('.').pop()}`;
-    const { error } = await this.supabase.supabase.storage.from('media').upload(path, file);
-    if (error) { this.setMessage('Upload failed: ' + error.message, 'error'); return; }
-    const { data } = this.supabase.supabase.storage.from('media').getPublicUrl(path);
-    this.form.photo_url = data.publicUrl;
+    try {
+      this.form.photo_url = await this.fb.uploadFile(path, file);
+    } catch (e: any) {
+      this.setMessage('Upload failed: ' + e.message, 'error');
+    }
   }
 
   setMessage(msg: string, type: 'success' | 'error') {

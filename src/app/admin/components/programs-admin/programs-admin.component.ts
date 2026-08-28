@@ -1,6 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SupabaseService } from '../../../core/services/supabase.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 import { Program } from '../../../core/models/database.types';
 
 @Component({
@@ -26,15 +26,9 @@ import { Program } from '../../../core/models/database.types';
         <div class="comic-card">
           <h2 class="font-heading text-xl text-orange-primary mb-4">{{ form.id ? 'Edytuj kierunek' : 'Nowy kierunek' }}</h2>
           <form (submit)="saveItem($event)" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm font-semibold mb-1">Nazwa kierunku</label>
-                <input [(ngModel)]="form.title" name="title" required class="w-full px-4 py-2.5 border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" />
-              </div>
-              <div>
-                <label class="block text-sm font-semibold mb-1">Slug (URL)</label>
-                <input [(ngModel)]="form.slug" name="slug" class="w-full px-4 py-2.5 border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" placeholder="auto" />
-              </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">Nazwa kierunku</label>
+              <input [(ngModel)]="form.title" name="title" required class="w-full px-4 py-2.5 border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" />
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -66,14 +60,6 @@ import { Program } from '../../../core/models/database.types';
             <div>
               <label class="block text-sm font-semibold mb-1">Perspektywy pracy</label>
               <textarea [(ngModel)]="form.career_prospects" name="career_prospects" rows="3" class="w-full px-4 py-2.5 border-2 border-ink rounded-lg"></textarea>
-            </div>
-            <div>
-              <label class="block text-sm font-semibold mb-1">URL grafiki</label>
-              <div class="flex gap-2">
-                <input [(ngModel)]="form.cover_image_url" name="cover_image_url" class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg" placeholder="https://..." />
-                <button type="button" (click)="imgInput.click()" class="comic-btn text-sm bg-surface text-ink">Upload</button>
-                <input #imgInput type="file" accept="image/*" class="hidden" (change)="uploadImage($event)" />
-              </div>
             </div>
             <div class="flex gap-3">
               <button type="submit" class="comic-btn-primary text-sm">Zapisz</button>
@@ -130,28 +116,22 @@ export class ProgramsAdminComponent implements OnInit {
   form = {
     id: '',
     title: '',
-    slug: '',
     description: '',
     what_you_learn: '',
     career_prospects: '',
     school_type: 'technikum',
-    cover_image_url: '',
     display_order: 0,
     is_active: true,
   };
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
     await this.load();
   }
 
   async load() {
-    const { data } = await this.supabase.supabase
-      .from('programs')
-      .select('*')
-      .order('display_order', { ascending: true });
-    this.items.set((data as Program[]) ?? []);
+    this.items.set(await this.fb.listPrograms());
   }
 
   toggleEditor(item: Program | null) {
@@ -159,41 +139,56 @@ export class ProgramsAdminComponent implements OnInit {
       this.form = {
         id: item.id,
         title: item.title,
-        slug: item.slug,
         description: item.description,
         what_you_learn: item.what_you_learn,
         career_prospects: item.career_prospects,
         school_type: item.school_type,
-        cover_image_url: item.cover_image_url ?? '',
         display_order: item.display_order,
         is_active: item.is_active,
       };
     } else {
-      this.form = { id: '', title: '', slug: '', description: '', what_you_learn: '', career_prospects: '', school_type: 'technikum', cover_image_url: '', display_order: this.items().length + 1, is_active: true };
+      this.form = {
+        id: '',
+        title: '',
+        description: '',
+        what_you_learn: '',
+        career_prospects: '',
+        school_type: 'technikum',
+        display_order: this.items().length + 1,
+        is_active: true,
+      };
     }
     this.editing.set(true);
   }
 
+  private slugify(title: string): string {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9ąęśćżźół]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
   async saveItem(event: Event) {
     event.preventDefault();
-    const slug = this.form.slug || this.form.title.toLowerCase().replace(/[^a-z0-9ąęśćżźół]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
-    const payload = {
+    const payload: any = {
       title: this.form.title,
-      slug,
+      slug: this.slugify(this.form.title),
       description: this.form.description,
       what_you_learn: this.form.what_you_learn,
       career_prospects: this.form.career_prospects,
       school_type: this.form.school_type,
-      cover_image_url: this.form.cover_image_url || null,
       display_order: this.form.display_order,
       is_active: this.form.is_active,
-      updated_at: new Date().toISOString(),
     };
 
-    const { error } = this.form.id
-      ? await this.supabase.supabase.from('programs').update(payload).eq('id', this.form.id)
-      : await this.supabase.supabase.from('programs').insert([payload]);
+    let error: any;
+    try {
+      await this.fb.saveProgram(payload, this.form.id || undefined);
+    } catch (e) {
+      error = e;
+    }
 
     if (error) {
       this.setMessage('Błąd: ' + error.message, 'error');
@@ -206,20 +201,14 @@ export class ProgramsAdminComponent implements OnInit {
 
   async deleteItem(item: Program) {
     if (!confirm(`Usunąć kierunek "${item.title}"?`)) return;
-    const { error } = await this.supabase.supabase.from('programs').delete().eq('id', item.id);
-    if (error) this.setMessage('Błąd: ' + error.message, 'error');
-    else { this.setMessage('Usunięto.', 'success'); await this.load(); }
-  }
-
-  async uploadImage(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    const path = `programs/${Date.now()}.${file.name.split('.').pop()}`;
-    const { error } = await this.supabase.supabase.storage.from('media').upload(path, file);
-    if (error) { this.setMessage('Upload failed: ' + error.message, 'error'); return; }
-    const { data } = this.supabase.supabase.storage.from('media').getPublicUrl(path);
-    this.form.cover_image_url = data.publicUrl;
+    try {
+      await this.fb.deleteProgram(item.id);
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + e.message, 'error');
+      return;
+    }
+    this.setMessage('Usunięto.', 'success');
+    await this.load();
   }
 
   setMessage(msg: string, type: 'success' | 'error') {

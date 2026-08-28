@@ -1,7 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { LightboxComponent } from '../../shared/components/lightbox/lightbox.component';
-import { SupabaseService } from '../../core/services/supabase.service';
+import { FirebaseService } from '../../core/services/firebase.service';
 import { GalleryAlbum, GalleryImage } from '../../core/models/database.types';
 
 @Component({
@@ -55,23 +55,16 @@ export class GaleriaComponent implements OnInit {
   lightboxOpen = signal(false);
   currentImageIndex = signal(0);
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const { data } = await this.supabase.supabase
-      .from('gallery_albums')
-      .select('*')
-      .order('display_order', { ascending: true });
-    this.albums.set((data as GalleryAlbum[]) ?? []);
+    const data = await this.fb.listAlbums();
+    this.albums.set(data);
   }
 
   async openAlbum(albumId: string) {
-    const { data } = await this.supabase.supabase
-      .from('gallery_images')
-      .select('*')
-      .eq('album_id', albumId)
-      .order('display_order', { ascending: true });
-    const images = (data as GalleryImage[]) ?? [];
+    const data = await this.fb.listGalleryImages(albumId);
+    const images = data ?? [];
     if (images.length === 0) return;
     this.albumImages.set(images);
     this.currentImageIndex.set(0);

@@ -2,7 +2,7 @@ import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NewsCardComponent } from '../../shared/components/news-card/news-card.component';
 import { ProgramCardComponent } from '../../shared/components/program-card/program-card.component';
-import { SupabaseService } from '../../core/services/supabase.service';
+import { FirebaseService } from '../../core/services/firebase.service';
 import { News, Program, HeroSlide } from '../../core/models/database.types';
 
 @Component({
@@ -203,7 +203,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   currentSlide = signal(0);
   private sliderInterval: ReturnType<typeof setInterval> | null = null;
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
     await Promise.all([
@@ -224,11 +224,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private async loadHeroSlides() {
-    const { data } = await this.supabase.supabase
-      .from('site_settings')
-      .select('value')
-      .eq('key', 'hero_slides')
-      .single();
+    const data = await this.fb.getSetting('hero_slides');
     if (data) {
       try {
         this.heroSlides.set(JSON.parse(data.value) as HeroSlide[]);
@@ -239,22 +235,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private async loadPrograms() {
-    const { data } = await this.supabase.supabase
-      .from('programs')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true })
-      .limit(6);
-    this.programs.set((data as Program[]) ?? []);
+    const data = await this.fb.listActivePrograms();
+    this.programs.set(data);
   }
 
   private async loadLatestNews() {
-    const { data } = await this.supabase.supabase
-      .from('news')
-      .select('*')
-      .eq('status', 'published')
-      .order('published_at', { ascending: false })
-      .limit(3);
-    this.latestNews.set((data as News[]) ?? []);
+    const data = await this.fb.listPublishedNews();
+    this.latestNews.set(data.slice(0, 3));
   }
 }

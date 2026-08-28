@@ -1,6 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
-import { SupabaseService } from '../../../core/services/supabase.service';
+import { FirebaseService } from '../../../core/services/firebase.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -11,9 +11,11 @@ import { SupabaseService } from '../../../core/services/supabase.service';
       <aside class="hidden lg:flex w-64 bg-dark text-white flex-col shrink-0">
         <div class="p-6 border-b border-gray-800">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-orange-primary border-2 border-white rounded-lg flex items-center justify-center font-heading text-white font-bold shadow-[2px_2px_0_rgba(255,255,255,0.2)]">
-              Z
-            </div>
+            <img
+              src="/wlepka100szary.png"
+              alt="ZCKOiZ Zabrze"
+              class="w-10 h-10 object-contain rounded-lg border-2 border-white bg-white shadow-[2px_2px_0_rgba(255,255,255,0.2)]"
+            />
             <div>
               <span class="font-heading font-bold block">ZCKOiZ</span>
               <span class="text-xs text-gray-400">Panel administracyjny</span>
@@ -50,7 +52,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
 
       <div class="flex-1 flex flex-col min-w-0">
         <header class="bg-surface border-b border-ink/10 px-4 lg:px-8 py-4 flex items-center justify-between lg:justify-end">
-          @if (profile()) {
+          @if (user()) {
             <div class="flex items-center gap-3 lg:hidden">
               <button (click)="mobileNav.set(!mobileNav())" class="p-2 border-2 border-ink rounded-lg" aria-label="Menu">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -59,15 +61,11 @@ import { SupabaseService } from '../../../core/services/supabase.service';
             </div>
             <div class="flex items-center gap-3">
               <div class="text-right hidden sm:block">
-                <p class="text-sm font-semibold">{{ profile()!.full_name || profile()!.email }}</p>
-                <p class="text-xs text-gray-500 flex gap-1">
-                  @for (role of roles(); track role) {
-                    <span class="badge-petrol text-[10px] px-2 py-0.5">{{ role }}</span>
-                  }
-                </p>
+                <p class="text-sm font-semibold">{{ user()?.email }}</p>
+                <p class="text-xs text-gray-500">Administrator</p>
               </div>
               <div class="w-10 h-10 rounded-full border-2 border-ink bg-petrol text-white flex items-center justify-center font-heading font-bold">
-                {{ (profile()!.full_name || profile()!.email).charAt(0).toUpperCase() }}
+                {{ (user()?.email ?? '').charAt(0).toUpperCase() }}
               </div>
             </div>
           }
@@ -104,34 +102,26 @@ export class AdminLayoutComponent implements OnInit {
   mobileNav = signal(false);
 
   constructor(
-    private supabase: SupabaseService,
+    private fb: FirebaseService,
     private router: Router,
   ) {}
 
   ngOnInit() {}
 
-  profile = () => this.supabase.profile();
-  roles = () => this.supabase.roles();
-  isAdmin = () => this.supabase.isAdmin();
+  user = () => this.fb.user();
 
-  navItems = () => {
-    const items = [
-      { path: '/admin', exact: true, icon: '📊', label: 'Dashboard' },
-      { path: '/admin/aktualnosci', exact: false, icon: '📰', label: 'Aktualności' },
-      { path: '/admin/kierunki', exact: false, icon: '🎓', label: 'Kierunki kształcenia' },
-      { path: '/admin/galeria', exact: false, icon: '🖼️', label: 'Galeria' },
-      { path: '/admin/dokumenty', exact: false, icon: '📄', label: 'Dokumenty' },
-      { path: '/admin/kadra', exact: false, icon: '👥', label: 'Kadra' },
-      { path: '/admin/ustawienia', exact: false, icon: '⚙️', label: 'Ustawienia' },
-    ];
-    if (this.isAdmin()) {
-      items.push({ path: '/admin/uzytkownicy', exact: false, icon: '🔐', label: 'Użytkownicy' });
-    }
-    return items;
-  };
+  navItems = () => [
+    { path: '/admin', exact: true, icon: '📊', label: 'Dashboard' },
+    { path: '/admin/aktualnosci', exact: false, icon: '📰', label: 'Aktualności' },
+    { path: '/admin/kierunki', exact: false, icon: '🎓', label: 'Kierunki kształcenia' },
+    { path: '/admin/galeria', exact: false, icon: '🖼️', label: 'Galeria' },
+    { path: '/admin/dokumenty', exact: false, icon: '📄', label: 'Dokumenty' },
+    { path: '/admin/kadra', exact: false, icon: '👥', label: 'Kadra' },
+    { path: '/admin/ustawienia', exact: false, icon: '⚙️', label: 'Ustawienia' },
+  ];
 
   async logout() {
-    await this.supabase.signOut();
+    await this.fb.signOut();
     this.router.navigate(['/admin/login']);
   }
 }

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { editorGuard, adminGuard } from '../core/guards/auth.guard';
+import { authGuard } from '../core/guards/auth.guard';
 
 export const adminRoutes: Routes = [
   {
@@ -13,37 +13,32 @@ export const adminRoutes: Routes = [
       },
       {
         path: 'aktualnosci',
-        canActivate: [editorGuard],
+        canActivate: [authGuard],
         loadComponent: () => import('./components/news-admin/news-admin.component').then(m => m.NewsAdminComponent),
       },
       {
         path: 'kierunki',
-        canActivate: [editorGuard],
+        canActivate: [authGuard],
         loadComponent: () => import('./components/programs-admin/programs-admin.component').then(m => m.ProgramsAdminComponent),
       },
       {
         path: 'galeria',
-        canActivate: [editorGuard],
+        canActivate: [authGuard],
         loadComponent: () => import('./components/gallery-admin/gallery-admin.component').then(m => m.GalleryAdminComponent),
       },
       {
         path: 'dokumenty',
-        canActivate: [editorGuard],
+        canActivate: [authGuard],
         loadComponent: () => import('./components/documents-admin/documents-admin.component').then(m => m.DocumentsAdminComponent),
       },
       {
         path: 'kadra',
-        canActivate: [editorGuard],
+        canActivate: [authGuard],
         loadComponent: () => import('./components/staff-admin/staff-admin.component').then(m => m.StaffAdminComponent),
       },
       {
-        path: 'uzytkownicy',
-        canActivate: [adminGuard],
-        loadComponent: () => import('./components/users-admin/users-admin.component').then(m => m.UsersAdminComponent),
-      },
-      {
         path: 'ustawienia',
-        canActivate: [editorGuard],
+        canActivate: [authGuard],
         loadComponent: () => import('./components/settings-admin/settings-admin.component').then(m => m.SettingsAdminComponent),
       },
     ],

@@ -1,8 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ContactFormComponent } from '../../shared/components/contact-form/contact-form.component';
-import { SupabaseService } from '../../core/services/supabase.service';
-import { SiteSettings } from '../../core/models/database.types';
+import { FirebaseService } from '../../core/services/firebase.service';
 
 @Component({
   selector: 'app-kontakt',
@@ -64,14 +63,10 @@ export class KontaktComponent implements OnInit {
   phone = '(32) 271-XX-XX';
   messageSent = signal(false);
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const { data } = await this.supabase.supabase
-      .from('site_settings')
-      .select('*');
-    if (!data) return;
-    const settings = data as SiteSettings[];
+    const settings = await this.fb.listSettings();
     const get = (key: string) => settings.find(s => s.key === key)?.value;
     if (get('contact_address')) this.address = get('contact_address')!;
     if (get('contact_email')) this.email = get('contact_email')!;

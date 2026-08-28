@@ -1,6 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { SupabaseService } from '../../core/services/supabase.service';
+import { FirebaseService } from '../../core/services/firebase.service';
 import { Staff } from '../../core/models/database.types';
 
 @Component({
@@ -71,14 +71,10 @@ export class KadraComponent implements OnInit {
   management = signal<Staff[]>([]);
   teachers = signal<Staff[]>([]);
 
-  constructor(private supabase: SupabaseService) {}
+  constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const { data } = await this.supabase.supabase
-      .from('staff')
-      .select('*')
-      .order('display_order', { ascending: true });
-    const all = (data as Staff[]) ?? [];
+    const all = await this.fb.listStaff();
     this.management.set(all.filter(s => s.is_management));
     this.teachers.set(all.filter(s => !s.is_management));
   }

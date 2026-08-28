@@ -2,7 +2,7 @@ import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
-import { SupabaseService } from '../../core/services/supabase.service';
+import { FirebaseService } from '../../core/services/firebase.service';
 import { News } from '../../core/models/database.types';
 
 @Component({
@@ -45,18 +45,14 @@ export class AktualnoscDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private supabase: SupabaseService,
+    private fb: FirebaseService,
   ) {}
 
   async ngOnInit() {
     const slug = this.route.snapshot.paramMap.get('slug');
     if (!slug) return;
 
-    const { data } = await this.supabase.supabase
-      .from('news')
-      .select('*')
-      .eq('slug', slug)
-      .single();
-    this.item.set(data as News | null);
+    const data = await this.fb.getNewsBySlug(slug);
+    this.item.set(data);
   }
 }
