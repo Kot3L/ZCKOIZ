@@ -132,10 +132,12 @@ export class GalleryAdminComponent implements OnInit {
   async uploadImages(input: HTMLInputElement, albumId: string) {
     const files = input.files;
     if (!files || files.length === 0) return;
-    let uploadError: any = null;
+    let firstError: any = null;
+    let uploaded = 0;
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const path = `gallery/${albumId}/${Date.now()}-${i}.${file.name.split('.').pop()}`;
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `gallery/${albumId}/${Date.now()}-${i}.${ext}`;
       try {
         const url = await this.fb.uploadFile(path, file);
         await this.fb.saveImage({
@@ -143,12 +145,17 @@ export class GalleryAdminComponent implements OnInit {
           image_url: url,
           display_order: i,
         });
+        uploaded++;
       } catch (e: any) {
-        uploadError = e;
+        firstError = firstError ?? e;
       }
     }
-    if (uploadError) this.setMessage('Część zdjęć nie została przesłana.', 'error');
-    else this.setMessage('Zdjęcia dodane.', 'success');
+    if (firstError) {
+      this.setMessage('Błąd przesyłania zdjęć: ' + (firstError?.message ?? firstError), 'error');
+      console.error('Upload gallery error', firstError);
+    } else {
+      this.setMessage('Dodano ' + uploaded + ' zdjęć.', 'success');
+    }
     input.value = '';
     await this.loadImages();
   }
