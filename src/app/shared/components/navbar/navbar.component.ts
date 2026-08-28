@@ -54,6 +54,31 @@ import { ThemeService } from '../../../core/services/theme.service';
             </button>
 
             <button
+              (click)="theme.setContrast('bw')"
+              class="comic-icon-btn"
+              [class.hc-active]="theme.contrast() === 'bw'"
+              title="Set high contrast black and white mode"
+              aria-label="Wysoki kontrast czarno-biały">
+              <span class="w-4 h-4 rounded-sm bg-white border-2 border-current"></span>
+            </button>
+            <button
+              (click)="theme.setContrast('black-yellow')"
+              class="comic-icon-btn"
+              [class.hc-active]="theme.contrast() === 'black-yellow'"
+              title="Set high contrast black and yellow"
+              aria-label="Wysoki kontrast czarno-żółty">
+              <span class="w-4 h-4 rounded-sm bg-black border-2 border-[#FFD300]"></span>
+            </button>
+            <button
+              (click)="theme.setContrast('yellow-black')"
+              class="comic-icon-btn"
+              [class.hc-active]="theme.contrast() === 'yellow-black'"
+              title="Set high contrast yellow and black"
+              aria-label="Wysoki kontrast żółto-czarny">
+              <span class="w-4 h-4 rounded-sm bg-[#FFD300] border-2 border-black"></span>
+            </button>
+
+            <button
               (click)="mobileOpen.set(!mobileOpen())"
               class="lg:hidden comic-icon-btn"
               aria-label="Menu">

@@ -83,6 +83,99 @@
   --color-blue-950: #0D2240;
 }
 
+/* ===== High contrast modes (class on <html>) ===== */
+/* These come after .dark so the palette is fully overridden when active. */
+
+/* Black & white */
+.hc-bw {
+  color-scheme: light;
+  --color-cream: #FFFFFF;
+  --color-cream-dark: #EfEfEF;
+  --color-ink: #000000;
+  --color-ink-light: #111111;
+  --color-surface: #FFFFFF;
+  --color-surface-line: #000000;
+  --color-hero: #000000;
+  --color-quicklinks: #000000;
+  --color-tile: #000000;
+  --color-star: #FFFFFF;
+  --color-btn-primary: #000000;
+  --color-btn-primary-dark: #000000;
+  --color-blue-primary: #000000;
+  --color-blue-dark: #000000;
+  --color-petrol: #000000;
+  --color-orange-primary: #000000;
+  --color-orange-dark: #000000;
+  --color-yellow-accent: #000000;
+  --color-orange-50: #FFFFFF;
+  --color-orange-100: #FFFFFF;
+  --color-blue-100: #FFFFFF;
+  --color-blue-950: #000000;
+}
+
+/* Black background, yellow text */
+.hc-black-yellow {
+  color-scheme: dark;
+  --color-cream: #000000;
+  --color-cream-dark: #0A0A0A;
+  --color-ink: #FFD300;
+  --color-ink-light: #E8C200;
+  --color-surface: #000000;
+  --color-surface-line: #FFD300;
+  --color-hero: #000000;
+  --color-quicklinks: #000000;
+  --color-tile: #000000;
+  --color-star: #FFD300;
+  --color-btn-primary: #FFD300;
+  --color-btn-primary-dark: #FFD300;
+  --color-blue-primary: #000000;
+  --color-blue-dark: #000000;
+  --color-petrol: #000000;
+  --color-orange-primary: #FFD300;
+  --color-orange-dark: #FFD300;
+  --color-yellow-accent: #FFD300;
+  --color-orange-50: #000000;
+  --color-orange-100: #FFD300;
+  --color-blue-100: #FFD300;
+  --color-blue-950: #000000;
+}
+
+/* Yellow background, black text */
+.hc-yellow-black {
+  color-scheme: light;
+  --color-cream: #FFD300;
+  --color-cream-dark: #E6BE00;
+  --color-ink: #000000;
+  --color-ink-light: #111111;
+  --color-surface: #FFD300;
+  --color-surface-line: #000000;
+  --color-hero: #000000;
+  --color-quicklinks: #000000;
+  --color-tile: #000000;
+  --color-star: #FFD300;
+  --color-btn-primary: #000000;
+  --color-btn-primary-dark: #000000;
+  --color-blue-primary: #000000;
+  --color-blue-dark: #000000;
+  --color-petrol: #000000;
+  --color-orange-primary: #000000;
+  --color-orange-dark: #000000;
+  --color-yellow-accent: #FFD300;
+  --color-orange-50: #FFD300;
+  --color-orange-100: #FFD300;
+  --color-blue-100: #FFD300;
+  --color-blue-950: #000000;
+}
+
+/* Force the primary button text for readable contrast in each mode */
+.hc-bw .comic-btn-primary,
+.hc-yellow-black .comic-btn-primary {
+  color: #FFFFFF;
+}
+.hc-black-yellow .comic-btn-primary {
+  color: #000000;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -234,6 +327,12 @@
   .comic-icon-btn:active {
     box-shadow: 0 0 0 var(--color-ink);
     transform: translate(3px, 3px) rotate(0deg);
+  }
+
+  .comic-icon-btn.hc-active {
+    background-color: var(--color-orange-primary);
+    color: #fff;
+    border-color: var(--color-orange-primary);
   }
 
   /* ===== Cards ===== */
