@@ -46,7 +46,7 @@ import { SiteSettings } from '../../core/models/database.types';
 
           <div class="comic-border overflow-hidden min-h-[380px] h-full">
             <iframe
-              src="https://maps.google.com/maps?q=ZCKOiZ%20Zabrze%20ul.%20Wyzwolenia%2030&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              src="https://maps.google.com/maps?q=ZCKOiZ%20Zabrze%20Pi%C5%82sudskiego%2058%2C%2041-800%20Zabrze&t=&z=15&ie=UTF8&iwloc=&output=embed"
               class="w-full h-full min-h-[380px]"
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"
@@ -59,7 +59,7 @@ import { SiteSettings } from '../../core/models/database.types';
   `,
 })
 export class KontaktComponent implements OnInit {
-  address = 'ul. Wyzwolenia 30, 41-800 Zabrze';
+  address = 'Piłsudskiego 58, 41-800 Zabrze';
   email = 'sekretariat@zckoiz.zabrze.pl';
   phone = '(32) 271-XX-XX';
   messageSent = signal(false);

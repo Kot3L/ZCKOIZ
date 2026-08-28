@@ -103,7 +103,7 @@ insert into public.staff (full_name, position, department, email, is_management,
 -- SITE SETTINGS
 -- =====================================================================
 insert into public.site_settings (key, value) values
-('contact_address', 'ul. Wyzwolenia 30, 41-800 Zabrze'),
+('contact_address', 'Piłsudskiego 58, 41-800 Zabrze'),
 ('contact_email', 'sekretariat@zckoiz.zabrze.pl'),
 ('contact_phone', '(32) 271-XX-XX'),
 ('hero_slides', jsonb_build_array(

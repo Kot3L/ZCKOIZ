@@ -35,7 +35,7 @@ import { ThemeService } from '../../../core/services/theme.service';
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
-            <a routerLink="/kontakt" class="comic-btn-primary text-sm py-2 px-4 hidden lg:inline-flex">
+            <a routerLink="/rekrutacja" class="comic-btn-primary text-sm py-2 px-4 hidden lg:inline-flex">
               Rekrutacja
             </a>
 
@@ -108,7 +108,7 @@ import { ThemeService } from '../../../core/services/theme.service';
               </a>
             }
             <a
-              routerLink="/kontakt"
+              routerLink="/rekrutacja"
               (click)="mobileOpen.set(false)"
               class="comic-btn-primary text-center w-full mt-4">
               Rekrutacja
@@ -131,6 +131,7 @@ export class NavbarComponent {
     { label: 'Galeria', path: '/galeria', exact: false },
     { label: 'Dokumenty', path: '/dokumenty', exact: false },
     { label: 'Kadra', path: '/kadra', exact: false },
+    { label: 'Rekrutacja', path: '/rekrutacja', exact: false },
     { label: 'Kontakt', path: '/kontakt', exact: false },
   ];
 }

@@ -88,7 +88,17 @@ export const routes: Routes = [
     data: {
       seo: {
         title: 'Kontakt',
-        description: 'Skontaktuj się z ZCKOiZ Zabrze - dane kontaktowe, godziny pracy sekretariatu.',
+        description: 'Skontaktuj si�t z ZCKOiZ Zabrze - dane kontaktowe, godziny pracy sekretariatu.',
+      },
+    },
+  },
+  {
+    path: 'rekrutacja',
+    loadComponent: () => import('./features/rekrutacja/rekrutacja.component').then(m => m.RekrutacjaComponent),
+    data: {
+      seo: {
+        title: 'Rekrutacja',
+        description: 'Zasady, terminy i dokumenty potrzebne do rekrutacji do ZCKOiZ Zabrze.',
       },
     },
   },
