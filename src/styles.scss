@@ -176,6 +176,15 @@
   color: #000000;
 }
 
+/* ===== Font size scaling (class on <html>) ===== */
+html.font-larger {
+  font-size: 18px;
+}
+
+html.font-largest {
+  font-size: 20px;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

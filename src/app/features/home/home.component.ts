@@ -10,7 +10,6 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
   standalone: true,
   imports: [RouterLink, NewsCardComponent, ProgramCardComponent],
   template: `
-    <!-- Hero Slider -->
     <section class="relative bg-hero overflow-hidden">
       <div class="halftone-bg absolute inset-0"></div>
       <div class="comic-dots absolute inset-0 opacity-40 pointer-events-none"></div>
@@ -94,7 +93,7 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
                 <span class="text-yellow-accent">Zabrze</span>
               </h1>
               <p class="text-xl text-gray-300 mb-8">
-                Zespół Centrów Kształcenia Zawodowego — technikum i branżowa szkoła I stopnia.
+                Zabrzańskiego Centrum Kształcenia Ogólnego i Zawodowego - technikum i branżowa szkoła I stopnia.
                 Wybierz swój kierunek i rozpocznij karierę!
               </p>
               <div class="flex flex-wrap gap-4 items-center">

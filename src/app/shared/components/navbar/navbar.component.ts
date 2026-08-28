@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
+import { FontService } from '../../../core/services/font.service';
 
 @Component({
   selector: 'app-navbar',
@@ -51,6 +52,21 @@ import { ThemeService } from '../../../core/services/theme.service';
                   <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                 }
               </svg>
+            </button>
+
+            <button
+              (click)="font.next()"
+              class="comic-icon-btn !w-auto !h-auto px-2"
+              [class.hc-active]="fontSize() !== 'normal'"
+              [attr.aria-label]="'Zmień rozmiar czcionki (aktualny: ' + fontSize() + ')'"
+              title="Zmień rozmiar czcionki (klik ponownie, aby wrócić do domyślnej)">
+              <span class="font-heading font-bold">
+                @switch (fontSize()) {
+                  @case ('largest') { <span class="text-lg">A+</span> }
+                  @case ('larger') { <span class="text-base">A+</span> }
+                  @default { <span class="text-sm">A</span> }
+                }
+              </span>
             </button>
 
             <button
@@ -124,6 +140,8 @@ export class NavbarComponent {
 
   theme = inject(ThemeService);
   isDark = this.theme.isDark;
+  font = inject(FontService);
+  fontSize = this.font.size;
 
   navItems = [
     { label: 'Oferta', path: '/oferta', exact: false },
