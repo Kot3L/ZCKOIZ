@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>ZCKOiZ Zabrze - Centrum Kształcenia Zawodowego</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Zespół Centrów Kształcenia Zawodowego w Zabrzu - Technikum i Branżowa Szkoła I Stopnia. Poznaj naszą ofertę edukacyjną.">
+  <meta property="og:title" content="ZCKOiZ Zabrze">
+  <meta property="og:description" content="Centrum Kształcenia Zawodowego w Zabrzu - oferta edukacyjna, rekrutacja, aktualności.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/png" href="/wlepka100szary.png">
+  <link rel="apple-touch-icon" href="/wlepka100szary.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('zckoiz-theme');
+        var dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (dark) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

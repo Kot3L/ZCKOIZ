@@ -1,0 +1,628 @@
+@import "tailwindcss" source("./app");
+
+@theme {
+  /* ===== Brand palette (logo: white / blue / orange / yellow) ===== */
+
+  /* Blue — primary brand color */
+  --color-blue-primary: #1D5FA8;
+  --color-blue-dark: #174A85;
+  --color-blue-light: #2E7BC4;
+
+  /* Primary button fill: brand blue in light mode, brighter blue in dark mode */
+  --color-btn-primary: #1D5FA8;
+  --color-btn-primary-dark: #174A85;
+  /* Petrol tokens kept as aliases of the blue brand color */
+  --color-petrol: #1D5FA8;
+  --color-petrol-dark: #174A85;
+  --color-petrol-light: #2E7BC4;
+
+  /* Orange — warm accent */
+  --color-orange-primary: #E85F2A;
+  --color-orange-dark: #C24A1C;
+  --color-orange-light: #F08050;
+
+  /* Yellow — highlight accent */
+  --color-yellow-accent: #F5C842;
+  --color-yellow-light: #FBE07A;
+
+  /* Star fill: vivid saturated yellow in light mode, muted in dark mode */
+  --color-star: #FFD300;
+
+  /* Neutrals */
+  --color-cream: #FDF6EC;
+  --color-cream-dark: #F5EBDA;
+  --color-ink: #1A1A1A;
+  --color-ink-light: #4A4A4A;
+
+  /* Semantic surfaces */
+  --color-surface: #FFFFFF;
+  --color-dark: #1A1A1A;
+  --color-surface-line: #1A1A1A;
+
+  /* Hero band: brand blue in light mode, near-black in dark mode */
+  --color-hero: #1D5FA8;
+
+  /* Quick links bar: yellow in light mode, near-black in dark mode */
+  --color-quicklinks: #F5C842;
+
+  /* Quick links tiles: brand blue in light mode, dark in dark mode */
+  --color-tile: #1D5FA8;
+
+  /* Fonts */
+  --font-heading: "Oswald", "Arial Narrow", sans-serif;
+  --font-body: "Inter", "Segoe UI", sans-serif;
+}
+
+:root {
+  --font-heading: "Oswald", "Arial Narrow", sans-serif;
+  --font-body: "Inter", "Segoe UI", sans-serif;
+}
+
+/* ===== Dark mode (class="dark" on <html>) ===== */
+.dark {
+  color-scheme: dark;
+
+  /* Swap the themed neutrals for dark surfaces */
+  --color-cream: #141416;
+  --color-cream-dark: #1C1C22;
+  --color-ink: #F2F2F4;
+  --color-ink-light: #9BA1AE;
+  --color-surface: #202028;
+  --color-surface-line: #8A8F9C;
+  --color-hero: #141419;
+  --color-quicklinks: #141419;
+  --color-tile: #1C1C22;
+  --color-star: #F5C842;
+  --color-btn-primary: #3B82C4;
+  --color-btn-primary-dark: #2E7BC4;
+
+  /* Slightly muted tints used in highlights */
+  --color-orange-50: #3A2A20;
+  --color-orange-100: #F6D7C8;
+  --color-blue-100: #CFE0F4;
+  --color-blue-950: #0D2240;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: light;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  svg {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+}
+
+@layer components {
+  /* ===== Comic borders (soft, near-symmetric hand-drawn feel) ===== */
+  .comic-border {
+    border: 3px solid var(--color-ink);
+    border-radius: 20px 22px 20px 22px / 22px 20px 22px 20px;
+    box-shadow: 4px 4px 0 var(--color-ink);
+  }
+
+  .comic-border-light {
+    border: 2px solid var(--color-ink);
+    border-radius: 16px 18px 16px 18px / 18px 16px 18px 16px;
+    box-shadow: 3px 3px 0 var(--color-ink);
+  }
+
+  /* ===== Comic buttons ===== */
+  .comic-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 2.5px solid var(--color-ink);
+    border-radius: 12px 14px 12px 14px / 14px 12px 14px 12px;
+    box-shadow: 3px 3px 0 var(--color-ink);
+    transition: all 150ms ease;
+    cursor: pointer;
+  }
+
+  .comic-btn:hover {
+    box-shadow: 1px 1px 0 var(--color-ink);
+    transform: translate(2px, 2px) rotate(-0.8deg);
+  }
+
+  .comic-btn:active {
+    box-shadow: 0 0 0 var(--color-ink);
+    transform: translate(3px, 3px) rotate(0deg);
+  }
+
+  .comic-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 2.5px solid var(--color-ink);
+    border-radius: 12px 14px 12px 14px / 14px 12px 14px 12px;
+    box-shadow: 3px 3px 0 var(--color-ink);
+    transition: all 150ms ease;
+    cursor: pointer;
+    background-color: var(--color-btn-primary);
+    color: white;
+  }
+
+  .comic-btn-primary:hover {
+    box-shadow: 1px 1px 0 var(--color-ink);
+    transform: translate(2px, 2px) rotate(-0.8deg);
+    background-color: var(--color-btn-primary-dark);
+  }
+
+  .comic-btn-primary:active {
+    box-shadow: 0 0 0 var(--color-ink);
+    transform: translate(3px, 3px) rotate(0deg);
+  }
+
+  .comic-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border: 2.5px solid var(--color-ink);
+    border-radius: 14px 12px 14px 12px / 12px 14px 12px 14px;
+    box-shadow: 3px 3px 0 var(--color-ink);
+    transition: all 150ms ease;
+    cursor: pointer;
+    background-color: var(--color-orange-primary);
+    color: white;
+  }
+
+  .comic-btn-secondary:hover {
+    box-shadow: 1px 1px 0 var(--color-ink);
+    transform: translate(2px, 2px) rotate(0.8deg);
+    background-color: var(--color-orange-dark);
+  }
+
+  .comic-btn-secondary:active {
+    box-shadow: 0 0 0 var(--color-ink);
+    transform: translate(3px, 3px) rotate(0deg);
+  }
+
+  /* Compact icon button that shares the comic-btn border style */
+  .comic-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 2.5px solid var(--color-ink);
+    border-radius: 12px 14px 12px 14px / 14px 12px 14px 12px;
+    box-shadow: 3px 3px 0 var(--color-ink);
+    transition: all 150ms ease;
+    cursor: pointer;
+    background-color: transparent;
+    color: var(--color-ink);
+  }
+
+  .comic-icon-btn:hover {
+    box-shadow: 1px 1px 0 var(--color-ink);
+    transform: translate(2px, 2px) rotate(-0.8deg);
+  }
+
+  .comic-icon-btn:active {
+    box-shadow: 0 0 0 var(--color-ink);
+    transform: translate(3px, 3px) rotate(0deg);
+  }
+
+  /* ===== Cards ===== */
+  .comic-card {
+    border: 3px solid var(--color-surface-line);
+    box-shadow: 4px 4px 0 var(--color-surface-line);
+    border-radius: 20px 22px 20px 22px / 22px 20px 22px 20px;
+    background-color: var(--color-surface);
+    padding: 1.5rem;
+    position: relative;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+
+  /* inner "second pass" sketch line — subtle hand-drawn double outline */
+  .comic-card::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1.5px solid var(--color-ink);
+    border-radius: 14px 16px 14px 16px / 16px 14px 16px 14px;
+    opacity: 0.2;
+    pointer-events: none;
+  }
+
+  .comic-card:hover {
+    transform: translateY(-4px) rotate(-0.6deg);
+    box-shadow: 6px 6px 0 var(--color-ink);
+  }
+
+  /* ===== Section heading ===== */
+  .section-heading {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    color: var(--color-blue-primary);
+    margin-bottom: 2rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    position: relative;
+    display: inline-block;
+  }
+
+  @media (min-width: 768px) {
+    .section-heading {
+      font-size: 2.25rem;
+      line-height: 2.5rem;
+    }
+  }
+
+  .section-heading::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background-color: var(--color-orange-primary);
+    border-radius: 2px;
+  }
+
+  /* ===== Halftone background ===== */
+  .halftone-bg {
+    position: relative;
+  }
+
+  .halftone-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image: radial-gradient(circle, var(--color-ink) 1px, transparent 1px);
+    background-size: 12px 12px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== Badges ===== */
+  .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 8px 10px 8px 10px / 10px 8px 10px 8px;
+    border: 1.5px solid var(--color-surface-line);
+    background-color: var(--color-surface);
+  }
+
+  .badge-yellow {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 8px 10px 8px 10px / 10px 8px 10px 8px;
+    border: 1.5px solid var(--color-ink);
+    background-color: var(--color-yellow-accent);
+  }
+
+  .badge-blue {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 8px 10px 8px 10px / 10px 8px 10px 8px;
+    border: 1.5px solid var(--color-ink);
+    background-color: var(--color-blue-primary);
+    color: white;
+  }
+
+  .badge-petrol {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 8px 10px 8px 10px / 10px 8px 10px 8px;
+    border: 1.5px solid var(--color-ink);
+    background-color: var(--color-petrol);
+    color: white;
+  }
+
+  .badge-orange {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 8px 10px 8px 10px / 10px 8px 10px 8px;
+    border: 1.5px solid var(--color-ink);
+    background-color: var(--color-orange-primary);
+    color: white;
+  }
+
+  /* ===== Speech bubble (dymek) — used in hero ===== */
+  .speech-bubble {
+    position: relative;
+    display: inline-block;
+    background-color: var(--color-surface);
+    border: 2.5px solid var(--color-surface-line);
+    border-radius: 16px;
+    box-shadow: 3px 3px 0 var(--color-surface-line);
+    padding: 0.65rem 1.1rem;
+  }
+
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -12px;
+    left: 22px;
+    width: 18px;
+    height: 18px;
+    background: var(--color-surface);
+    border-right: 2.5px solid var(--color-surface-line);
+    border-bottom: 2.5px solid var(--color-surface-line);
+    transform: rotate(45deg) skew(14deg, 14deg);
+    box-shadow: 4px 4px 0 -1px var(--color-surface);
+  }
+
+  /* ===== Container ===== */
+  .container-main {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 80rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-main {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-main {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  /* ===== Comic background decorations ===== */
+
+  /* Halftone dot pattern (stronger, for dark hero backgrounds) */
+  .comic-dots {
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.28) 1.5px, transparent 1.5px);
+    background-size: 14px 14px;
+  }
+
+  /* Diagonal hatching lines */
+  .comic-hatch {
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.12) 0px,
+      rgba(255, 255, 255, 0.12) 2px,
+      transparent 2px,
+      transparent 8px
+    );
+  }
+
+  /* ===== Sketched stars (hand-drawn marker look) ===== */
+  .comic-star {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    background: var(--color-star);
+    -webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+
+  /* rough double-stroke outline: a slightly rotated darker copy on top */
+  .comic-star::before,
+  .comic-star::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(26, 26, 26, 0.55);
+    -webkit-clip-path: polygon(50% 4%, 60% 37%, 96% 38%, 68% 59%, 79% 89%, 50% 70%, 21% 89%, 32% 59%, 4% 38%, 40% 37%);
+    clip-path: polygon(50% 4%, 60% 37%, 96% 38%, 68% 59%, 79% 89%, 50% 70%, 21% 89%, 32% 59%, 4% 38%, 40% 37%);
+  }
+  .comic-star::after {
+    transform: rotate(7deg) scale(0.96);
+    background: rgba(26, 26, 26, 0.25);
+  }
+
+  /* white sketched star off-set copy to suggest a highlight / accent */
+  .comic-star-white {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  .comic-star-white::before,
+  .comic-star-white::after {
+    background: rgba(26, 26, 26, 0.3);
+  }
+
+  /* ===== Sketched circles (rough double ring) ===== */
+  .comic-circle {
+    position: absolute;
+    border: 2.5px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+  }
+  .comic-circle::before {
+    content: '';
+    position: absolute;
+    inset: -7px;
+    border: 2px dashed rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+  }
+  .comic-circle::after {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+  }
+
+  /* ===== Sketched wave (scallop band) ===== */
+  .comic-wave {
+    position: absolute;
+    height: 22px;
+    background-image: radial-gradient(
+      circle at 11px 50%,
+      transparent 8px,
+      rgba(255, 255, 255, 0.35) 9px,
+      transparent 10px
+    );
+    background-size: 22px 22px;
+    background-repeat: repeat-x;
+  }
+
+  /* ===== Sketched scribble (squiggly line) ===== */
+  .comic-scribble {
+    position: absolute;
+    height: 26px;
+    background-image:
+      radial-gradient(circle at 8px 50%, rgba(255, 255, 255, 0.5) 5px, transparent 6px),
+      radial-gradient(circle at 34px 20%, rgba(255, 255, 255, 0.5) 5px, transparent 6px),
+      radial-gradient(circle at 60px 80%, rgba(255, 255, 255, 0.5) 5px, transparent 6px),
+      radial-gradient(circle at 86px 20%, rgba(255, 255, 255, 0.5) 5px, transparent 6px),
+      radial-gradient(circle at 112px 50%, rgba(255, 255, 255, 0.5) 5px, transparent 6px);
+    background-size: 24px 24px;
+    background-repeat: repeat-x;
+  }
+
+  /* ===== Little sketched monster (blob with eyes + mouth) ===== */
+  .comic-monster {
+    position: absolute;
+    width: 92px;
+    height: 78px;
+    border: 2.5px solid rgba(255, 255, 255, 0.45);
+    border-radius: 54% 46% 50% 50% / 55% 52% 48% 45%;
+    background:
+      radial-gradient(circle at 33% 42%, rgba(255, 255, 255, 0.95) 0 7px, transparent 7px),
+      radial-gradient(circle at 67% 42%, rgba(255, 255, 255, 0.95) 0 7px, transparent 7px),
+      radial-gradient(ellipse at 50% 70%, rgba(255, 255, 255, 0.55) 0 6px, transparent 7px),
+      rgba(255, 255, 255, 0.12);
+  }
+  .comic-monster::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 6px;
+    top: -12px;
+    border: 2.5px solid rgba(255, 255, 255, 0.45);
+    border-radius: 70% 30% 60% 40%;
+    transform: rotate(20deg);
+  }
+  .comic-monster::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    right: 6px;
+    top: -11px;
+    border: 2.5px solid rgba(255, 255, 255, 0.45);
+    border-radius: 40% 70% 40% 60%;
+    transform: rotate(-15deg);
+  }
+
+  /* Speed / action lines (diagonal) */
+  .comic-speed-lines {
+    position: absolute;
+    background: repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.14) 0px,
+      rgba(255, 255, 255, 0.14) 3px,
+      transparent 3px,
+      transparent 14px
+    );
+  }
+
+  /* Slow spin for starburst decorations */
+  .animate-spin-slow {
+    animation: comicSpin 22s linear infinite;
+  }
+
+  .animate-float {
+    animation: comicFloat 5s ease-in-out infinite;
+  }
+
+  .animate-bounce-soft {
+    animation: comicBounce 2.6s ease-in-out infinite;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out both;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out both;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes comicSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes comicFloat {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}
+
+@keyframes comicBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
