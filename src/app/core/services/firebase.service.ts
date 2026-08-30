@@ -175,6 +175,7 @@ export class FirebaseService {
   // =====================================================================
   listAlbums = () => this.list<GalleryAlbum>('gallery_albums', 'display_order');
   getAlbum = (id: string) => this.get<GalleryAlbum>('gallery_albums', id);
+  getAlbumBySlug = (slug: string) => this.listWhere<GalleryAlbum>('gallery_albums', 'slug', slug).then((x) => x[0] ?? null);
   saveAlbum = (data: Partial<GalleryAlbum>, id?: string) => this.save('gallery_albums', data as any, id);
   deleteAlbum = (id: string) => this.remove('gallery_albums', id);
 
@@ -212,8 +213,17 @@ export class FirebaseService {
   // =====================================================================
   async uploadFile(path: string, file: Blob): Promise<string> {
     const storageRef = ref(this.ready.storage, path);
-    await uploadBytes(storageRef, file);
-    return getDownloadURL(storageRef);
+    const contentType = (file as File).type || 'application/octet-stream';
+    await this.withTimeout(
+      uploadBytes(storageRef, file, { contentType }),
+      30000,
+      'Przekroczono limit czasu przesyłania do Firebase Storage. Sprawdź, czy Storage jest włączony i czy reguły pozwalają na zapis.',
+    );
+    return this.withTimeout(
+      getDownloadURL(storageRef),
+      30000,
+      'Przekroczono limit czasu pobierania adresu obrazka z Firebase Storage.',
+    );
   }
 
   async deleteFile(url: string): Promise<void> {
@@ -223,5 +233,14 @@ export class FirebaseService {
     } catch {
       /* ignore */
     }
+  }
+
+  private withTimeout<T>(p: Promise<T>, ms: number, message: string): Promise<T> {
+    return Promise.race([
+      p,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(message)), ms),
+      ),
+    ]);
   }
 }

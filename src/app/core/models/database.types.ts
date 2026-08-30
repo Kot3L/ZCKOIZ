@@ -5,6 +5,8 @@ export interface News {
   content: string;
   excerpt: string;
   cover_image_url: string | null;
+  content_images: string[];
+  album_id: string | null;
   status: 'published' | 'draft';
   author_id: string;
   published_at: string | null;

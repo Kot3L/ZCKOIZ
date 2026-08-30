@@ -52,13 +52,23 @@ export const routes: Routes = [
       },
     },
   },
-  {
+{
     path: 'galeria',
     loadComponent: () => import('./features/galeria/galeria.component').then(m => m.GaleriaComponent),
     data: {
       seo: {
         title: 'Galeria',
-        description: 'Galeria zdjęć z życia ZCKOiZ Zabrze.',
+        description: 'Galeria zdj\u0119\u0107 z \u017cycia ZCKOiZ Zabrze.',
+      },
+    },
+  },
+  {
+    path: 'galeria/:slug',
+    loadComponent: () => import('./features/galeria/album-detail.component').then(m => m.AlbumDetailComponent),
+    data: {
+      seo: {
+        title: 'Album galerii',
+        description: 'Album zdj\u0119\u0107 z ZCKOiZ Zabrze.',
       },
     },
   },

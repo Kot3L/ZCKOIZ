@@ -55,20 +55,26 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
             <div class="flex flex-wrap gap-2 mb-4">
               @for (img of imagesByAlbum(album.id); track img.id) {
                 <div class="relative group">
-                  <img [src]="img.image_url" class="w-24 h-20 object-cover rounded border-2 border-ink" />
+                  @if (!failedImages().has(img.id)) {
+                    <img [src]="img.image_url" (error)="onImageError(img)" class="w-24 h-20 object-cover rounded border-2 border-ink" />
+                  } @else {
+                    <div class="w-24 h-20 rounded border-2 border-red-400 bg-cream-dark flex items-center justify-center p-1 text-[10px] leading-tight text-center text-gray-500 break-all">
+                      Nie ładuje się — sprawdź URL
+                    </div>
+                  }
                   <button
                     (click)="deleteImage(img)"
                     class="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold hidden group-hover:flex items-center justify-center border border-ink">×</button>
                 </div>
-              } @empty {
+              }
+              @if (imagesByAlbum(album.id).length === 0) {
                 <p class="text-gray-400 text-sm w-full">Brak zdjęć</p>
               }
             </div>
 
             <div class="flex items-center gap-2">
-              <input #fileInput type="file" accept="image/*" multiple class="hidden"
-                (change)="uploadImages(fileInput, album.id)" />
-              <button (click)="fileInput.click()" class="comic-btn text-sm bg-surface text-ink">+ Dodaj zdjęcia</button>
+              <input #urlInput type="url" placeholder="Wklej URL zdjęcia (np. .jpg / .png)" class="flex-1 px-3 py-2 text-sm border-2 border-ink rounded-lg" />
+              <button (click)="addImageByUrl(album.id, urlInput)" class="comic-btn text-sm bg-surface text-ink">Dodaj</button>
             </div>
           </div>
         } @empty {
@@ -83,6 +89,7 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
 export class GalleryAdminComponent implements OnInit {
   albums = signal<GalleryAlbum[]>([]);
   images = signal<GalleryImage[]>([]);
+  failedImages = signal<Set<string>>(new Set());
   newAlbumTitle = '';
   newAlbumDesc = '';
   newAlbumVisible = true;
@@ -101,6 +108,11 @@ export class GalleryAdminComponent implements OnInit {
 
   async loadImages() {
     this.images.set(await this.fb.listAllImages());
+    this.failedImages.set(new Set());
+  }
+
+  onImageError(img: GalleryImage) {
+    this.failedImages.update(s => new Set(s).add(img.id));
   }
 
   imagesByAlbum = (albumId: string) => this.images().filter(i => i.album_id === albumId);
@@ -152,35 +164,21 @@ export class GalleryAdminComponent implements OnInit {
     }
   }
 
-  async uploadImages(input: HTMLInputElement, albumId: string) {
-    const files = input.files;
-    if (!files || files.length === 0) return;
-    let firstError: any = null;
-    let uploaded = 0;
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `gallery/${albumId}/${Date.now()}-${i}.${ext}`;
-      try {
-        const url = await this.fb.uploadFile(path, file);
-        await this.fb.saveImage({
-          album_id: albumId,
-          image_url: url,
-          display_order: i,
-        });
-        uploaded++;
-      } catch (e: any) {
-        firstError = firstError ?? e;
-      }
+  async addImageByUrl(albumId: string, input: HTMLInputElement) {
+    const url = input.value.trim();
+    if (!url) return;
+    try {
+      await this.fb.saveImage({
+        album_id: albumId,
+        image_url: url,
+        display_order: this.imagesByAlbum(albumId).length,
+      });
+      input.value = '';
+      this.setMessage('Zdjęcie dodane.', 'success');
+      await this.loadImages();
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e?.message ?? e), 'error');
     }
-    if (firstError) {
-      this.setMessage('Błąd przesyłania zdjęć: ' + (firstError?.message ?? firstError), 'error');
-      console.error('Upload gallery error', firstError);
-    } else {
-      this.setMessage('Dodano ' + uploaded + ' zdjęć.', 'success');
-    }
-    input.value = '';
-    await this.loadImages();
   }
 
   async deleteImage(img: GalleryImage) {

@@ -2,7 +2,7 @@ import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { FirebaseService } from '../../../core/services/firebase.service';
-import { News } from '../../../core/models/database.types';
+import { News, GalleryAlbum } from '../../../core/models/database.types';
 
 @Component({
   selector: 'app-news-admin',
@@ -42,17 +42,54 @@ import { News } from '../../../core/models/database.types';
               <textarea [(ngModel)]="form.content" name="content" rows="8" class="w-full px-4 py-2.5 border-2 border-ink rounded-lg focus:outline-none focus:border-petrol"></textarea>
             </div>
             <div>
-              <label class="block text-sm font-semibold mb-1">Obrazek wyróżniający</label>
-              <div class="flex gap-2">
-                <input [(ngModel)]="form.cover_image_url" name="cover_image_url" class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" placeholder="https://... lub wgraj plik" />
-                <button type="button" (click)="fileInput.click()" class="comic-btn text-sm bg-surface text-ink">Upload</button>
-                <input #fileInput type="file" accept="image/*" class="hidden" (change)="uploadCoverImage($event)" />
-              </div>
+              <label class="block text-sm font-semibold mb-1">Obrazek wyróżniający (URL)</label>
+              <input [(ngModel)]="form.cover_image_url" name="cover_image_url" class="w-full px-4 py-2.5 border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" placeholder="https://..." />
+              <p class="text-xs text-gray-500 mt-1">Wklej bezpośredni link do obrazka (np. .jpg / .png).</p>
               @if (form.cover_image_url) {
-                <div class="mt-3">
+                <div class="mt-3 relative inline-block group">
                   <img [src]="form.cover_image_url" class="max-h-48 w-auto border-2 border-ink rounded-lg object-cover shadow-[2px_2px_0_var(--color-ink)]" alt="Podgląd obrazka" />
+                  <button type="button" (click)="removeCoverImage()" title="Usuń zdjęcie"
+                    class="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold hidden group-hover:flex items-center justify-center border border-ink">×</button>
                 </div>
               }
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">Zdjęcia pod tekstem (URL)</label>
+              <div class="space-y-3">
+                @for (img of form.content_images; track $index) {
+                  <div class="flex gap-3 items-center">
+                    <div class="relative group shrink-0">
+                      @if (form.content_images[$index].trim()) {
+                        <img [src]="form.content_images[$index]" class="w-20 h-16 object-cover rounded border-2 border-ink" alt="Podgląd" />
+                        <button type="button" (click)="removeContentImage($index)" title="Usuń zdjęcie"
+                          class="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold hidden group-hover:flex items-center justify-center border border-ink">×</button>
+                      } @else {
+                        <div class="w-20 h-16 rounded border-2 border-dashed border-ink/40 flex items-center justify-center text-gray-400 text-2xl">+</div>
+                      }
+                    </div>
+                    <input [(ngModel)]="form.content_images[$index]" [name]="'content_images_' + $index"
+                      class="flex-1 px-3 py-2 text-sm border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" placeholder="https://..." />
+                  </div>
+                }
+              </div>
+              <button type="button" (click)="addContentImage()"
+                class="comic-btn text-sm bg-surface text-ink mt-3">+ Dodaj zdjęcie</button>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">Album ze zdjęciami (karuzela)</label>
+              <div class="flex gap-2 items-center">
+                <select [(ngModel)]="form.album_id" name="album_id" class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg bg-surface">
+                  <option [ngValue]="null">— bez albumu —</option>
+                  @for (album of albums(); track album.id) {
+                    <option [ngValue]="album.id">{{ album.title }}</option>
+                  }
+                </select>
+                @if (form.album_id) {
+                  <button type="button" (click)="form.album_id = null"
+                    class="comic-btn text-xs !py-2 !px-3 bg-red-50 text-red-600 !shadow-[2px_2px_0_#991b1b] !border-red-600 shrink-0">Usuń album</button>
+                }
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Wybrany album zostanie wyświetlony w aktualności jako karuzela zdjęć.</p>
             </div>
             <div class="flex gap-3 pt-2">
               <button type="submit" class="comic-btn-primary text-sm">Zapisz</button>
@@ -67,6 +104,7 @@ import { News } from '../../../core/models/database.types';
         <table class="w-full text-left text-sm">
           <thead>
             <tr class="bg-cream-dark border-b-2 border-ink">
+              <th class="px-4 py-3 font-heading uppercase text-xs">Obrazek</th>
               <th class="px-4 py-3 font-heading uppercase text-xs">Tytuł</th>
               <th class="px-4 py-3 font-heading uppercase text-xs hidden md:table-cell">Data</th>
               <th class="px-4 py-3 font-heading uppercase text-xs text-right">Akcje</th>
@@ -75,6 +113,13 @@ import { News } from '../../../core/models/database.types';
           <tbody>
             @for (item of items(); track item.id) {
               <tr class="border-b border-ink/10 hover:bg-cream transition-colors">
+                <td class="px-4 py-3">
+                  @if (item.cover_image_url) {
+                    <img [src]="item.cover_image_url" class="w-16 h-12 object-cover rounded border-2 border-ink/40" alt="Obrazek" />
+                  } @else {
+                    <span class="text-gray-400 text-xs">—</span>
+                  }
+                </td>
                 <td class="px-4 py-3 font-medium">{{ item.title }}</td>
                 <td class="px-4 py-3 hidden md:table-cell text-gray-500">{{ item.created_at | date:'dd.MM.yyyy' }}</td>
                 <td class="px-4 py-3">
@@ -85,7 +130,7 @@ import { News } from '../../../core/models/database.types';
                 </td>
               </tr>
             } @empty {
-              <tr><td colspan="3" class="px-4 py-8 text-center text-gray-500">Brak aktualności</td></tr>
+              <tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">Brak aktualności</td></tr>
             }
           </tbody>
         </table>
@@ -95,6 +140,7 @@ import { News } from '../../../core/models/database.types';
 })
 export class NewsAdminComponent implements OnInit {
   items = signal<News[]>([]);
+  albums = signal<GalleryAlbum[]>([]);
   editing = signal(false);
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
@@ -104,16 +150,22 @@ export class NewsAdminComponent implements OnInit {
     title: '',
     content: '',
     cover_image_url: '',
+    content_images: [] as string[],
+    album_id: null as string | null,
   };
 
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    await this.load();
+    await Promise.all([this.load(), this.loadAlbums()]);
   }
 
   async load() {
     this.items.set(await this.fb.listNews());
+  }
+
+  async loadAlbums() {
+    this.albums.set(await this.fb.listAlbums());
   }
 
   toggleEditor(item: News | null) {
@@ -123,9 +175,11 @@ export class NewsAdminComponent implements OnInit {
         title: item.title,
         content: item.content,
         cover_image_url: item.cover_image_url ?? '',
+        content_images: [...(item.content_images ?? [])],
+        album_id: item.album_id ?? null,
       };
     } else {
-      this.form = { id: '', title: '', content: '', cover_image_url: '' };
+      this.form = { id: '', title: '', content: '', cover_image_url: '', content_images: [], album_id: null };
     }
     this.editing.set(true);
   }
@@ -136,6 +190,18 @@ export class NewsAdminComponent implements OnInit {
       .replace(/[^a-z0-9ąęśćżźół]+/g, '-')
       .replace(/-+/g, '-')
       .replace(/^-|-$/g, '');
+  }
+
+  addContentImage() {
+    this.form.content_images.push('');
+  }
+
+  removeContentImage(index: number) {
+    this.form.content_images.splice(index, 1);
+  }
+
+  removeCoverImage() {
+    this.form.cover_image_url = '';
   }
 
   async saveItem(event: Event) {
@@ -149,6 +215,8 @@ export class NewsAdminComponent implements OnInit {
       title: this.form.title,
       content: this.form.content,
       cover_image_url: this.form.cover_image_url || null,
+      content_images: this.form.content_images.filter(u => u.trim()),
+      album_id: this.form.album_id || null,
       slug: this.slugify(this.form.title),
       status: 'published',
       published_at: now,
@@ -183,20 +251,6 @@ export class NewsAdminComponent implements OnInit {
     }
     this.setMessage('Usunięto.', 'success');
     await this.load();
-  }
-
-  async uploadCoverImage(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    const ext = file.name.split('.').pop();
-    const path = `news/${Date.now()}.${ext}`;
-    try {
-      this.form.cover_image_url = await this.fb.uploadFile(path, file);
-    } catch (e: any) {
-      this.setMessage('Upload failed: ' + e.message, 'error');
-    }
   }
 
   setMessage(msg: string, type: 'success' | 'error') {

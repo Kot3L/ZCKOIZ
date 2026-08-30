@@ -94,9 +94,9 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
                   <span class="text-yellow-accent font-bold">Zabrze</span>
                 </h1>
                 <img
-                  src="/wlepka100szary.png"
+                  src="/logobig.png"
                   alt="logo ZCKOiZ Zabrze"
-                  class="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain rounded-xl border-2 border-white bg-white shadow-[2px_2px_0_#1A1A1A] shrink-0 animate-float"
+                  class="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain rounded-xl border-2 border-white shadow-[2px_2px_0_#1A1A1A] shrink-0 animate-float bg-transparent"
                 />
               </div>
               <p class="text-xl text-gray-300 mb-8">
