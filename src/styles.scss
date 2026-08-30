@@ -366,6 +366,39 @@ html.font-largest {
     pointer-events: none;
   }
 
+  /* ===== Navbar dropdown (Szkoła) ===== */
+  .dropdown-panel {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translate(-50%, -10px);
+    background-color: var(--color-surface);
+    border: 3px solid var(--color-surface-line);
+    border-radius: 0 0 16px 18px / 0 0 18px 16px;
+    box-shadow: 5px 5px 0 var(--color-ink);
+    padding: 1.5rem;
+    min-width: 520px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 60;
+    transition:
+      opacity 220ms ease,
+      transform 220ms ease,
+      visibility 0s linear 220ms;
+  }
+
+  .dropdown-panel.panel-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+    transition:
+      opacity 160ms ease,
+      transform 160ms ease,
+      visibility 0s linear 0s;
+  }
+
   .comic-card:hover {
     transform: translateY(-4px) rotate(-0.6deg);
     box-shadow: 6px 6px 0 var(--color-ink);
@@ -707,6 +740,18 @@ html.font-largest {
 
   .animate-slide-up {
     animation: slideUp 0.5s ease-out both;
+  }
+
+  .inview-hidden {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  .inview-visible {
+    transition:
+      opacity 0.7s ease-out 0.05s,
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
+    transform: translateY(0);
   }
 }
 

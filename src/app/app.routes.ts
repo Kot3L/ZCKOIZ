@@ -73,6 +73,16 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'szkola/:slug',
+    loadComponent: () => import('./features/szkola/school-page.component').then(m => m.SchoolPageComponent),
+    data: {
+      seo: {
+        title: 'Szkoła',
+        description: 'Ważne informacje o Zabrzańskim Centrum Kształcenia Ogólnego i Zawodowego.',
+      },
+    },
+  },
+  {
     path: 'dokumenty',
     loadComponent: () => import('./features/dokumenty/dokumenty.component').then(m => m.DokumentyComponent),
     data: {
