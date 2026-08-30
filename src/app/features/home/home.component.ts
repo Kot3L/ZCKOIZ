@@ -56,7 +56,7 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
               <div class="min-h-[70vh] md:min-h-[80vh] flex items-center">
                 <div class="container-main py-16 md:py-24">
                   <div class="max-w-2xl animate-fade-in">
-                    <h1 class="text-5xl md:text-7xl text-white mb-4 leading-tight">
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl text-white mb-4 leading-tight font-bold">
                       {{ slide.title }}
                     </h1>
                     <p class="text-xl text-gray-300 mb-8">{{ slide.subtitle }}</p>
@@ -87,14 +87,20 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
       } @else {
         <div class="min-h-[70vh] md:min-h-[80vh] flex items-center">
           <div class="container-main py-16 md:py-24 relative z-10">
-            <div class="max-w-2xl">
-              <h1 class="text-5xl md:text-7xl text-white mb-4 leading-tight">
-                ZCKOiZ<br>
-                <span class="text-yellow-accent">Zabrze</span>
-              </h1>
+            <div class="max-w-4xl">
+              <div class="flex items-center gap-4 mb-4">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl text-white leading-tight font-bold">
+                  Zabrzańskiego Centrum Kształcenia Ogólnego i Zawodowego<br>
+                  <span class="text-yellow-accent font-bold">Zabrze</span>
+                </h1>
+                <img
+                  src="/wlepka100szary.png"
+                  alt="logo ZCKOiZ Zabrze"
+                  class="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain rounded-xl border-2 border-white bg-white shadow-[2px_2px_0_#1A1A1A] shrink-0 animate-float"
+                />
+              </div>
               <p class="text-xl text-gray-300 mb-8">
-                Zabrzańskiego Centrum Kształcenia Ogólnego i Zawodowego - technikum i branżowa szkoła I stopnia.
-                Wybierz swój kierunek i rozpocznij karierę!
+                Technikum i branżowa szkoła I stopnia. Wybierz swój kierunek i rozpocznij karierę!
               </p>
               <div class="flex flex-wrap gap-4 items-center">
                 <a routerLink="/oferta" class="comic-btn-primary text-lg">
