@@ -226,6 +226,7 @@ export class FirebaseService {
     } as any;
     await setDoc(doc(this.ready.db, 'school_pages', slug), d, { merge: true });
   }
+  deleteSchoolPage = (slug: string) => this.remove('school_pages', slug);
 
   // =====================================================================
   // SCHOOL MENU (dropdown "Szkoła")

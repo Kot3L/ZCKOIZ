@@ -100,7 +100,7 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
                 class="w-52 h-52 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain shrink-0 -ml-10 sm:-ml-14 md:-ml-20 relative z-0 animate-float bg-transparent"
               />
               </div>
-              <p class="text-xl text-gray-300 mb-8">
+              <p class="text-xl text-gray-300 mt-8 mb-8">
                 Technikum i branżowa szkoła I stopnia. Wybierz swój kierunek i rozpocznij karierę!
               </p>
               <div class="flex flex-wrap gap-4 items-center">

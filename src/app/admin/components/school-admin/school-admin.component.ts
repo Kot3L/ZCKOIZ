@@ -81,6 +81,9 @@ interface MenuFormGroup {
                           @for (page of pages(); track page.slug) {
                             <option [value]="page.slug">{{ page.title }} (/szkola/{{ page.slug }})</option>
                           }
+                          @if (item.slug && !pages().some((p) => p.slug === item.slug)) {
+                            <option [value]="item.slug">{{ titleFromSlug(item.slug) }} (/szkola/{{ item.slug }})</option>
+                          }
                         </select>
                         <span class="text-xs text-petrol font-mono truncate">szkola/{{ item.slug || slugFromName(item.label) }}</span>
                       </div>
@@ -118,11 +121,15 @@ interface MenuFormGroup {
 
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           @for (page of pages(); track page.slug) {
-            <button (click)="editPage(page.slug)"
-              class="text-left px-3 py-2 rounded-lg border-2 border-ink/20 hover:border-petrol hover:bg-cream transition-colors text-sm">
-              <span class="font-semibold">{{ page.title }}</span>
-              <span class="block text-xs text-gray-400 mt-1">/szkola/{{ page.slug }}</span>
-            </button>
+            <div class="relative">
+              <button (click)="editPage(page.slug)"
+                class="w-full text-left px-3 py-2 pr-8 rounded-lg border-2 border-ink/20 hover:border-petrol hover:bg-cream transition-colors text-sm">
+                <span class="font-semibold">{{ page.title }}</span>
+                <span class="block text-xs text-gray-400 mt-1">/szkola/{{ page.slug }}</span>
+              </button>
+              <button (click)="deletePage(page.slug, $event)" title="Usuń podstronę"
+                class="absolute top-1.5 right-1.5 w-6 h-6 shrink-0 bg-red-600 text-white rounded-full text-xs font-bold border border-ink opacity-60 hover:opacity-100">×</button>
+            </div>
           }
         </div>
 
@@ -325,9 +332,45 @@ export class SchoolAdminComponent implements OnInit {
     try {
       const clean = this.cleanGroups();
       await this.fb.saveSchoolMenu({ id: 'main', groups: clean });
-    } catch {
-      /* zignoruj drobne błędy autozapisu */
+      await this.ensurePagesForLinks(clean);
+    } catch (e: any) {
+      console.error('Błąd zapisu menu:', e);
+      this.setMessage('Nie udało się zapisać menu: ' + (e.message ?? e), 'error');
     }
+  }
+
+  private async ensurePagesForLinks(groups: SchoolMenuGroup[]) {
+    const existing = new Set(this.pages().map((p) => p.slug));
+    const missing = new Set<string>();
+    for (const g of groups) {
+      for (const i of g.items) {
+        const m = i.url?.match(/^\/szkola\/([^/]+)$/);
+        if (m && !existing.has(m[1])) missing.add(m[1]);
+      }
+    }
+    let created = false;
+    for (const slug of missing) {
+      if (!slug.trim()) continue;
+      await this.fb.saveSchoolPage(
+        {
+          id: slug,
+          slug,
+          title: this.titleFromSlug(slug),
+          subtitle: '',
+          sections: [],
+        },
+        slug,
+      );
+      created = true;
+    }
+    if (created) await this.loadPages();
+  }
+
+  titleFromSlug(slug: string): string {
+    return slug
+      .split('-')
+      .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+      .join(' ');
   }
 
   private menuSaveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -402,6 +445,19 @@ export class SchoolAdminComponent implements OnInit {
       })),
     };
     this.pageEditorOpen.set(true);
+  }
+
+  async deletePage(slug: string, event?: Event) {
+    event?.stopPropagation();
+    const page = this.pages().find((x) => x.slug === slug);
+    if (!confirm(`Czy na pewno usunąć podstronę „${page?.title || slug}” (/szkola/${slug})?`)) return;
+    try {
+      await this.fb.deleteSchoolPage(slug);
+      await this.loadPages();
+      this.setMessage(`Podstrona „${page?.title || slug}” została usunięta.`, 'success');
+    } catch (e: any) {
+      this.setMessage('Błąd usuwania: ' + (e.message ?? e), 'error');
+    }
   }
 
   addSection() {

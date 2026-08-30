@@ -96,8 +96,29 @@ export class SchoolPageComponent {
     if (!current) {
       current = SCHOOL_PAGES[slug] ?? null;
     }
+    if (!current) {
+      current = {
+        slug,
+        title: this.titleFromSlug(slug),
+        subtitle: 'Informacje z Zabrzańskiego Centrum Kształcenia Ogólnego i Zawodowego',
+        sections: [
+          {
+            heading: 'Informacje',
+            body: ['Treść tej podstrony jest w przygotowaniu.'],
+            links: [{ label: 'Skontaktuj się z nami', url: '/kontakt' }],
+          },
+        ],
+      };
+    }
     this.page.set(current);
     this.loading.set(false);
+  }
+
+  private titleFromSlug(slug: string): string {
+    return slug
+      .split('-')
+      .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : w))
+      .join(' ');
   }
 
   private toDisplayPage(r: SchoolPageRecord): SchoolPage {

@@ -30,21 +30,18 @@ import { FirebaseService } from '../../../core/services/firebase.service';
               routerLinkActive="bg-orange-primary text-white"
               [routerLinkActiveOptions]="{ exact: item.exact }"
               class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium">
-              <span class="text-lg">{{ item.icon }}</span>
               {{ item.label }}
             </a>
           }
         </nav>
 
         <div class="p-4 border-t border-gray-800">
-          <a routerLink="/" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium">
-            <span class="text-lg">←</span>
+          <a routerLink="/" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium">
             Powrót na stronę
           </a>
           <button
             (click)="logout()"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium text-left">
-            <span class="text-lg">⏻</span>
+            class="w-full flex items-center px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium text-left">
             Wyloguj się
           </button>
         </div>
@@ -62,7 +59,7 @@ import { FirebaseService } from '../../../core/services/firebase.service';
             <div class="flex items-center gap-3">
               <div class="text-right hidden sm:block">
                 <p class="text-sm font-semibold">{{ user()?.email }}</p>
-                <p class="text-xs text-gray-500">Administrator</p>
+                <p class="text-xs text-gray-500">zalogowany jako Administrator</p>
               </div>
               <div class="w-10 h-10 rounded-full border-2 border-ink bg-petrol text-white flex items-center justify-center font-heading font-bold">
                 {{ (user()?.email ?? '').charAt(0).toUpperCase() }}
@@ -80,12 +77,10 @@ import { FirebaseService } from '../../../core/services/firebase.service';
                 [routerLinkActiveOptions]="{ exact: item.exact }"
                 (click)="mobileNav.set(false)"
                 class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-cream-dark transition-colors text-sm font-medium">
-                <span>{{ item.icon }}</span>
                 {{ item.label }}
               </a>
             }
-            <button (click)="logout()" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-cream-dark transition-colors text-sm font-medium">
-              <span>⏻</span>
+            <button (click)="logout()" class="w-full text-left flex items-center px-4 py-3 rounded-lg hover:bg-cream-dark transition-colors text-sm font-medium">
               Wyloguj się
             </button>
           </nav>
@@ -111,14 +106,14 @@ export class AdminLayoutComponent implements OnInit {
   user = () => this.fb.user();
 
   navItems = () => [
-    { path: '/admin', exact: true, icon: '📊', label: 'Dashboard' },
-    { path: '/admin/aktualnosci', exact: false, icon: '📰', label: 'Aktualności' },
-    { path: '/admin/kierunki', exact: false, icon: '🎓', label: 'Kierunki kształcenia' },
-    { path: '/admin/galeria', exact: false, icon: '🖼️', label: 'Galeria' },
-    { path: '/admin/dokumenty', exact: false, icon: '📄', label: 'Dokumenty' },
-    { path: '/admin/szkola', exact: false, icon: '🏫', label: 'Szkoła' },
-    { path: '/admin/kadra', exact: false, icon: '👥', label: 'Kadra' },
-    { path: '/admin/ustawienia', exact: false, icon: '⚙️', label: 'Ustawienia' },
+    { path: '/admin', exact: true, label: 'Dashboard' },
+    { path: '/admin/aktualnosci', exact: false, label: 'Aktualności' },
+    { path: '/admin/kierunki', exact: false, label: 'Kierunki kształcenia' },
+    { path: '/admin/galeria', exact: false, label: 'Galeria' },
+    { path: '/admin/dokumenty', exact: false, label: 'Dokumenty' },
+    { path: '/admin/szkola', exact: false, label: 'Szkoła' },
+    { path: '/admin/kadra', exact: false, label: 'Kadra' },
+    { path: '/admin/ustawienia', exact: false, label: 'Ustawienia' },
   ];
 
   async logout() {
