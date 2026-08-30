@@ -1,17 +1,29 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { News, GalleryImage } from '../../core/models/database.types';
 
 @Component({
   selector: 'app-aktualnosc-detail',
   standalone: true,
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, SkeletonComponent],
   template: `
-    @if (item()) {
-      <article class="pt-10 pb-16 md:pt-14 md:pb-24">
-        <div class="container-main max-w-4xl">
+    <div class="pt-10 pb-16 md:pt-14 md:pb-24">
+      <div class="container-main max-w-4xl">
+        @if (loading()) {
+          <div class="space-y-6" aria-busy="true">
+            <app-skeleton type="text" [style.width]="'30%'"/>
+            <app-skeleton type="title" [style.width]="'90%'"/>
+            <app-skeleton type="text" [style.width]="'40%'"/>
+            <app-skeleton type="rect" class="mt-4"/>
+            <app-skeleton type="text" class="mt-4"/>
+            <app-skeleton type="text"/>
+            <app-skeleton type="text" [style.width]="'80%'"/>
+          </div>
+        } @else if (item()) {
+          <article>
           <a routerLink="/aktualnosci" class="inline-flex items-center gap-2 text-petrol font-heading font-semibold text-sm uppercase tracking-wide mb-8 hover:gap-3 transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             Wróć do aktualności
@@ -81,15 +93,17 @@ import { News, GalleryImage } from '../../core/models/database.types';
               }
             </section>
           }
-        </div>
-      </article>
-    }
+          </article>
+        }
+      </div>
+    </div>
   `,
 })
 export class AktualnoscDetailComponent implements OnInit {
   item = signal<News | null>(null);
   galleryImages = signal<GalleryImage[]>([]);
   currentImage = signal(0);
+  loading = signal(true);
 
   constructor(
     private route: ActivatedRoute,
@@ -100,12 +114,17 @@ export class AktualnoscDetailComponent implements OnInit {
     const slug = this.route.snapshot.paramMap.get('slug');
     if (!slug) return;
 
-    const data = await this.fb.getNewsBySlug(slug);
-    this.item.set(data);
-    if (data?.album_id) {
-      const images = await this.fb.listGalleryImages(data.album_id);
-      this.galleryImages.set(images ?? []);
-      this.currentImage.set(0);
+    this.loading.set(true);
+    try {
+      const data = await this.fb.getNewsBySlug(slug);
+      this.item.set(data);
+      if (data?.album_id) {
+        const images = await this.fb.listGalleryImages(data.album_id);
+        this.galleryImages.set(images ?? []);
+        this.currentImage.set(0);
+      }
+    } finally {
+      this.loading.set(false);
     }
   }
 

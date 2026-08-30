@@ -2,12 +2,13 @@ import { Component, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, StatCardComponent, DatePipe],
+  imports: [RouterLink, StatCardComponent, DatePipe, SkeletonComponent],
   template: `
     <div class="space-y-8">
       <div>
@@ -15,6 +16,16 @@ import { FirebaseService } from '../../../core/services/firebase.service';
         <p class="text-gray-500">Przegląd danych w portalu</p>
       </div>
 
+      @if (loading()) {
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true">
+          @for (s of [1,2,3,4,5,6]; track s) {
+            <div class="comic-card space-y-3">
+              <app-skeleton type="title" [style.width]="'50%'"/>
+              <app-skeleton type="title" [style.width]="'30%'"/>
+            </div>
+          }
+        </div>
+      } @else {
       <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <app-stat-card [value]="stats().news" label="Aktualności" />
         <app-stat-card [value]="stats().programs" label="Kierunki" />
@@ -23,6 +34,7 @@ import { FirebaseService } from '../../../core/services/firebase.service';
         <app-stat-card [value]="stats().documents" label="Dokumenty" />
         <app-stat-card [value]="stats().staff" label="Kadra" />
       </div>
+      }
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="comic-card">
@@ -49,7 +61,16 @@ import { FirebaseService } from '../../../core/services/firebase.service';
 
         <div class="comic-card">
           <h2 class="font-heading text-xl text-petrol mb-4">Ostatnie aktualności</h2>
-          @if (recentNews().length > 0) {
+          @if (loading()) {
+            <div class="space-y-3" aria-busy="true">
+              @for (s of [1,2,3]; track s) {
+                <div class="space-y-2">
+                  <app-skeleton type="title" [style.width]="'50%'"/>
+                  <app-skeleton type="text" [style.width]="'35%'"/>
+                </div>
+              }
+            </div>
+          } @else if (recentNews().length > 0) {
             <ul class="divide-y divide-ink/10">
               @for (item of recentNews(); track item.id) {
                 <li class="py-3">
@@ -71,27 +92,32 @@ import { FirebaseService } from '../../../core/services/firebase.service';
 export class DashboardComponent implements OnInit {
   stats = signal({ news: 0, programs: 0, albums: 0, images: 0, documents: 0, staff: 0 });
   recentNews = signal<any[]>([]);
+  loading = signal(true);
 
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const [news, programs, albums, images, docs, staff] = await Promise.all([
-      this.fb.listNews(),
-      this.fb.listPrograms(),
-      this.fb.listAlbums(),
-      this.fb.listAllImages(),
-      this.fb.listDocuments(),
-      this.fb.listStaff(),
-    ]);
+    try {
+      const [news, programs, albums, images, docs, staff] = await Promise.all([
+        this.fb.listNews(),
+        this.fb.listPrograms(),
+        this.fb.listAlbums(),
+        this.fb.listAllImages(),
+        this.fb.listDocuments(),
+        this.fb.listStaff(),
+      ]);
 
-    this.stats.set({
-      news: news.length,
-      programs: programs.length,
-      albums: albums.length,
-      images: images.length,
-      documents: docs.length,
-      staff: staff.length,
-    });
-    this.recentNews.set(news.slice(0, 5));
+      this.stats.set({
+        news: news.length,
+        programs: programs.length,
+        albums: albums.length,
+        images: images.length,
+        documents: docs.length,
+        staff: staff.length,
+      });
+      this.recentNews.set(news.slice(0, 5));
+    } finally {
+      this.loading.set(false);
+    }
   }
 }

@@ -1,12 +1,13 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
 import { Document } from '../../../core/models/database.types';
 
 @Component({
   selector: 'app-documents-admin',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, SkeletonComponent],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
@@ -63,6 +64,18 @@ import { Document } from '../../../core/models/database.types';
         </div>
       }
 
+      @if (loading()) {
+        <div class="bg-surface comic-border overflow-hidden" aria-busy="true">
+          <div class="p-5 space-y-4">
+            @for (r of [1,2,3,4,5]; track r) {
+              <div class="space-y-2">
+                <app-skeleton type="title" [style.width]="'35%'"/>
+                <app-skeleton type="text" [style.width]="'20%'"/>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
       <div class="bg-surface comic-border overflow-hidden">
         <table class="w-full text-left text-sm">
           <thead>
@@ -91,6 +104,7 @@ import { Document } from '../../../core/models/database.types';
           </tbody>
         </table>
       </div>
+      }
     </div>
   `,
 })
@@ -99,13 +113,18 @@ export class DocumentsAdminComponent implements OnInit {
   editing = signal(false);
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
+  loading = signal(true);
 
   form = { id: '', title: '', description: '', file_url: '', category: 'Rekrutacja' };
 
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    await this.load();
+    try {
+      await this.load();
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async load() {

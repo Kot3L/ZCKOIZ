@@ -1,12 +1,13 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
 import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types';
 
 @Component({
   selector: 'app-gallery-admin',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, SkeletonComponent],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
@@ -34,6 +35,20 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
         </form>
       </div>
 
+      @if (loading()) {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" aria-busy="true">
+          @for (s of [1,2]; track s) {
+            <div class="comic-card">
+              <app-skeleton type="title" [style.width]="'50%'"/>
+              <div class="flex flex-wrap gap-2 mt-4">
+                @for (img of [1,2,3,4,5]; track img) {
+                  <app-skeleton type="rect" [style]="{ width: '96px', height: '80px', 'aspect-ratio': 'auto' }" class="rounded-lg"/>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         @for (album of albums(); track album.id) {
           <div class="comic-card">
@@ -83,6 +98,7 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
           </div>
         }
       </div>
+      }
     </div>
   `,
 })
@@ -95,11 +111,16 @@ export class GalleryAdminComponent implements OnInit {
   newAlbumVisible = true;
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
+  loading = signal(true);
 
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    await Promise.all([this.loadAlbums(), this.loadImages()]);
+    try {
+      await Promise.all([this.loadAlbums(), this.loadImages()]);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async loadAlbums() {

@@ -1,15 +1,45 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { Program } from '../../core/models/database.types';
 
 @Component({
   selector: 'app-program-detail',
   standalone: true,
-  imports: [PageHeaderComponent, RouterLink],
+  imports: [PageHeaderComponent, RouterLink, SkeletonComponent],
   template: `
-    @if (program()) {
+    @if (loading()) {
+      <section class="py-12">
+        <div class="container-main">
+          <div class="space-y-6" aria-busy="true">
+            <app-skeleton type="title" [style.width]="'50%'"/>
+            <app-skeleton type="text" [style.width]="'35%'"/>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
+              <div class="lg:col-span-2 space-y-6">
+                <div class="comic-card space-y-3">
+                  <app-skeleton type="title" [style.width]="'40%'"/>
+                  <app-skeleton type="text"/>
+                  <app-skeleton type="text"/>
+                  <app-skeleton type="text" [style.width]="'80%'"/>
+                </div>
+                <div class="comic-card space-y-3">
+                  <app-skeleton type="title" [style.width]="'40%'"/>
+                  <app-skeleton type="text"/>
+                  <app-skeleton type="text" [style.width]="'70%'"/>
+                </div>
+              </div>
+              <div class="comic-card space-y-3">
+                <app-skeleton type="title" [style.width]="'50%'"/>
+                <app-skeleton type="text"/>
+                <app-skeleton type="button"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    } @else if (program()) {
       <app-page-header
         [title]="program()!.title"
         [subtitle]="program()!.school_type === 'technikum' ? 'Technikum' : 'Branżowa Szkoła I Stopnia'" />
@@ -61,6 +91,7 @@ import { Program } from '../../core/models/database.types';
 })
 export class ProgramDetailComponent implements OnInit {
   program = signal<Program | null>(null);
+  loading = signal(true);
 
   constructor(
     private route: ActivatedRoute,
@@ -71,7 +102,11 @@ export class ProgramDetailComponent implements OnInit {
     const slug = this.route.snapshot.paramMap.get('slug');
     if (!slug) return;
 
-    const data = await this.fb.getProgramBySlug(slug);
-    this.program.set(data);
+    try {
+      const data = await this.fb.getProgramBySlug(slug);
+      this.program.set(data);
+    } finally {
+      this.loading.set(false);
+    }
   }
 }

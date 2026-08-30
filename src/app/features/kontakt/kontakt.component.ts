@@ -1,18 +1,36 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ContactFormComponent } from '../../shared/components/contact-form/contact-form.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
 
 @Component({
   selector: 'app-kontakt',
   standalone: true,
-  imports: [PageHeaderComponent, ContactFormComponent],
+  imports: [PageHeaderComponent, ContactFormComponent, SkeletonComponent],
   template: `
     <app-page-header title="Kontakt" subtitle="Skontaktuj się z naszą szkołą" />
 
     <section class="py-12 md:py-16">
       <div class="container-main">
         <div class="grid grid-cols-1 lg:grid-cols-[1.05fr_1.35fr] gap-8 mb-12 items-stretch">
+          @if (loading()) {
+            <div class="space-y-6">
+              <div class="comic-card space-y-3">
+                <app-skeleton type="title" [style.width]="'40%'"/>
+                <app-skeleton type="text"/>
+                <app-skeleton type="text"/>
+                <app-skeleton type="text" [style.width]="'60%'"/>
+              </div>
+              <div class="comic-card space-y-3">
+                <app-skeleton type="title" [style.width]="'45%'"/>
+                <app-skeleton type="text"/>
+                <app-skeleton type="text"/>
+                <app-skeleton type="text"/>
+                <app-skeleton type="text" [style.width]="'70%'"/>
+              </div>
+            </div>
+          } @else {
           <div class="space-y-6">
             <div class="comic-card">
               <h2 class="font-heading text-xl text-orange-primary mb-4">Dane kontaktowe</h2>
@@ -42,6 +60,7 @@ import { FirebaseService } from '../../core/services/firebase.service';
               </ul>
             </div>
           </div>
+          }
 
           <div class="comic-border overflow-hidden min-h-[380px] h-full">
             <iframe
@@ -62,15 +81,20 @@ export class KontaktComponent implements OnInit {
   email = 'sekretariat@zckoiz.zabrze.pl';
   phone = '(32) 271-XX-XX';
   messageSent = signal(false);
+  loading = signal(true);
 
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const settings = await this.fb.listSettings();
-    const get = (key: string) => settings.find(s => s.key === key)?.value;
-    if (get('contact_address')) this.address = get('contact_address')!;
-    if (get('contact_email')) this.email = get('contact_email')!;
-    if (get('contact_phone')) this.phone = get('contact_phone')!;
+    try {
+      const settings = await this.fb.listSettings();
+      const get = (key: string) => settings.find(s => s.key === key)?.value;
+      if (get('contact_address')) this.address = get('contact_address')!;
+      if (get('contact_email')) this.email = get('contact_email')!;
+      if (get('contact_phone')) this.phone = get('contact_phone')!;
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   onFormSubmitted() {

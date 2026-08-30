@@ -2,6 +2,7 @@ import { Component, signal, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { SchoolPageRecord } from '../../core/models/database.types';
 import { SCHOOL_PAGES, SchoolPage } from './school-content';
@@ -9,10 +10,23 @@ import { SCHOOL_PAGES, SchoolPage } from './school-content';
 @Component({
   selector: 'app-school-page',
   standalone: true,
-  imports: [PageHeaderComponent, RouterLink],
+  imports: [PageHeaderComponent, RouterLink, SkeletonComponent],
   template: `
     @if (loading()) {
-      <div class="py-16 text-center text-gray-500">Ładowanie…</div>
+      <div class="py-12">
+        <div class="container-main max-w-4xl">
+          <div class="space-y-6" aria-busy="true">
+            <app-skeleton type="title" [style.width]="'50%'"/>
+            <app-skeleton type="text" [style.width]="'35%'"/>
+            <div class="comic-card mt-6 space-y-3">
+              <app-skeleton type="title" [style.width]="'40%'"/>
+              <app-skeleton type="text"/>
+              <app-skeleton type="text"/>
+              <app-skeleton type="text" [style.width]="'75%'"/>
+            </div>
+          </div>
+        </div>
+      </div>
     } @else if (page()) {
       <app-page-header [title]="page()!.title" [subtitle]="page()!.subtitle" />
 

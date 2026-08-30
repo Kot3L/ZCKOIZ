@@ -1,47 +1,69 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { Document } from '../../core/models/database.types';
 
 @Component({
   selector: 'app-dokumenty',
   standalone: true,
-  imports: [PageHeaderComponent],
+  imports: [PageHeaderComponent, SkeletonComponent],
   template: `
     <app-page-header title="Dokumenty" subtitle="Pliki do pobrania - statut, rekrutacja, regulaminy i więcej" />
 
     <section class="py-12 md:py-16">
       <div class="container-main">
-        @for (category of categories(); track category) {
-          <div class="mb-10">
-            <h2 class="section-heading">{{ category }}</h2>
-            <div class="space-y-3">
-              @for (doc of documentsByCategory(category); track doc.id) {
-                <a
-                  [href]="doc.file_url"
-                  target="_blank"
-                  rel="noopener"
-                  class="comic-card flex items-center gap-4 !p-4 hover:bg-surface">
-                  <div class="w-12 h-12 shrink-0 bg-petrol border-2 border-ink rounded-lg flex items-center justify-center text-white font-heading font-bold text-lg">
-                    PDF
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <h3 class="font-heading text-lg text-ink line-clamp-1">{{ doc.title }}</h3>
-                    @if (doc.description) {
-                      <p class="text-gray-500 text-sm line-clamp-1">{{ doc.description }}</p>
-                    }
-                  </div>
-                  <svg class="w-6 h-6 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                  </svg>
-                </a>
-              }
+        @if (loading()) {
+          <div class="space-y-10" aria-busy="true">
+            @for (g of [1,2,3]; track g) {
+              <div>
+                <app-skeleton type="title" [style.width]="'35%'"/>
+                <div class="mt-4 space-y-3">
+                  @for (d of [1,2,3]; track d) {
+                    <div class="comic-card flex items-center gap-4 !p-4">
+                      <div class="w-12 h-12 shrink-0"><app-skeleton type="rect" /></div>
+                      <div class="flex-1 space-y-2">
+                        <app-skeleton type="text" [style.width]="'45%'"/>
+                        <app-skeleton type="text" [style.width]="'70%'"/>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          @for (category of categories(); track category) {
+            <div class="mb-10">
+              <h2 class="section-heading">{{ category }}</h2>
+              <div class="space-y-3">
+                @for (doc of documentsByCategory(category); track doc.id) {
+                  <a
+                    [href]="doc.file_url"
+                    target="_blank"
+                    rel="noopener"
+                    class="comic-card flex items-center gap-4 !p-4 hover:bg-surface">
+                    <div class="w-12 h-12 shrink-0 bg-petrol border-2 border-ink rounded-lg flex items-center justify-center text-white font-heading font-bold text-lg">
+                      PDF
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-heading text-lg text-ink line-clamp-1">{{ doc.title }}</h3>
+                      @if (doc.description) {
+                        <p class="text-gray-500 text-sm line-clamp-1">{{ doc.description }}</p>
+                      }
+                    </div>
+                    <svg class="w-6 h-6 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                  </a>
+                }
+              </div>
             </div>
-          </div>
-        } @empty {
-          <div class="text-center py-16">
-            <p class="text-gray-500 text-lg">Brak dokumentów do wyświetlenia</p>
-          </div>
+          } @empty {
+            <div class="text-center py-16">
+              <p class="text-gray-500 text-lg">Brak dokumentów do wyświetlenia</p>
+            </div>
+          }
         }
       </div>
     </section>
@@ -49,6 +71,7 @@ import { Document } from '../../core/models/database.types';
 })
 export class DokumentyComponent implements OnInit {
   documents = signal<Document[]>([]);
+  loading = signal(true);
 
   categories = () => {
     const unique = new Set<string>();
@@ -62,7 +85,11 @@ export class DokumentyComponent implements OnInit {
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const data = await this.fb.listDocuments();
-    this.documents.set(data);
+    try {
+      const data = await this.fb.listDocuments();
+      this.documents.set(data);
+    } finally {
+      this.loading.set(false);
+    }
   }
 }

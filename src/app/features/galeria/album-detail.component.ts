@@ -2,15 +2,30 @@ import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { LightboxComponent } from '../../shared/components/lightbox/lightbox.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { GalleryAlbum, GalleryImage } from '../../core/models/database.types';
 
 @Component({
   selector: 'app-album-detail',
   standalone: true,
-  imports: [PageHeaderComponent, LightboxComponent, RouterLink],
+  imports: [PageHeaderComponent, LightboxComponent, RouterLink, SkeletonComponent],
   template: `
-    @if (album()) {
+    @if (loading()) {
+      <div class="py-12">
+        <div class="container-main">
+          <div class="space-y-4" aria-busy="true">
+            <app-skeleton type="title" [style.width]="'50%'"/>
+            <app-skeleton type="text" [style.width]="'35%'"/>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
+              @for (s of [1,2,3,4,5,6,7,8]; track s) {
+                <app-skeleton type="rect" class="rounded-xl" />
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else if (album()) {
       <app-page-header [title]="album()!.title" [subtitle]="album()!.description ?? undefined" />
 
       <section class="py-12 md:py-16">
@@ -67,6 +82,7 @@ export class AlbumDetailComponent implements OnInit {
   images = signal<GalleryImage[]>([]);
   lightboxOpen = signal(false);
   currentImageIndex = signal(0);
+  loading = signal(true);
 
   constructor(
     private route: ActivatedRoute,
@@ -77,12 +93,16 @@ export class AlbumDetailComponent implements OnInit {
     const slug = this.route.snapshot.paramMap.get('slug');
     if (!slug) return;
 
-    const data = await this.fb.getAlbumBySlug(slug);
-    if (!data || data.is_visible === false) return;
-    this.album.set(data);
+    try {
+      const data = await this.fb.getAlbumBySlug(slug);
+      if (!data || data.is_visible === false) return;
+      this.album.set(data);
 
-    const imgs = await this.fb.listGalleryImages(data.id);
-    this.images.set(imgs ?? []);
+      const imgs = await this.fb.listGalleryImages(data.id);
+      this.images.set(imgs ?? []);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   openImage(index: number) {

@@ -2,6 +2,7 @@ import { Component, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NewsCardComponent } from '../../shared/components/news-card/news-card.component';
 import { ProgramCardComponent } from '../../shared/components/program-card/program-card.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { InviewDirective } from '../../shared/directives/inview.directive';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { News, Program, HeroSlide } from '../../core/models/database.types';
@@ -9,7 +10,7 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, NewsCardComponent, ProgramCardComponent, InviewDirective],
+  imports: [RouterLink, NewsCardComponent, ProgramCardComponent, InviewDirective, SkeletonComponent],
   template: `
     <section class="relative bg-hero overflow-hidden">
       <div class="halftone-bg absolute inset-0"></div>
@@ -144,7 +145,25 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
     </section>
 
     <!-- Programs Preview -->
-    @if (programs().length > 0) {
+    @if (loading()) {
+      <section class="py-16 md:py-20">
+        <div class="container-main">
+          <app-skeleton type="title" [style.width]="'40%'"/>
+          <p class="mt-4"><app-skeleton type="text" [style.width]="'30%'"/></p>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+            @for (s of [1,2,3]; track s) {
+              <div class="comic-card !p-0 overflow-hidden">
+                <app-skeleton type="rect" />
+                <div class="p-5 space-y-3">
+                  <app-skeleton type="title" />
+                  <app-skeleton type="text" />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    } @else if (programs().length > 0) {
       <section class="py-16 md:py-20">
         <div class="container-main">
           <div class="flex items-end justify-between mb-10">
@@ -171,7 +190,25 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
     }
 
     <!-- Latest News -->
-    @if (latestNews().length > 0) {
+    @if (loading()) {
+      <section class="py-16 md:py-20 bg-cream-dark">
+        <div class="container-main">
+          <app-skeleton type="title" [style.width]="'40%'"/>
+          <p class="mt-4"><app-skeleton type="text" [style.width]="'30%'"/></p>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+            @for (s of [1,2,3]; track s) {
+              <div class="comic-card !p-0 overflow-hidden">
+                <app-skeleton type="rect" />
+                <div class="p-5 space-y-3">
+                  <app-skeleton type="title" />
+                  <app-skeleton type="text" />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    } @else if (latestNews().length > 0) {
       <section class="py-16 md:py-20 bg-cream-dark">
         <div class="container-main">
           <div class="flex items-end justify-between mb-10">
@@ -212,16 +249,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   programs = signal<Program[]>([]);
   latestNews = signal<News[]>([]);
   currentSlide = signal(0);
+  loading = signal(true);
   private sliderInterval: ReturnType<typeof setInterval> | null = null;
 
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    await Promise.all([
-      this.loadHeroSlides(),
-      this.loadPrograms(),
-      this.loadLatestNews(),
-    ]);
+    try {
+      await Promise.all([
+        this.loadHeroSlides(),
+        this.loadPrograms(),
+        this.loadLatestNews(),
+      ]);
+    } finally {
+      this.loading.set(false);
+    }
 
     if (this.heroSlides().length > 1) {
       this.sliderInterval = setInterval(() => {

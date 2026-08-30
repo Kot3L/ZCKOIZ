@@ -1,13 +1,14 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
 import { News, GalleryAlbum } from '../../../core/models/database.types';
 
 @Component({
   selector: 'app-news-admin',
   standalone: true,
-  imports: [FormsModule, DatePipe],
+  imports: [FormsModule, DatePipe, SkeletonComponent],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
@@ -100,6 +101,21 @@ import { News, GalleryAlbum } from '../../../core/models/database.types';
       }
 
       <!-- News List -->
+      @if (loading()) {
+        <div class="bg-surface comic-border overflow-hidden" aria-busy="true">
+          <div class="p-5 space-y-4">
+            @for (r of [1,2,3,4,5]; track r) {
+              <div class="flex items-center gap-4">
+                <app-skeleton type="rect" [style]="{ width: '64px', height: '48px', 'aspect-ratio': 'auto' }" class="shrink-0"/>
+                <div class="flex-1 space-y-2">
+                  <app-skeleton type="title" [style.width]="'40%'"/>
+                  <app-skeleton type="text" [style.width]="'20%'"/>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
       <div class="bg-surface comic-border overflow-hidden">
         <table class="w-full text-left text-sm">
           <thead>
@@ -135,6 +151,7 @@ import { News, GalleryAlbum } from '../../../core/models/database.types';
           </tbody>
         </table>
       </div>
+      }
     </div>
   `,
 })
@@ -144,6 +161,7 @@ export class NewsAdminComponent implements OnInit {
   editing = signal(false);
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
+  loading = signal(true);
 
   form = {
     id: '',
@@ -157,7 +175,11 @@ export class NewsAdminComponent implements OnInit {
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    await Promise.all([this.load(), this.loadAlbums()]);
+    try {
+      await Promise.all([this.load(), this.loadAlbums()]);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async load() {

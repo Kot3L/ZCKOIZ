@@ -1,5 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
 import {
   SchoolMenuGroup,
@@ -27,7 +28,7 @@ interface MenuFormGroup {
 @Component({
   selector: 'app-school-admin',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, SkeletonComponent],
   template: `
     <div class="space-y-6">
       <div>
@@ -39,6 +40,23 @@ interface MenuFormGroup {
         <div [class]="messageType() === 'error' ? 'bg-red-50 text-red-700 border-red-500' : 'bg-green-50 text-green-700 border-green-500'"
              class="p-4 border-2 rounded-lg text-sm">{{ message() }}</div>
       }
+
+      @if (loading()) {
+        <div class="comic-card space-y-4" aria-busy="true">
+          <app-skeleton type="title" [style.width]="'50%'"/>
+          <app-skeleton type="text" [style.width]="'70%'"/>
+          <div class="border-2 border-ink/20 rounded-lg p-4 space-y-3">
+            <app-skeleton type="title" [style.width]="'30%'"/>
+            <app-skeleton type="text"/>
+            <app-skeleton type="text" [style.width]="'60%'"/>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            @for (s of [1,2,3,4,5,6,7,8]; track s) {
+              <app-skeleton type="rect" [style]="{ height: '56px', 'aspect-ratio': 'auto' }" class="rounded-lg"/>
+            }
+          </div>
+        </div>
+      } @else {
 
       <!-- ===== Dropdown menu editor ===== -->
       <div class="comic-card">
@@ -219,11 +237,13 @@ interface MenuFormGroup {
           </div>
         }
       </div>
+      }
     </div>
   `,
 })
 export class SchoolAdminComponent implements OnInit {
   pages = signal<SchoolPageRecord[]>([]);
+  loading = signal(true);
 
   menuForm = {
     groups: [] as MenuFormGroup[],
@@ -243,8 +263,12 @@ export class SchoolAdminComponent implements OnInit {
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    await this.loadPages();
-    await this.loadMenu();
+    try {
+      await this.loadPages();
+      await this.loadMenu();
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   private toLink(l: SchoolPageLink): SchoolPageLink {

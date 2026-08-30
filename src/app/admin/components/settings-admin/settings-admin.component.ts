@@ -1,12 +1,13 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
 import { SiteSettings } from '../../../core/models/database.types';
 
 @Component({
   selector: 'app-settings-admin',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, SkeletonComponent],
   template: `
     <div class="space-y-6">
       <div>
@@ -19,6 +20,15 @@ import { SiteSettings } from '../../../core/models/database.types';
              class="p-4 border-2 rounded-lg text-sm">{{ message() }}</div>
       }
 
+      @if (loading()) {
+        <div class="comic-card max-w-2xl space-y-4" aria-busy="true">
+          <app-skeleton type="title" [style.width]="'35%'"/>
+          <app-skeleton type="button"/>
+          <app-skeleton type="button"/>
+          <app-skeleton type="button"/>
+          <app-skeleton type="button" [style.width]="'160px'"/>
+        </div>
+      } @else {
       <div class="comic-card max-w-2xl">
         <h2 class="font-heading text-xl text-orange-primary mb-4">Dane kontaktowe</h2>
         <form (submit)="save($event)" class="space-y-4">
@@ -37,6 +47,7 @@ import { SiteSettings } from '../../../core/models/database.types';
           <button type="submit" class="comic-btn-primary text-sm">Zapisz ustawienia</button>
         </form>
       </div>
+      }
     </div>
   `,
 })
@@ -44,18 +55,23 @@ export class SettingsAdminComponent implements OnInit {
   form = { contact_address: '', contact_email: '', contact_phone: '' };
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
+  loading = signal(true);
 
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
-    const data = await this.fb.listSettings();
-    const map: Record<string, string> = {};
-    data.forEach(s => map[s.key] = s.value);
-    this.form = {
-      contact_address: map['contact_address'] ?? '',
-      contact_email: map['contact_email'] ?? '',
-      contact_phone: map['contact_phone'] ?? '',
-    };
+    try {
+      const data = await this.fb.listSettings();
+      const map: Record<string, string> = {};
+      data.forEach(s => map[s.key] = s.value);
+      this.form = {
+        contact_address: map['contact_address'] ?? '',
+        contact_email: map['contact_email'] ?? '',
+        contact_phone: map['contact_phone'] ?? '',
+      };
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async save(event: Event) {

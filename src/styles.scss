@@ -731,6 +731,43 @@ html.font-largest {
   .animate-bounce-soft {
     animation: comicBounce 2.6s ease-in-out infinite;
   }
+
+  /* ===== Loading skeletons ===== */
+  .sk-block {
+    display: block;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    background-color: rgba(160, 160, 160, 0.28);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.4s ease-in-out infinite;
+    border-radius: 8px 10px 8px 10px / 10px 8px 10px 8px;
+  }
+
+  .sk-title {
+    height: 1.75rem;
+    width: 70%;
+    max-width: 420px;
+  }
+
+  .sk-text {
+    height: 0.9rem;
+    width: 100%;
+  }
+
+  .sk-circle {
+    border-radius: 50%;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+  }
+
+  .sk-rect {
+    aspect-ratio: 16 / 10;
+    width: 100%;
+  }
+
+  .sk-button {
+    height: 3rem;
+    width: 120px;
+  }
 }
 
 @layer utilities {
@@ -778,4 +815,9 @@ html.font-largest {
 @keyframes comicBounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
