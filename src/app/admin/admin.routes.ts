@@ -32,6 +32,11 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./components/documents-admin/documents-admin.component').then(m => m.DocumentsAdminComponent),
       },
       {
+        path: 'szkola',
+        canActivate: [authGuard],
+        loadComponent: () => import('./components/school-admin/school-admin.component').then(m => m.SchoolAdminComponent),
+      },
+      {
         path: 'kadra',
         canActivate: [authGuard],
         loadComponent: () => import('./components/staff-admin/staff-admin.component').then(m => m.StaffAdminComponent),

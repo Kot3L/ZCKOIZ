@@ -90,3 +90,34 @@ export interface HeroSlide {
   display_order: number;
   is_active: boolean;
 }
+
+export interface SchoolPageLink {
+  label: string;
+  url: string;
+  external?: boolean;
+}
+
+export interface SchoolPageSection {
+  heading: string;
+  body?: string[];
+  links?: SchoolPageLink[];
+}
+
+export interface SchoolPageRecord {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle?: string;
+  sections: SchoolPageSection[];
+  updated_at?: string;
+}
+
+export interface SchoolMenuGroup {
+  heading: string;
+  items: SchoolPageLink[];
+}
+
+export interface SchoolMenu {
+  id: string;
+  groups: SchoolMenuGroup[];
+}

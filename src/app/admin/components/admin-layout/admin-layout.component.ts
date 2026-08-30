@@ -116,6 +116,7 @@ export class AdminLayoutComponent implements OnInit {
     { path: '/admin/kierunki', exact: false, icon: '🎓', label: 'Kierunki kształcenia' },
     { path: '/admin/galeria', exact: false, icon: '🖼️', label: 'Galeria' },
     { path: '/admin/dokumenty', exact: false, icon: '📄', label: 'Dokumenty' },
+    { path: '/admin/szkola', exact: false, icon: '🏫', label: 'Szkoła' },
     { path: '/admin/kadra', exact: false, icon: '👥', label: 'Kadra' },
     { path: '/admin/ustawienia', exact: false, icon: '⚙️', label: 'Ustawienia' },
   ];

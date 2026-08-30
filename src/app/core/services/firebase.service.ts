@@ -34,6 +34,8 @@ import {
   Document,
   Staff,
   SiteSettings,
+  SchoolPageRecord,
+  SchoolMenu,
 } from '../models/database.types';
 
 @Injectable({ providedIn: 'root' })
@@ -207,6 +209,35 @@ export class FirebaseService {
   listSettings = () => this.list<SiteSettings>('site_settings');
   getSetting = (key: string) => this.listWhere<SiteSettings>('site_settings', 'key', key).then((x) => x[0] ?? null);
   saveSetting = (data: Partial<SiteSettings>, id?: string) => this.save('site_settings', data as any, id);
+
+  // =====================================================================
+  // SCHOOL PAGES (podstrony "Szkoła")
+  // =====================================================================
+  listSchoolPages = () => this.list<SchoolPageRecord>('school_pages');
+  getSchoolPage = (slug: string) =>
+    this.get<SchoolPageRecord>('school_pages', slug).then((p) => {
+      if (p && typeof p === 'object' && 'sections' in p) return p;
+      return null;
+    });
+  async saveSchoolPage(data: Partial<SchoolPageRecord>, slug: string): Promise<void> {
+    const d = {
+      ...data,
+      updated_at: Timestamp.now().toDate().toISOString(),
+    } as any;
+    await setDoc(doc(this.ready.db, 'school_pages', slug), d, { merge: true });
+  }
+
+  // =====================================================================
+  // SCHOOL MENU (dropdown "Szkoła")
+  // =====================================================================
+  getSchoolMenu = () => this.get<SchoolMenu>('school_menu', 'main');
+  async saveSchoolMenu(data: Partial<SchoolMenu>): Promise<void> {
+    const d = {
+      ...data,
+      updated_at: Timestamp.now().toDate().toISOString(),
+    } as any;
+    await setDoc(doc(this.ready.db, 'school_menu', 'main'), d, { merge: true });
+  }
 
   // =====================================================================
   // STORAGE UPLOAD

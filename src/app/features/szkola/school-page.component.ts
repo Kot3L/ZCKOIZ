@@ -1,7 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { FirebaseService } from '../../core/services/firebase.service';
+import { SchoolPageRecord } from '../../core/models/database.types';
 import { SCHOOL_PAGES, SchoolPage } from './school-content';
 
 @Component({
@@ -9,7 +11,9 @@ import { SCHOOL_PAGES, SchoolPage } from './school-content';
   standalone: true,
   imports: [PageHeaderComponent, RouterLink],
   template: `
-    @if (page()) {
+    @if (loading()) {
+      <div class="py-16 text-center text-gray-500">Ładowanie…</div>
+    } @else if (page()) {
       <app-page-header [title]="page()!.title" [subtitle]="page()!.subtitle" />
 
       <section class="py-12 md:py-16">
@@ -59,8 +63,10 @@ import { SCHOOL_PAGES, SchoolPage } from './school-content';
 })
 export class SchoolPageComponent {
   page = signal<SchoolPage | null>(null);
+  loading = signal(false);
 
-  constructor(private route: ActivatedRoute) {}
+  private route = inject(ActivatedRoute);
+  private fb = inject(FirebaseService);
 
   ngOnDestroy() {
     this.routeSub?.unsubscribe();
@@ -71,7 +77,39 @@ export class SchoolPageComponent {
   ngOnInit() {
     this.routeSub = this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug');
-      this.page.set(slug ? (SCHOOL_PAGES[slug] ?? null) : null);
+      this.display(slug || '');
     });
+  }
+
+  private async display(slug: string) {
+    this.loading.set(true);
+    this.page.set(null);
+    let current: SchoolPage | null = null;
+    try {
+      const dbPage = await this.fb.getSchoolPage(slug);
+      if (dbPage) {
+        current = this.toDisplayPage(dbPage);
+      }
+    } catch {
+      current = null;
+    }
+    if (!current) {
+      current = SCHOOL_PAGES[slug] ?? null;
+    }
+    this.page.set(current);
+    this.loading.set(false);
+  }
+
+  private toDisplayPage(r: SchoolPageRecord): SchoolPage {
+    return {
+      slug: r.slug,
+      title: r.title,
+      subtitle: r.subtitle,
+      sections: (r.sections ?? []).map((s) => ({
+        heading: s.heading,
+        body: s.body && s.body.length ? s.body : undefined,
+        links: s.links && s.links.length ? s.links : undefined,
+      })),
+    };
   }
 }

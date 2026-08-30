@@ -1,51 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
 import { FontService } from '../../../core/services/font.service';
-
-interface SchoolMenuItem {
-  label: string;
-  url: string;
-  external?: boolean;
-}
-
-interface SchoolMenuGroup {
-  heading: string;
-  items: SchoolMenuItem[];
-}
-
-const SCHOOL_MENU: SchoolMenuGroup[] = [
-  {
-    heading: 'O szkole',
-    items: [
-      { label: 'Partnerzy szkoły', url: '/szkola/partnerzy' },
-      { label: 'Dyrekcja', url: '/szkola/dyrekcja' },
-      { label: 'Sekretariat', url: '/szkola/sekretariat' },
-      { label: 'Kadra ZCKOiZ', url: '/kadra' },
-      { label: 'Specjaliści', url: '/szkola/specjalisci' },
-      { label: 'Biblioteka', url: '/szkola/biblioteka' },
-      { label: 'Rajd po Zabrzu', url: '/szkola/rajd-po-zabrzu' },
-      { label: 'Historia', url: '/szkola/historia' },
-      { label: 'Statut ZCKOiZ', url: '/szkola/statut' },
-      { label: 'RODO ZCKOiZ', url: '/szkola/rodo' },
-      { label: 'Rada Rodziców', url: '/szkola/rada-rodzicow' },
-      { label: 'Dla rodzica', url: '/szkola/dla-rodzica' },
-      { label: 'BIP', url: 'https://bip.miastozabrze.pl/engine//bip/84?o=TreeMenu&e=e|84', external: true },
-    ],
-  },
-  {
-    heading: 'Organizacja roku',
-    items: [
-      { label: 'Zestaw podręczników', url: '/szkola/zestaw-podrecznikow' },
-      { label: 'Wychowawcy klas', url: '/szkola/wychowawcy-klas' },
-      { label: 'Samorząd uczniowski', url: '/szkola/samorzad' },
-      { label: 'Organizacja roku szkolnego', url: '/szkola/organizacja-roku' },
-      { label: 'Dni wolne od zajęć', url: '/szkola/dni-wolne' },
-      { label: 'Regulamin oceniania', url: '/szkola/regulamin' },
-      { label: 'Wymagania edukacyjne', url: '/szkola/wymagania' },
-    ],
-  },
-];
+import { FirebaseService } from '../../../core/services/firebase.service';
+import { SchoolMenuGroup } from '../../../core/models/database.types';
+import { DEFAULT_SCHOOL_MENU } from '../../../features/szkola/school-content';
 
 @Component({
   selector: 'app-navbar',
@@ -93,7 +52,7 @@ const SCHOOL_MENU: SchoolMenuGroup[] = [
                 (mouseenter)="openSchool()"
                 (mouseleave)="scheduleSchoolClose()">
                 <div class="grid grid-cols-2 gap-x-8 gap-y-6">
-                  @for (group of schoolMenu; track group.heading) {
+                  @for (group of schoolMenu(); track group.heading) {
                     <div>
                       <h4 class="text-xs font-heading font-bold uppercase tracking-widest text-petrol mb-3 whitespace-nowrap">{{ group.heading }}</h4>
                       <ul class="space-y-1">
@@ -226,7 +185,7 @@ const SCHOOL_MENU: SchoolMenuGroup[] = [
             </button>
             @if (schoolMobileOpen()) {
               <div class="pl-4 space-y-1 border-l-2 border-ink/10 ml-2">
-                @for (group of schoolMenu; track group.heading) {
+                @for (group of schoolMenu(); track group.heading) {
                   <p class="text-xs font-heading font-bold uppercase tracking-widest text-petrol pt-2 pb-1">{{ group.heading }}</p>
                   @for (item of group.items; track item.url) {
                     @if (item.external) {
@@ -257,7 +216,7 @@ const SCHOOL_MENU: SchoolMenuGroup[] = [
     </nav>
   `,
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
   mobileOpen = signal(false);
   schoolMobileOpen = signal(false);
   schoolOpen = signal(false);
@@ -270,8 +229,9 @@ export class NavbarComponent {
   fontSize = this.font.size;
 
   private router = inject(Router);
+  private fb = inject(FirebaseService);
 
-  schoolMenu = SCHOOL_MENU;
+  schoolMenu = signal<SchoolMenuGroup[]>(DEFAULT_SCHOOL_MENU);
 
   constructor() {
     this.router.events.subscribe((event) => {
@@ -285,6 +245,21 @@ export class NavbarComponent {
         }
       }
     });
+  }
+
+  ngOnInit() {
+    this.loadSchoolMenu();
+  }
+
+  private async loadSchoolMenu() {
+    try {
+      const menu = await this.fb.getSchoolMenu();
+      if (menu && menu.groups && menu.groups.length) {
+        this.schoolMenu.set(menu.groups);
+      }
+    } catch {
+      this.schoolMenu.set(DEFAULT_SCHOOL_MENU);
+    }
   }
 
   openSchool() {

@@ -90,15 +90,15 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
           <div class="container-main py-16 md:py-24 relative z-10">
             <div class="max-w-4xl">
               <div class="flex items-center gap-4 mb-4">
-                <h1 class="text-3xl sm:text-4xl md:text-5xl text-white leading-tight font-bold">
-                  Zabrzańskiego Centrum Kształcenia Ogólnego i Zawodowego<br>
-                  <span class="text-yellow-accent font-bold">Zabrze</span>
-                </h1>
-                <img
-                  src="/logobig.png"
-                  alt="logo ZCKOiZ Zabrze"
-                  class="w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain rounded-xl border-2 border-white shadow-[2px_2px_0_#1A1A1A] shrink-0 animate-float bg-transparent"
-                />
+              <h1 class="text-3xl sm:text-4xl md:text-5xl text-white leading-tight font-bold relative z-10">
+                Zabrzańskiego Centrum Kształcenia Ogólnego i Zawodowego<br>
+                <span class="text-yellow-accent font-bold">Zabrze</span>
+              </h1>
+              <img
+                src="/logobig.png"
+                alt="logo ZCKOiZ Zabrze"
+                class="w-52 h-52 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain shrink-0 -ml-10 sm:-ml-14 md:-ml-20 relative z-0 animate-float bg-transparent"
+              />
               </div>
               <p class="text-xl text-gray-300 mb-8">
                 Technikum i branżowa szkoła I stopnia. Wybierz swój kierunek i rozpocznij karierę!

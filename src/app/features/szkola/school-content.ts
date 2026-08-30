@@ -17,6 +17,44 @@ export interface SchoolPage {
   sections: SchoolSection[];
 }
 
+export interface SchoolMenuGroup {
+  heading: string;
+  items: SchoolLink[];
+}
+
+export const DEFAULT_SCHOOL_MENU: SchoolMenuGroup[] = [
+  {
+    heading: 'O szkole',
+    items: [
+      { label: 'Partnerzy szkoły', url: '/szkola/partnerzy' },
+      { label: 'Dyrekcja', url: '/szkola/dyrekcja' },
+      { label: 'Sekretariat', url: '/szkola/sekretariat' },
+      { label: 'Kadra ZCKOiZ', url: '/kadra' },
+      { label: 'Specjaliści', url: '/szkola/specjalisci' },
+      { label: 'Biblioteka', url: '/szkola/biblioteka' },
+      { label: 'Rajd po Zabrzu', url: '/szkola/rajd-po-zabrzu' },
+      { label: 'Historia', url: '/szkola/historia' },
+      { label: 'Statut ZCKOiZ', url: '/szkola/statut' },
+      { label: 'RODO ZCKOiZ', url: '/szkola/rodo' },
+      { label: 'Rada Rodziców', url: '/szkola/rada-rodzicow' },
+      { label: 'Dla rodzica', url: '/szkola/dla-rodzica' },
+      { label: 'BIP', url: 'https://bip.miastozabrze.pl/engine//bip/84?o=TreeMenu&e=e|84', external: true },
+    ],
+  },
+  {
+    heading: 'Organizacja roku',
+    items: [
+      { label: 'Zestaw podręczników', url: '/szkola/zestaw-podrecznikow' },
+      { label: 'Wychowawcy klas', url: '/szkola/wychowawcy-klas' },
+      { label: 'Samorząd uczniowski', url: '/szkola/samorzad' },
+      { label: 'Organizacja roku szkolnego', url: '/szkola/organizacja-roku' },
+      { label: 'Dni wolne od zajęć', url: '/szkola/dni-wolne' },
+      { label: 'Regulamin oceniania', url: '/szkola/regulamin' },
+      { label: 'Wymagania edukacyjne', url: '/szkola/wymagania' },
+    ],
+  },
+];
+
 export const SCHOOL_PAGES: Record<string, SchoolPage> = {
   partnerzy: {
     slug: 'partnerzy',
