@@ -23,10 +23,14 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
 
       <div class="comic-card">
         <h2 class="font-heading text-xl text-orange-primary mb-4">Nowy album</h2>
-        <form (submit)="createAlbum($event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input [(ngModel)]="newAlbumTitle" name="albumTitle" required placeholder="Tytuł albumu" class="md:col-span-2 px-4 py-2.5 border-2 border-ink rounded-lg" />
-          <input [(ngModel)]="newAlbumDesc" name="albumDesc" placeholder="Opis" class="px-4 py-2.5 border-2 border-ink rounded-lg" />
-          <button type="submit" class="comic-btn-primary text-sm">Utwórz</button>
+        <form (submit)="createAlbum($event)" class="flex flex-wrap md:flex-nowrap items-center gap-2 md:gap-3">
+          <input [(ngModel)]="newAlbumTitle" name="albumTitle" required placeholder="Tytuł albumu" class="w-full md:w-auto md:flex-1 px-3 py-2 text-sm border-2 border-ink rounded-lg" />
+          <input [(ngModel)]="newAlbumDesc" name="albumDesc" placeholder="Opis" class="w-full md:w-auto md:flex-1 px-3 py-2 text-sm border-2 border-ink rounded-lg" />
+          <label class="flex items-center gap-2 shrink-0 text-sm text-ink font-semibold cursor-pointer">
+            <input type="checkbox" [(ngModel)]="newAlbumVisible" name="albumVisible" id="albumVisible" class="w-4 h-4" />
+            Pokaż w galerii
+          </label>
+          <button type="submit" class="comic-btn-primary text-xs !py-2 !px-4 shrink-0">Utwórz</button>
         </form>
       </div>
 
@@ -39,6 +43,11 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
                 @if (album.description) {
                   <p class="text-sm text-gray-500">{{ album.description }}</p>
                 }
+                <label class="inline-flex items-center gap-2 mt-2 cursor-pointer">
+                  <input type="checkbox" [checked]="album.is_visible !== false"
+                    (change)="toggleVisibility(album, $event)" class="w-4 h-4" />
+                  <span class="text-sm text-ink font-medium">Pokaż w galerii</span>
+                </label>
               </div>
               <button (click)="deleteAlbum(album)" class="comic-btn text-xs !py-1.5 !px-3 bg-red-50 text-red-600 !shadow-[2px_2px_0_#991b1b] !border-red-600">Usuń</button>
             </div>
@@ -76,6 +85,7 @@ export class GalleryAdminComponent implements OnInit {
   images = signal<GalleryImage[]>([]);
   newAlbumTitle = '';
   newAlbumDesc = '';
+  newAlbumVisible = true;
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
 
@@ -105,11 +115,24 @@ export class GalleryAdminComponent implements OnInit {
         slug,
         description: this.newAlbumDesc || null,
         display_order: this.albums().length + 1,
+        is_visible: this.newAlbumVisible,
       });
       this.newAlbumTitle = '';
       this.newAlbumDesc = '';
+      this.newAlbumVisible = true;
       this.setMessage('Album utworzony.', 'success');
       await this.loadAlbums();
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e.message ?? e), 'error');
+    }
+  }
+
+  async toggleVisibility(album: GalleryAlbum, event: Event) {
+    const visible = (event.target as HTMLInputElement).checked;
+    try {
+      await this.fb.saveAlbum({ is_visible: visible }, album.id);
+      await this.loadAlbums();
+      this.setMessage(visible ? 'Album widoczny w galerii.' : 'Album ukryty w galerii.', 'success');
     } catch (e: any) {
       this.setMessage('Błąd: ' + (e.message ?? e), 'error');
     }

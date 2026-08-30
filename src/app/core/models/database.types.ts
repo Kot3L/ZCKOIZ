@@ -35,6 +35,7 @@ export interface GalleryAlbum {
   description: string | null;
   cover_image_url: string | null;
   display_order: number;
+  is_visible: boolean;
   created_at: string;
 }
 

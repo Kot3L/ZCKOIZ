@@ -59,7 +59,7 @@ export class GaleriaComponent implements OnInit {
 
   async ngOnInit() {
     const data = await this.fb.listAlbums();
-    this.albums.set(data);
+    this.albums.set(data.filter((a) => a.is_visible !== false));
   }
 
   async openAlbum(albumId: string) {
