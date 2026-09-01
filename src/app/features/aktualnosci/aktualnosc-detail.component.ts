@@ -1,6 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { News, GalleryImage } from '../../core/models/database.types';
@@ -59,6 +60,23 @@ import { News, GalleryImage } from '../../core/models/database.types';
             </div>
           }
 
+          @if (youtubeEmbeds().length) {
+            <div class="space-y-6 mt-10">
+              @for (src of youtubeEmbeds(); track src) {
+                <div class="relative aspect-video overflow-hidden rounded-xl border-2 border-ink shadow-[4px_4px_0_var(--color-ink)]">
+                  <iframe
+                    [src]="src"
+                    title="Film YouTube"
+                    class="absolute inset-0 w-full h-full"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                  </iframe>
+                </div>
+              }
+            </div>
+          }
+
           @if (galleryImages().length > 0) {
             <section class="mt-12">
               <h2 class="font-heading text-2xl text-ink mb-6">Galeria zdjęć</h2>
@@ -104,10 +122,12 @@ export class AktualnoscDetailComponent implements OnInit {
   galleryImages = signal<GalleryImage[]>([]);
   currentImage = signal(0);
   loading = signal(true);
+  youtubeEmbeds = signal<SafeResourceUrl[]>([]);
 
   constructor(
     private route: ActivatedRoute,
     private fb: FirebaseService,
+    private sanitizer: DomSanitizer,
   ) {}
 
   async ngOnInit() {
@@ -123,9 +143,23 @@ export class AktualnoscDetailComponent implements OnInit {
         this.galleryImages.set(images ?? []);
         this.currentImage.set(0);
       }
+      this.youtubeEmbeds.set((data?.youtube_urls ?? [])
+        .map(u => this.toEmbedUrl(u))
+        .filter((u): u is string => !!u)
+        .map(e => this.sanitizer.bypassSecurityTrustResourceUrl(e)));
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private toEmbedUrl(url: string): string | null {
+    if (!url) return null;
+    const trimmed = url.trim();
+    const watchMatch = trimmed.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+    if (watchMatch) {
+      return 'https://www.youtube.com/embed/' + watchMatch[1];
+    }
+    return null;
   }
 
   prevImage() {

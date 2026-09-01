@@ -77,6 +77,25 @@ import { News, GalleryAlbum } from '../../../core/models/database.types';
                 class="comic-btn text-sm bg-surface text-ink mt-3">+ Dodaj zdjęcie</button>
             </div>
             <div>
+              <label class="block text-sm font-semibold mb-1">Filmy YouTube</label>
+              <div class="space-y-3">
+                @for (link of form.youtube_urls; track $index) {
+                  <div class="flex gap-3 items-center">
+                    <div class="shrink-0 w-9">
+                      <svg class="w-9 h-6 rounded" viewBox="0 0 24 24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </div>
+                    <input [(ngModel)]="form.youtube_urls[$index]" [name]="'youtube_' + $index"
+                      class="flex-1 px-3 py-2 text-sm border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" placeholder="https://www.youtube.com/watch?v=..." />
+                    <button type="button" (click)="removeYoutube($index)" title="Usuń film"
+                      class="w-7 h-7 shrink-0 bg-red-600 text-white rounded-full text-sm font-bold border border-ink">×</button>
+                  </div>
+                }
+              </div>
+              <button type="button" (click)="addYoutube()"
+                class="comic-btn text-sm bg-surface text-ink mt-3">+ Dodaj film YouTube</button>
+              <p class="text-xs text-gray-500 mt-1">Wklej link do filmu — zostanie osadzony w artykule (np. https://www.youtube.com/watch?v=XXXXX lub https://youtu.be/XXXXX).</p>
+            </div>
+            <div>
               <label class="block text-sm font-semibold mb-1">Album ze zdjęciami (karuzela)</label>
               <div class="flex gap-2 items-center">
                 <select [(ngModel)]="form.album_id" name="album_id" class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg bg-surface">
@@ -169,6 +188,7 @@ export class NewsAdminComponent implements OnInit {
     content: '',
     cover_image_url: '',
     content_images: [] as string[],
+    youtube_urls: [] as string[],
     album_id: null as string | null,
   };
 
@@ -198,10 +218,11 @@ export class NewsAdminComponent implements OnInit {
         content: item.content,
         cover_image_url: item.cover_image_url ?? '',
         content_images: [...(item.content_images ?? [])],
+        youtube_urls: [...(item.youtube_urls ?? [])],
         album_id: item.album_id ?? null,
       };
     } else {
-      this.form = { id: '', title: '', content: '', cover_image_url: '', content_images: [], album_id: null };
+      this.form = { id: '', title: '', content: '', cover_image_url: '', content_images: [], youtube_urls: [], album_id: null };
     }
     this.editing.set(true);
   }
@@ -222,6 +243,14 @@ export class NewsAdminComponent implements OnInit {
     this.form.content_images.splice(index, 1);
   }
 
+  addYoutube() {
+    this.form.youtube_urls.push('');
+  }
+
+  removeYoutube(index: number) {
+    this.form.youtube_urls.splice(index, 1);
+  }
+
   removeCoverImage() {
     this.form.cover_image_url = '';
   }
@@ -238,6 +267,7 @@ export class NewsAdminComponent implements OnInit {
       content: this.form.content,
       cover_image_url: this.form.cover_image_url || null,
       content_images: this.form.content_images.filter(u => u.trim()),
+      youtube_urls: this.form.youtube_urls.map(u => u.trim()).filter(u => u),
       album_id: this.form.album_id || null,
       slug: this.slugify(this.form.title),
       status: 'published',

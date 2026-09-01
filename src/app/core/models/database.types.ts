@@ -6,6 +6,7 @@ export interface News {
   excerpt: string;
   cover_image_url: string | null;
   content_images: string[];
+  youtube_urls: string[];
   album_id: string | null;
   status: 'published' | 'draft';
   author_id: string;
