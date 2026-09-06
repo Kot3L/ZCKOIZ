@@ -60,7 +60,8 @@ import { RouterLink } from '@angular/router';
             <ul class="space-y-2 text-sm text-gray-400">
               <li>Poniedziałek - Piątek</li>
               <li class="text-white font-semibold">7:00 - 16:00</li>
-              <li class="mt-3 text-gray-500">Sekretariat czynny w godzinach 7:30 - 15:30</li>
+              <li class="mt-3 text-gray-500">Sekretariat czynny w godzinach</li>
+              <li class="text-white font-semibold">7:30 - 15:30</li>
             </ul>
           </div>
         </div>

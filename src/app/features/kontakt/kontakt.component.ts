@@ -53,7 +53,7 @@ import { FirebaseService } from '../../core/services/firebase.service';
             <div class="comic-card">
               <h2 class="font-heading text-xl text-petrol mb-4">Godziny pracy sekretariatu</h2>
               <ul class="space-y-2 text-ink">
-                <li class="flex justify-between"><span>Poniedziałek - Piątek</span><span class="font-semibold">7:30 - 15:30</span></li>
+                <li class="flex justify-between"><span>Sekretariat czynny w godzinach</span><span class="font-semibold">7:30 - 15:30</span></li>
                 <li class="flex justify-between"><span>Poniedziałek - Piątek (świetlica)</span><span class="font-semibold">7:00 - 16:00</span></li>
                 <li class="flex justify-between text-ink-light"><span>Sobota</span><span>nieczynne</span></li>
                 <li class="flex justify-between text-ink-light"><span>Niedziela</span><span>nieczynne</span></li>
