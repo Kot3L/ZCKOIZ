@@ -64,7 +64,7 @@ import { FirebaseService } from '../../core/services/firebase.service';
 
           <div class="comic-border overflow-hidden min-h-[380px] h-full">
             <iframe
-              src="https://maps.google.com/maps?q=ZCKOiZ%20Zabrze%20Pi%C5%82sudskiego%2058%2C%2041-800%20Zabrze&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              src="https://maps.google.com/maps?q=ZCKOiZ%20Zabrze%20Marsza%C5%82ka%20J.%20Pi%C5%82sudskiego%2058%2C%2041-800%20Zabrze&t=&z=15&ie=UTF8&iwloc=&output=embed"
               class="w-full h-full min-h-[380px]"
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"
@@ -77,9 +77,9 @@ import { FirebaseService } from '../../core/services/firebase.service';
   `,
 })
 export class KontaktComponent implements OnInit {
-  address = 'Piłsudskiego 58, 41-800 Zabrze';
+  address = 'Marszałka J. Piłsudskiego 58, Zabrze 41-800';
   email = 'sekretariat@zckoiz.zabrze.pl';
-  phone = '(32) 271-XX-XX';
+  phone = '+48 32 271 27 67';
   messageSent = signal(false);
   loading = signal(true);
 

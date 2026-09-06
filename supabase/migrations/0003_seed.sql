@@ -103,9 +103,9 @@ insert into public.staff (full_name, position, department, email, is_management,
 -- SITE SETTINGS
 -- =====================================================================
 insert into public.site_settings (key, value) values
-('contact_address', 'Piłsudskiego 58, 41-800 Zabrze'),
+('contact_address', 'Marszałka J. Piłsudskiego 58, Zabrze 41-800'),
 ('contact_email', 'sekretariat@zckoiz.zabrze.pl'),
-('contact_phone', '(32) 271-XX-XX'),
+('contact_phone', '+48 32 271 27 67'),
 ('hero_slides', jsonb_build_array(
   jsonb_build_object('id', '1', 'title', 'Kształcimy profesjonalistów', 'subtitle', 'Technikum i Branżowa Szkoła I Stopnia. Wybierz kierunek i rozpocznij karierę zawodową.', 'link_url', '/oferta', 'link_label', 'Poznaj ofertę', 'image_url', null, 'display_order', 1, 'is_active', true),
   jsonb_build_object('id', '2', 'title', 'Trwa rekrutacja 2025/2026', 'subtitle', 'Zapisz się już dziś! Sprawdź naszą ofertę i dołącz do grona naszych uczniów.', 'link_url', '/kontakt', 'link_label', 'Skontaktuj się', 'image_url', null, 'display_order', 2, 'is_active', true)

@@ -28,6 +28,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'fire
 import { environment } from '../../../environments/environment';
 import {
   News,
+  NewsPdf,
   Program,
   GalleryAlbum,
   GalleryImage,
@@ -133,15 +134,17 @@ export class FirebaseService {
     }
   }
 
-  private async save(coll: string, data: Record<string, unknown>, id?: string): Promise<void> {
+  private async save(coll: string, data: Record<string, unknown>, id?: string): Promise<string | null> {
     const d = { ...data, updated_at: Timestamp.now().toDate().toISOString() };
     if (id) {
-      await updateDoc(doc(this.ready.db, coll, id), { ...d, id } as any);
+      await setDoc(doc(this.ready.db, coll, id), { ...d, id } as any, { merge: true });
+      return id;
     } else {
-      await addDoc(collection(this.ready.db, coll), {
+      const ref = await addDoc(collection(this.ready.db, coll), {
         ...d,
         created_at: Timestamp.now().toDate().toISOString(),
       } as any);
+      return ref.id;
     }
   }
 
@@ -153,13 +156,79 @@ export class FirebaseService {
   // NEWS
   // =====================================================================
   listPublishedNews = () => this.list<News>('news', 'published_at', false).then((xs) =>
-    xs.filter((n) => n.status === 'published'),
+    xs.filter((n) => n.status === 'published').map((n) => this.cleanNewsPdf(n)),
   );
-  listNews = () => this.list<News>('news', 'created_at', false);
-  getNews = (id: string) => this.get<News>('news', id);
-  getNewsBySlug = (slug: string) => this.listWhere<News>('news', 'slug', slug).then((x) => x[0] ?? null);
+  listNews = () => this.list<News>('news', 'created_at', false).then((xs) => xs.map((n) => this.cleanNewsPdf(n)));
+
+  /** Usuwa ewentualny base64 zapisany dawniej w pdf_url (przed przeniesieniem PDF do osobnej kolekcji). */
+  private cleanNewsPdf(n: News): News {
+    if (n.pdf_url && n.pdf_url.startsWith('data:')) {
+      return { ...n, pdf_url: null };
+    }
+    return n;
+  }
+  getNews = (id: string) => this.get<News>('news', id).then((n) => (n ? this.cleanNewsPdf(n) : n));
+  getNewsBySlug = (slug: string) =>
+    this.listWhere<News>('news', 'slug', slug).then((x) => (x[0] ? this.cleanNewsPdf(x[0]) : null));
   saveNews = (data: Partial<News>, id?: string) => this.save('news', data as any, id);
   deleteNews = (id: string) => this.remove('news', id);
+  async deleteNewsSafe(id: string) {
+    await this.remove('news', id);
+    await this.deleteNewsPdf(id);
+  }
+
+  // PDF dołączony do aktualności — trzymany osobno (kolekcja `news_pdfs`),
+  // żeby nie przekroczyć limitu 1 MiB dokumentu Firestore. Większe pliki
+  // dzielimy na fragmenty (`news_pdfs/{newsId}/chunks/*`).
+
+  private static readonly PDF_CHUNK_SIZE = 400 * 1024; // ok. 400 KB base64 na fragment (~300 KB pliku)
+
+  async saveNewsPdf(newsId: string, dataUrl: string, name: string): Promise<void> {
+    const comma = dataUrl.indexOf(',');
+    const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+    const chunkSize = FirebaseService.PDF_CHUNK_SIZE;
+    const chunks: string[] = [];
+    for (let i = 0; i < base64.length; i += chunkSize) {
+      chunks.push(base64.slice(i, i + chunkSize));
+    }
+
+    const coll = `news_pdfs/${newsId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    for (let i = 0; i < chunks.length; i++) {
+      await this.save(coll, { index: i, data: chunks[i] } as any, String(i));
+    }
+    await this.save('news_pdfs', { name, chunks: chunks.length } as any, newsId);
+  }
+
+  async getNewsPdf(newsId: string): Promise<NewsPdf | null> {
+    const meta = await this.get<NewsPdf & { chunks?: number }>('news_pdfs', newsId);
+    if (!meta) return null;
+    // Format starszy: cały base64 w polu `data` w jednym dokumencie.
+    if ((meta as any).data) {
+      return { id: newsId, data: (meta as any).data, name: meta.name };
+    }
+    const coll = `news_pdfs/${newsId}/chunks`;
+    const parts = await this.list<{ index: number; data: string }>(coll, 'index');
+    const data = parts
+      .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+      .map((p) => p.data)
+      .join('');
+    return {
+      id: newsId,
+      data: 'data:application/pdf;base64,' + data,
+      name: meta.name,
+    };
+  }
+
+  async deleteNewsPdf(newsId: string): Promise<void> {
+    const coll = `news_pdfs/${newsId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    await this.remove('news_pdfs', newsId);
+  }
 
   // =====================================================================
   // PROGRAMS

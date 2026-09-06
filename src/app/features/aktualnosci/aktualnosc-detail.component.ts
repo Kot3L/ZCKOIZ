@@ -5,6 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { News, GalleryImage } from '../../core/models/database.types';
+import { dataUrlToBlobUrl, fileNameFromUrl } from '../../shared/utils/pdf.utils';
 
 @Component({
   selector: 'app-aktualnosc-detail',
@@ -77,6 +78,26 @@ import { News, GalleryImage } from '../../core/models/database.types';
             </div>
           }
 
+          @if (pdfName() || pdfHref()) {
+            <div class="mt-10 border-2 border-ink rounded-xl bg-surface overflow-hidden">
+              <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b-2 border-ink">
+                <span class="inline-flex items-center gap-2 font-semibold text-ink min-w-0">
+                  <svg class="w-5 h-5 shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  {{ pdfName() || 'Dokument PDF' }}
+                </span>
+                <a [href]="pdfHref()" target="_blank" rel="noopener"
+                  class="comic-btn text-sm bg-surface text-ink">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  Pobierz / Otwórz
+                </a>
+              </div>
+              @if (pdfPreviewSrc()) {
+                <iframe [src]="pdfPreviewSrc()" title="Podgląd PDF"
+                  class="w-full h-[30rem] bg-white"></iframe>
+              }
+            </div>
+          }
+
           @if (galleryImages().length > 0) {
             <section class="mt-12">
               <h2 class="font-heading text-2xl text-ink mb-6">Galeria zdjęć</h2>
@@ -123,6 +144,9 @@ export class AktualnoscDetailComponent implements OnInit {
   currentImage = signal(0);
   loading = signal(true);
   youtubeEmbeds = signal<SafeResourceUrl[]>([]);
+  pdfBlobUrl = signal<string | null>(null);
+  pdfHref = signal<string>('');
+  pdfName = signal<string | null>(null);
 
   constructor(
     private route: ActivatedRoute,
@@ -147,9 +171,27 @@ export class AktualnoscDetailComponent implements OnInit {
         .map(u => this.toEmbedUrl(u))
         .filter((u): u is string => !!u)
         .map(e => this.sanitizer.bypassSecurityTrustResourceUrl(e)));
+
+      if (data?.pdf_name && !data.pdf_url) {
+        const pdf = await this.fb.getNewsPdf(data.id);
+        if (pdf?.data) {
+          this.pdfName.set(pdf.name || data.pdf_name);
+          this.pdfHref.set(dataUrlToBlobUrl(pdf.data));
+          this.pdfBlobUrl.set(this.pdfHref());
+        }
+      } else if (data?.pdf_url) {
+        this.pdfName.set(data.pdf_name || fileNameFromUrl(data.pdf_url, 'Dokument PDF'));
+        this.pdfHref.set(data.pdf_url);
+      }
     } finally {
       this.loading.set(false);
     }
+  }
+
+  pdfPreviewSrc(): SafeResourceUrl | null {
+    const url = this.pdfBlobUrl() ?? this.pdfHref();
+    if (!url) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
   private toEmbedUrl(url: string): string | null {

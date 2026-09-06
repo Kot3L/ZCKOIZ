@@ -1,9 +1,11 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
 import { News, GalleryAlbum } from '../../../core/models/database.types';
+import { dataUrlToBlobUrl, revokeBlobUrl, fileNameFromUrl } from '../../../shared/utils/pdf.utils';
 
 @Component({
   selector: 'app-news-admin',
@@ -94,6 +96,37 @@ import { News, GalleryAlbum } from '../../../core/models/database.types';
               <button type="button" (click)="addYoutube()"
                 class="comic-btn text-sm bg-surface text-ink mt-3">+ Dodaj film YouTube</button>
               <p class="text-xs text-gray-500 mt-1">Wklej link do filmu — zostanie osadzony w artykule (np. https://www.youtube.com/watch?v=XXXXX lub https://youtu.be/XXXXX).</p>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">Plik PDF do pobrania</label>
+              @if (form.pdf_url || pdfDataUrl()) {
+                <div class="border-2 border-ink rounded-lg bg-surface overflow-hidden">
+                  <div class="flex items-center justify-between gap-3 px-3 py-2.5 border-b-2 border-ink">
+                    <span class="inline-flex items-center gap-2 text-sm font-semibold text-ink min-w-0">
+                      <svg class="w-5 h-5 shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                      <span class="truncate">{{ form.pdf_name || fileNameFromUrl(form.pdf_url!, 'plik.pdf') }}</span>
+                    </span>
+                    <span class="inline-flex items-center gap-2 shrink-0">
+                      <a [href]="pdfHref()" target="_blank" rel="noopener" title="Otwórz / pobierz"
+                        class="text-xs font-semibold text-petrol hover:underline">Otwórz</a>
+                      <button type="button" (click)="removePdf()" title="Usuń plik"
+                        class="w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold border border-ink">×</button>
+                    </span>
+                  </div>
+                  @if (pdfPreviewSrc()) {
+                    <iframe [src]="pdfPreviewSrc()" title="Podgląd PDF" class="w-full h-72 bg-white"></iframe>
+                  }
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Plik jest zapisywany w bazie danych. Po usunięciu (×) możesz dodać inny.</p>
+              } @else {
+                <div class="flex gap-2">
+                  <input [(ngModel)]="form.pdf_url" name="pdf_url" placeholder="URL pliku PDF (np. https://.../plik.pdf)"
+                    class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" />
+                  <button type="button" (click)="pdfInput.click()" class="comic-btn text-sm bg-surface text-ink shrink-0">Upload PDF</button>
+                  <input #pdfInput type="file" accept="application/pdf" class="hidden" (change)="uploadPdf($event)" />
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Wklej link do pliku albo wgraj PDF ze swojego urządzenia. Plik zostanie zapisany w bazie danych i pokazany w panelu oraz artykule.</p>
+              }
             </div>
             <div>
               <label class="block text-sm font-semibold mb-1">Album ze zdjęciami (karuzela)</label>
@@ -189,10 +222,18 @@ export class NewsAdminComponent implements OnInit {
     cover_image_url: '',
     content_images: [] as string[],
     youtube_urls: [] as string[],
+    pdf_url: null as string | null,
+    pdf_name: null as string | null,
     album_id: null as string | null,
   };
 
-  constructor(private fb: FirebaseService) {}
+  pdfDataUrl = signal<string | null>(null);
+  pdfBlobUrl = signal<string | null>(null);
+
+  constructor(
+    private fb: FirebaseService,
+    private sanitizer: DomSanitizer,
+  ) {}
 
   async ngOnInit() {
     try {
@@ -211,6 +252,9 @@ export class NewsAdminComponent implements OnInit {
   }
 
   toggleEditor(item: News | null) {
+    revokeBlobUrl(this.pdfBlobUrl());
+    this.pdfBlobUrl.set(null);
+    this.pdfDataUrl.set(null);
     if (item) {
       this.form = {
         id: item.id,
@@ -219,12 +263,27 @@ export class NewsAdminComponent implements OnInit {
         cover_image_url: item.cover_image_url ?? '',
         content_images: [...(item.content_images ?? [])],
         youtube_urls: [...(item.youtube_urls ?? [])],
+        pdf_url: item.pdf_url ?? null,
+        pdf_name: item.pdf_name ?? null,
         album_id: item.album_id ?? null,
       };
+      if (item.pdf_name && !item.pdf_url) {
+        this.loadPdfData(item.id).catch((e) =>
+          this.setMessage('Nie udało się wczytać pliku PDF: ' + (e.message ?? e), 'error'),
+        );
+      }
     } else {
-      this.form = { id: '', title: '', content: '', cover_image_url: '', content_images: [], youtube_urls: [], album_id: null };
+      this.form = { id: '', title: '', content: '', cover_image_url: '', content_images: [], youtube_urls: [], pdf_url: null, pdf_name: null, album_id: null };
     }
     this.editing.set(true);
+  }
+
+  async loadPdfData(newsId: string) {
+    const pdf = await this.fb.getNewsPdf(newsId);
+    if (pdf?.data) {
+      this.pdfDataUrl.set(pdf.data);
+      this.pdfBlobUrl.set(dataUrlToBlobUrl(pdf.data));
+    }
   }
 
   private slugify(title: string): string {
@@ -251,6 +310,62 @@ export class NewsAdminComponent implements OnInit {
     this.form.youtube_urls.splice(index, 1);
   }
 
+  async uploadPdf(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const MAX_BYTES = 10 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      this.setMessage(`Plik jest za duży (max ${(MAX_BYTES / 1024 / 1024).toFixed(1)} MB).`, 'error');
+      input.value = '';
+      return;
+    }
+
+    try {
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Nie udało się odczytać pliku.'));
+        reader.readAsDataURL(file);
+      });
+      revokeBlobUrl(this.pdfBlobUrl());
+      this.pdfDataUrl.set(dataUrl);
+      this.pdfBlobUrl.set(dataUrlToBlobUrl(dataUrl));
+      this.form.pdf_url = null;
+      this.form.pdf_name = file.name;
+      this.setMessage('Plik PDF został dodany.', 'success');
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e.message ?? e), 'error');
+    }
+    input.value = '';
+  }
+
+  removePdf() {
+    revokeBlobUrl(this.pdfBlobUrl());
+    this.pdfBlobUrl.set(null);
+    this.pdfDataUrl.set(null);
+    this.form.pdf_url = null;
+    this.form.pdf_name = null;
+  }
+
+  pdfHref(): string {
+    return this.pdfBlobUrl() ?? this.form.pdf_url ?? '';
+  }
+
+  pdfPreviewSrc(): SafeResourceUrl | null {
+    if (this.pdfBlobUrl()) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfBlobUrl()!);
+    }
+    const url = this.form.pdf_url;
+    if (url && (url.startsWith('http') || url.startsWith('/'))) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    }
+    return null;
+  }
+
+  fileNameFromUrl = fileNameFromUrl;
+
   removeCoverImage() {
     this.form.cover_image_url = '';
   }
@@ -268,6 +383,8 @@ export class NewsAdminComponent implements OnInit {
       cover_image_url: this.form.cover_image_url || null,
       content_images: this.form.content_images.filter(u => u.trim()),
       youtube_urls: this.form.youtube_urls.map(u => u.trim()).filter(u => u),
+      pdf_url: this.form.pdf_url || null,
+      pdf_name: this.form.pdf_name || null,
       album_id: this.form.album_id || null,
       slug: this.slugify(this.form.title),
       status: 'published',
@@ -275,10 +392,21 @@ export class NewsAdminComponent implements OnInit {
     };
 
     try {
-      if (this.form.id) {
-        await this.fb.saveNews(payload, this.form.id);
+      let newsId = this.form.id;
+      if (newsId) {
+        await this.fb.saveNews(payload, newsId);
       } else {
-        await this.fb.saveNews(payload);
+        newsId = (await this.fb.saveNews(payload)) ?? '';
+      }
+
+      // PDF uplaodowany z urządzenia trzymamy w osobnej kolekcji,
+      // żeby nie przekraczać limitu 1 MiB dokumentu `news`.
+      const pdfUploaded = this.pdfDataUrl();
+      if (pdfUploaded) {
+        await this.fb.saveNewsPdf(newsId, pdfUploaded, this.form.pdf_name || 'plik.pdf');
+      }
+      if (!pdfUploaded && newsId && (this.form.pdf_url || !this.form.pdf_name)) {
+        await this.fb.deleteNewsPdf(newsId);
       }
     } catch (e) {
       error = e;
@@ -296,7 +424,7 @@ export class NewsAdminComponent implements OnInit {
   async deleteItem(item: News) {
     if (!confirm(`Czy na pewno usunąć aktualność "${item.title}"?`)) return;
     try {
-      await this.fb.deleteNews(item.id);
+      await this.fb.deleteNewsSafe(item.id);
     } catch (e: any) {
       this.setMessage('Błąd usuwania: ' + e.message, 'error');
       return;

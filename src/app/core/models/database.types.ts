@@ -7,12 +7,22 @@ export interface News {
   cover_image_url: string | null;
   content_images: string[];
   youtube_urls: string[];
+  pdf_url: string | null;
+  pdf_name: string | null;
   album_id: string | null;
   status: 'published' | 'draft';
   author_id: string;
   published_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface NewsPdf {
+  id: string;
+  data: string;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Program {
