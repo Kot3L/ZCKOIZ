@@ -8,13 +8,13 @@ import { AdminStateService } from '../services/admin-state.service';
  * Guard porównuje hash wpisanego segmentu z tym skrótem, więc odtworzenie
  * sekretu z repozytorium/Firestore nie jest możliwe (jedynie brute-force).
  */
-const SECRET_HASH = '7675eaf17d8a5517e2108a6f5b851bcc3389e5ca2cea15d31be46d034491ef71';
+const SECRET_HASH = 'ab102f5d1a15d7bf6d834e03d7c17dbaed46c35eca075e87e71f9fcbda2fd0e4';
 
 export const adminSecretGuard: CanActivateFn = async (route) => {
   const router = inject(Router);
   const adminState = inject(AdminStateService);
 
-  if (typeof window === 'undefined') return true; // SSR – weryfikacja tylko po stronie klienta
+  if (typeof window === 'undefined') return true; 
   if (adminState.secret()) return true;
 
   const candidate = route.paramMap.get('secret') ?? '';
