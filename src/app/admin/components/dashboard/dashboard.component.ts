@@ -1,9 +1,10 @@
 import { Component, signal, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
+import { AdminStateService } from '../../../core/services/admin-state.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,19 +40,19 @@ import { FirebaseService } from '../../../core/services/firebase.service';
         <div class="comic-card">
           <h2 class="font-heading text-xl text-orange-primary mb-4">Szybkie akcje</h2>
           <div class="space-y-3">
-            <a routerLink="/admin/aktualnosci" class="comic-btn-secondary w-full justify-between !py-3">
+            <a [routerLink]="base() + '/aktualnosci'" class="comic-btn-secondary w-full justify-between !py-3">
               <span>Dodaj aktualność</span>
               <span>→</span>
             </a>
-            <a routerLink="/admin/kierunki" class="comic-btn-primary w-full justify-between !py-3">
+            <a [routerLink]="base() + '/kierunki'" class="comic-btn-primary w-full justify-between !py-3">
               <span>Zarządzaj kierunkami</span>
               <span>→</span>
             </a>
-            <a routerLink="/admin/galeria" class="comic-btn w-full justify-between !py-3 bg-surface text-ink">
+            <a [routerLink]="base() + '/galeria'" class="comic-btn w-full justify-between !py-3 bg-surface text-ink">
               <span>Dodaj zdjęcia</span>
               <span>→</span>
             </a>
-            <a routerLink="/admin/dokumenty" class="comic-btn w-full justify-between !py-3 bg-surface text-ink">
+            <a [routerLink]="base() + '/dokumenty'" class="comic-btn w-full justify-between !py-3 bg-surface text-ink">
               <span>Dodaj dokument</span>
               <span>→</span>
             </a>
@@ -93,7 +94,14 @@ export class DashboardComponent implements OnInit {
   recentNews = signal<any[]>([]);
   loading = signal(true);
 
-  constructor(private fb: FirebaseService) {}
+  constructor(
+    private fb: FirebaseService,
+    private route: ActivatedRoute,
+    private adminState: AdminStateService,
+  ) {}
+
+  base = () =>
+    '/' + (this.adminState.secret() || this.route.snapshot.paramMap.get('secret') || '');
 
   async ngOnInit() {
     try {

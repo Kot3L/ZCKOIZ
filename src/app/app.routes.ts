@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminSecretGuard } from './core/guards/admin-secret.guard';
 
 export const routes: Routes = [
   {
@@ -123,12 +124,13 @@ export const routes: Routes = [
     },
   },
   {
-    path: 'admin',
-    canActivate: [authGuard],
+    path: ':secret',
+    canActivate: [adminSecretGuard],
     loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes),
   },
   {
-    path: 'admin/login',
+    path: ':secret/login',
+    canActivate: [adminSecretGuard],
     loadComponent: () => import('./admin/components/login/login.component').then(m => m.LoginComponent),
   },
   {

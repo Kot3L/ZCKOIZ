@@ -84,9 +84,6 @@ import { RouterLink } from '@angular/router';
           <p class="text-gray-500 text-xs">
             &copy; {{ currentYear }} ZCKOiZ Zabrze. Wszelkie prawa zastrzeżone.
           </p>
-          <a routerLink="/admin" class="text-gray-600 hover:text-gray-400 text-xs transition-colors">
-            Panel administracyjny
-          </a>
         </div>
       </div>
     </footer>

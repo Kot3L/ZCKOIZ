@@ -1,6 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet, Router, ActivatedRoute } from '@angular/router';
 import { FirebaseService } from '../../../core/services/firebase.service';
+import { AdminStateService } from '../../../core/services/admin-state.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -99,25 +100,32 @@ export class AdminLayoutComponent implements OnInit {
   constructor(
     private fb: FirebaseService,
     private router: Router,
+    private route: ActivatedRoute,
+    private adminState: AdminStateService,
   ) {}
 
   ngOnInit() {}
 
   user = () => this.fb.user();
 
-  navItems = () => [
-    { path: '/admin', exact: true, label: 'Dashboard' },
-    { path: '/admin/aktualnosci', exact: false, label: 'Aktualności' },
-    { path: '/admin/kierunki', exact: false, label: 'Kierunki kształcenia' },
-    { path: '/admin/galeria', exact: false, label: 'Galeria' },
-    { path: '/admin/dokumenty', exact: false, label: 'Dokumenty' },
-    { path: '/admin/szkola', exact: false, label: 'Szkoła' },
-    { path: '/admin/kadra', exact: false, label: 'Kadra' },
-    { path: '/admin/ustawienia', exact: false, label: 'Ustawienia' },
-  ];
+  base = () => '/' + (this.adminState.secret() || this.route.snapshot.paramMap.get('secret') || '');
+
+  navItems = () => {
+    const base = this.base();
+    return [
+      { path: base, exact: true, label: 'Dashboard' },
+      { path: base + '/aktualnosci', exact: false, label: 'Aktualności' },
+      { path: base + '/kierunki', exact: false, label: 'Kierunki kształcenia' },
+      { path: base + '/galeria', exact: false, label: 'Galeria' },
+      { path: base + '/dokumenty', exact: false, label: 'Dokumenty' },
+      { path: base + '/szkola', exact: false, label: 'Szkoła' },
+      { path: base + '/kadra', exact: false, label: 'Kadra' },
+      { path: base + '/ustawienia', exact: false, label: 'Ustawienia' },
+    ];
+  };
 
   async logout() {
     await this.fb.signOut();
-    this.router.navigate(['/admin/login']);
+    this.router.navigate([this.base() + '/login']);
   }
 }

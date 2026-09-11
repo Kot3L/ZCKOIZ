@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FirebaseService } from '../../../core/services/firebase.service';
 
 @Component({
@@ -79,6 +79,7 @@ export class LoginComponent {
   constructor(
     private fb: FirebaseService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {}
 
   async onSubmit(event: Event) {
@@ -87,7 +88,7 @@ export class LoginComponent {
     this.loading.set(true);
     try {
       await this.fb.signIn(this.email, this.password);
-      this.router.navigate(['/admin']);
+      this.router.navigate(['/' + (this.route.snapshot.paramMap.get('secret') || '')]);
     } catch (e: any) {
       this.error.set(e?.message ?? 'Nie udało się zalogować.');
     } finally {
