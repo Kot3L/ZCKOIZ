@@ -111,9 +111,6 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
                 <a routerLink="/kontakt" class="comic-btn bg-surface text-ink border-white text-lg hover:bg-cream-dark">
                   Kontakt
                 </a>
-                <span class="speech-bubble font-heading font-semibold text-sm text-orange-primary uppercase tracking-wide ml-1">
-                  Trwa rekrutacja!
-                </span>
               </div>
             </div>
           </div>
@@ -233,10 +230,7 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
 
     <section class="py-16 md:py-20 bg-orange-primary halftone-bg border-y-3 border-ink">
       <div class="container-main relative z-10 text-center" inview>
-        <h2 class="text-4xl md:text-5xl text-white mb-4">Rozpocznij naukę w ZCKOiZ!</h2>
-        <p class="text-orange-100 text-lg mb-8 max-w-2xl mx-auto">
-          Trwa rekrutacja na rok szkolny 2025/2026. Sprawdź naszą ofertę i zgłoś się już dziś.
-        </p>
+        <h2 class="text-4xl md:text-5xl text-white mb-8">Rozpocznij naukę w ZCKOiZ!</h2>
         <a routerLink="/kontakt" class="comic-btn bg-surface text-orange-primary border-white text-lg hover:bg-cream-dark">
           Skontaktuj się z nami
         </a>
