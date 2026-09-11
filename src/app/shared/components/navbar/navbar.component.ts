@@ -283,7 +283,7 @@ export class NavbarComponent implements OnInit {
     this.schoolCloseTimer = setTimeout(() => {
       this.schoolOpen.set(false);
       this.schoolCloseTimer = null;
-    }, 2000);
+    }, 1000);
   }
 
   beforeSchool = [

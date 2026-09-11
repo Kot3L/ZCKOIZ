@@ -293,7 +293,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private async loadLatestNews() {
-    const data = await this.fb.listPublishedNews();
-    this.latestNews.set(data.slice(0, 3));
+    const { items } = await this.fb.listPublishedNewsPage(3);
+    this.latestNews.set(items);
   }
 }

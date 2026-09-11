@@ -8,7 +8,7 @@ import { RouterLink } from '@angular/router';
   template: `
     <footer class="bg-dark text-white mt-auto">
       <div class="container-main py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
           <div>
             <div class="flex items-center gap-3 mb-4">
               <img
@@ -29,11 +29,25 @@ import { RouterLink } from '@angular/router';
           <div>
             <h4 class="font-heading text-sm uppercase tracking-wider text-yellow-accent mb-4">Nawigacja</h4>
             <ul class="space-y-2">
-              <li><a routerLink="/oferta" class="text-gray-400 hover:text-white transition-colors text-sm">Oferta edukacyjna</a></li>
+              <li><a routerLink="/oferta" class="text-gray-400 hover:text-white transition-colors text-sm">Oferta</a></li>
               <li><a routerLink="/aktualnosci" class="text-gray-400 hover:text-white transition-colors text-sm">Aktualności</a></li>
               <li><a routerLink="/galeria" class="text-gray-400 hover:text-white transition-colors text-sm">Galeria</a></li>
-              <li><a routerLink="/dokumenty" class="text-gray-400 hover:text-white transition-colors text-sm">Dokumenty</a></li>
               <li><a routerLink="/kadra" class="text-gray-400 hover:text-white transition-colors text-sm">Kadra</a></li>
+              <li><a routerLink="/rekrutacja" class="text-gray-400 hover:text-white transition-colors text-sm">Rekrutacja</a></li>
+              <li><a routerLink="/kontakt" class="text-gray-400 hover:text-white transition-colors text-sm">Kontakt</a></li>
+              <li><a routerLink="/dokumenty" class="text-gray-400 hover:text-white transition-colors text-sm">Dokumenty</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="font-heading text-sm uppercase tracking-wider text-yellow-accent mb-4">Szkoła</h4>
+            <ul class="space-y-2">
+              <li><a routerLink="/szkola/historia" class="text-gray-400 hover:text-white transition-colors text-sm">Historia</a></li>
+              <li><a routerLink="/szkola/dyrekcja" class="text-gray-400 hover:text-white transition-colors text-sm">Dyrekcja</a></li>
+              <li><a routerLink="/szkola/sekretariat" class="text-gray-400 hover:text-white transition-colors text-sm">Sekretariat</a></li>
+              <li><a routerLink="/szkola/biblioteka" class="text-gray-400 hover:text-white transition-colors text-sm">Biblioteka</a></li>
+              <li><a routerLink="/szkola/samorzad" class="text-gray-400 hover:text-white transition-colors text-sm">Samorząd uczniowski</a></li>
+              <li><a routerLink="/szkola/organizacja-roku" class="text-gray-400 hover:text-white transition-colors text-sm">Organizacja roku</a></li>
             </ul>
           </div>
 

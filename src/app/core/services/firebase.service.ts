@@ -22,7 +22,10 @@ import {
   query,
   orderBy,
   where,
+  limit,
+  startAfter,
   Timestamp,
+  DocumentSnapshot,
 } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { environment } from '../../../environments/environment';
@@ -158,6 +161,37 @@ export class FirebaseService {
   listPublishedNews = () => this.list<News>('news', 'published_at', false).then((xs) =>
     xs.filter((n) => n.status === 'published').map((n) => this.cleanNewsPdf(n)),
   );
+
+  /**
+   * Stronicowanie aktualności bez pobierania całej kolekcji — pobiera tylko stronę
+   * (kursorem jest dokument Firestore). Nie obciąża bazy przy dużej liczbie wpisów.
+   */
+  async listPublishedNewsPage(
+    pageSize: number,
+    cursor?: DocumentSnapshot,
+  ): Promise<{ items: News[]; nextCursor: DocumentSnapshot | null }> {
+    const coll = collection(this.ready.db, 'news');
+    let cur: DocumentSnapshot | null | undefined = cursor ?? null;
+    const out: News[] = [];
+    for (let guard = 0; guard < 100; guard++) {
+      const q: any = cur
+        ? query(coll, orderBy('published_at', 'desc'), startAfter(cur), limit(pageSize))
+        : query(coll, orderBy('published_at', 'desc'), limit(pageSize));
+      const xs: any = await getDocs(q);
+      const docs: any[] = xs.docs;
+      if (!docs.length) return { items: out, nextCursor: null };
+      for (const d of docs) {
+        const n = this.mapDoc<News>(d);
+        if (n.status === 'published') {
+          out.push(this.cleanNewsPdf(n));
+          if (out.length === pageSize) return { items: out, nextCursor: d as DocumentSnapshot };
+        }
+      }
+      cur = docs[docs.length - 1] as DocumentSnapshot;
+      if (docs.length < pageSize) return { items: out, nextCursor: null };
+    }
+    return { items: out, nextCursor: cur ?? null };
+  }
   listNews = () => this.list<News>('news', 'created_at', false).then((xs) => xs.map((n) => this.cleanNewsPdf(n)));
 
   /** Usuwa ewentualny base64 zapisany dawniej w pdf_url (przed przeniesieniem PDF do osobnej kolekcji). */
