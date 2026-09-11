@@ -33,13 +33,29 @@ interface MenuFormGroup {
     <div class="space-y-6">
       <div>
         <h1 class="text-3xl text-ink mb-1">Szkoła</h1>
-        <p class="text-gray-500">Zarządzaj menu „Szkoła” oraz treścią podstron</p>
       </div>
 
       @if (message()) {
         <div [class]="messageType() === 'error' ? 'bg-red-50 text-red-700 border-red-500' : 'bg-green-50 text-green-700 border-green-500'"
              class="p-4 border-2 rounded-lg text-sm">{{ message() }}</div>
       }
+
+      <div class="flex gap-1 border-b-4 border-petrol/30 mb-6">
+        <button (click)="activeTab.set('menu')"
+          class="px-4 py-2.5 text-sm font-semibold rounded-t-lg border-2 border-b-0 transition-colors"
+          [class]="activeTab() === 'menu'
+            ? 'bg-petrol text-white border-petrol'
+            : 'bg-surface text-gray-600 border-ink/20 hover:text-petrol'">
+          Menu rozwijane „Szkoła”
+        </button>
+        <button (click)="activeTab.set('pages')"
+          class="px-4 py-2.5 text-sm font-semibold rounded-t-lg border-2 border-b-0 transition-colors"
+          [class]="activeTab() === 'pages'
+            ? 'bg-petrol text-white border-petrol'
+            : 'bg-surface text-gray-600 border-ink/20 hover:text-petrol'">
+          Treść podstron
+        </button>
+      </div>
 
       @if (loading()) {
         <div class="comic-card space-y-4" aria-busy="true">
@@ -59,9 +75,9 @@ interface MenuFormGroup {
       } @else {
 
       <!-- ===== Dropdown menu editor ===== -->
+      @if (activeTab() === 'menu') {
       <div class="comic-card">
-        <div class="flex items-center justify-between">
-          <h2 class="font-heading text-xl text-orange-primary mb-1">Menu rozwijane „Szkoła”</h2>
+        <div class="flex items-center justify-between mb-4">
           <button (click)="addGroup()" class="comic-btn text-sm bg-surface text-ink">+ Dodaj grupę</button>
         </div>
         <p class="text-gray-500 text-sm mb-4">Grupy i pozycje widoczne w rozwijanym menu nawigacji.</p>
@@ -128,11 +144,12 @@ interface MenuFormGroup {
 
         <button (click)="saveMenu()" class="comic-btn-primary text-sm mt-6">Zapisz menu</button>
       </div>
+      }
 
       <!-- ===== Page content editor ===== -->
+      @if (activeTab() === 'pages') {
       <div class="comic-card">
-        <div class="flex items-center justify-between">
-          <h2 class="font-heading text-xl text-orange-primary mb-1">Treść podstron</h2>
+        <div class="flex items-center justify-between mb-4">
           <button (click)="resetPageEditor()" class="comic-btn text-sm bg-surface text-ink">+ Nowa podstrona</button>
         </div>
         <p class="text-gray-500 text-sm mb-4">Wybierz podstronę, aby edytować jej treść.</p>
@@ -238,12 +255,14 @@ interface MenuFormGroup {
         }
       </div>
       }
+      }
     </div>
   `,
 })
 export class SchoolAdminComponent implements OnInit {
   pages = signal<SchoolPageRecord[]>([]);
   loading = signal(true);
+  activeTab = signal<'menu' | 'pages'>('menu');
 
   menuForm = {
     groups: [] as MenuFormGroup[],

@@ -13,7 +13,6 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl text-ink mb-1">Galeria</h1>
-          <p class="text-gray-500">Zarządzaj albumami i zdjęciami</p>
         </div>
       </div>
 

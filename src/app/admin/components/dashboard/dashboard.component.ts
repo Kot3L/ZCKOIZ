@@ -13,7 +13,6 @@ import { FirebaseService } from '../../../core/services/firebase.service';
     <div class="space-y-8">
       <div>
         <h1 class="text-3xl text-ink mb-1">Dashboard</h1>
-        <p class="text-gray-500">Przegląd danych w portalu</p>
       </div>
 
       @if (loading()) {

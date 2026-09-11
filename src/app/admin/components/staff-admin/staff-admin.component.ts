@@ -13,7 +13,6 @@ import { Staff } from '../../../core/models/database.types';
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl text-ink mb-1">Kadra</h1>
-          <p class="text-gray-500">Zarządzaj listą pracowników i dyrekcji</p>
         </div>
         <button (click)="toggleEditor(null)" class="comic-btn-primary text-sm">+ Dodaj pracownika</button>
       </div>

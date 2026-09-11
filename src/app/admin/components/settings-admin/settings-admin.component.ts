@@ -12,7 +12,6 @@ import { SiteSettings } from '../../../core/models/database.types';
     <div class="space-y-6">
       <div>
         <h1 class="text-3xl text-ink mb-1">Ustawienia</h1>
-        <p class="text-gray-500">Dane kontaktowe i ustawienia ogólne serwisu</p>
       </div>
 
       @if (message()) {

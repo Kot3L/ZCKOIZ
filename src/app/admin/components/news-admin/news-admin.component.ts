@@ -16,7 +16,6 @@ import { dataUrlToBlobUrl, revokeBlobUrl, fileNameFromUrl } from '../../../share
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-3xl text-ink mb-1">Aktualności</h1>
-          <p class="text-gray-500">Zarządzaj treściami na stronie głównej i liście aktualności</p>
         </div>
         <button (click)="toggleEditor(null)" class="comic-btn-primary text-sm">
           + Dodaj aktualność
