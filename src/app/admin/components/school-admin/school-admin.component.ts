@@ -345,11 +345,25 @@ export class SchoolAdminComponent implements OnInit {
     this.persistMenu();
   }
 
-  removeItem(groupIndex: number, itemIndex: number) {
+  async removeItem(groupIndex: number, itemIndex: number) {
     const item = this.menuForm.groups[groupIndex]?.items[itemIndex];
     if (!confirm(`Czy na pewno usunąć pozycję „${item?.label || ''}” z menu?`)) return;
     this.menuForm.groups[groupIndex].items.splice(itemIndex, 1);
     this.persistMenu();
+
+    if (item?.kind === 'school') {
+      const slug = item.slug || this.slugFromName(item.label);
+      const page = this.pages().find((x) => x.slug === slug);
+      if (page && confirm(`Czy usunąć również treść podstrony „${page.title}” (/szkola/${slug})?`)) {
+        try {
+          await this.fb.deleteSchoolPage(slug);
+          await this.loadPages();
+          this.setMessage(`Treść podstrony „${page.title}” została usunięta.`, 'success');
+        } catch (e: any) {
+          this.setMessage('Błąd usuwania treści: ' + (e.message ?? e), 'error');
+        }
+      }
+    }
   }
 
   private async persistMenu() {
