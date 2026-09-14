@@ -59,9 +59,9 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
                 <div class="container-main py-16 md:py-24">
                   <div class="max-w-2xl animate-fade-in">
                     <h1 class="text-4xl sm:text-5xl md:text-6xl text-white mb-4 leading-tight font-bold">
-                      {{ slide.title }}
+                      {{ keepPolishWordsTogether(slide.title) }}
                     </h1>
-                    <p class="text-xl text-gray-300 mb-8">{{ slide.subtitle }}</p>
+                    <p class="text-xl text-gray-300 mb-8">{{ keepPolishWordsTogether(slide.subtitle) }}</p>
                     @if (slide.link_url) {
                       <a [routerLink]="slide.link_url" class="comic-btn-primary text-lg">
                         {{ slide.link_label || 'Dowiedz się więcej' }}
@@ -102,7 +102,7 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
               />
               </div>
               <p class="text-xl text-gray-300 mt-8 mb-8">
-                Technikum i branżowa szkoła I stopnia. Wybierz swój kierunek i rozpocznij karierę!
+                Technikum i&nbsp;branżowa szkoła I&nbsp;stopnia. Wybierz swój kierunek i&nbsp;rozpocznij karierę!
               </p>
               <div class="flex flex-wrap gap-4 items-center">
                 <a routerLink="/oferta" class="comic-btn-primary text-lg">
@@ -245,6 +245,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   currentSlide = signal(0);
   loading = signal(true);
   private sliderInterval: ReturnType<typeof setInterval> | null = null;
+
+  keepPolishWordsTogether(text: string): string {
+    return text.replace(/\b([aiouwz])\s+/gi, '$1\u00a0');
+  }
 
   constructor(private fb: FirebaseService) {}
 
