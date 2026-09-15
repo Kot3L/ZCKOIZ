@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
@@ -14,6 +14,8 @@ import { ThemeService } from './core/services/theme.service';
   styleUrls: ['./app.scss'],
 })
 export class App {
+  isAdminRoute = signal(false);
+
   constructor(
     private router: Router,
     private seo: SeoService,
@@ -22,6 +24,8 @@ export class App {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe(() => {
+        const routePath = this.router.routerState.root.firstChild?.routeConfig?.path;
+        this.isAdminRoute.set(routePath === ':secret' || routePath === ':secret/login');
         this.applySeo();
       });
   }

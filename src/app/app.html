@@ -1,5 +1,7 @@
 <div class="min-h-screen flex flex-col">
-  <app-navbar />
+  @if (!isAdminRoute()) {
+    <app-navbar />
+  }
   <main class="flex-grow">
     <router-outlet />
   </main>
