@@ -6,6 +6,17 @@ import { Program } from '../../../core/models/database.types';
   selector: 'app-program-card',
   standalone: true,
   imports: [RouterLink],
+  styles: `
+    :host {
+      display: block;
+      min-width: 0;
+      height: 100%;
+    }
+
+    :host > a {
+      height: 100%;
+    }
+  `,
   template: `
     <a [routerLink]="['/oferta', program().slug]" class="comic-card block group overflow-hidden">
       @if (program().cover_image_url) {
