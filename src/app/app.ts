@@ -1,10 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { SeoService } from './core/services/seo.service';
 import { ThemeService } from './core/services/theme.service';
+import { CookieConsentService } from './core/services/cookie-consent.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ import { ThemeService } from './core/services/theme.service';
 })
 export class App {
   isAdminRoute = signal(false);
+  cookieConsent = inject(CookieConsentService);
 
   constructor(
     private router: Router,

@@ -39,9 +39,10 @@ import { DEFAULT_SCHOOL_MENU } from '../../../features/szkola/school-content';
 
             <div
               class="relative"
-              (mouseenter)="openSchool()"
-              (mouseleave)="scheduleSchoolClose()">
+              data-school-menu
+              (mouseenter)="openSchool()">
               <button
+                (mouseleave)="onSchoolPartLeave($event)"
                 class="px-3 py-2 rounded-lg text-sm font-heading font-semibold uppercase tracking-wide hover:bg-cream-dark hover:text-orange-primary transition-colors flex items-center gap-1">
                 Szkoła
                 <svg class="w-3 h-3 mt-0.5 transition-transform" [class.rotate-180]="schoolOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
@@ -50,7 +51,7 @@ import { DEFAULT_SCHOOL_MENU } from '../../../features/szkola/school-content';
                 class="dropdown-panel"
                 [class.panel-open]="schoolOpen()"
                 (mouseenter)="openSchool()"
-                (mouseleave)="scheduleSchoolClose()">
+                (mouseleave)="onSchoolPartLeave($event)">
                 <div class="grid grid-cols-2 gap-x-8 gap-y-6">
                   @for (group of schoolMenu(); track group.heading) {
                     <div>
@@ -221,8 +222,6 @@ export class NavbarComponent implements OnInit {
   schoolMobileOpen = signal(false);
   schoolOpen = signal(false);
 
-  private schoolCloseTimer: ReturnType<typeof setTimeout> | null = null;
-
   theme = inject(ThemeService);
   isDark = this.theme.isDark;
   font = inject(FontService);
@@ -239,10 +238,6 @@ export class NavbarComponent implements OnInit {
         this.schoolOpen.set(false);
         this.mobileOpen.set(false);
         this.schoolMobileOpen.set(false);
-        if (this.schoolCloseTimer) {
-          clearTimeout(this.schoolCloseTimer);
-          this.schoolCloseTimer = null;
-        }
       }
     });
   }
@@ -263,27 +258,17 @@ export class NavbarComponent implements OnInit {
   }
 
   openSchool() {
-    if (this.schoolCloseTimer) {
-      clearTimeout(this.schoolCloseTimer);
-      this.schoolCloseTimer = null;
-    }
     this.schoolOpen.set(true);
   }
 
   closeSchool() {
-    if (this.schoolCloseTimer) {
-      clearTimeout(this.schoolCloseTimer);
-      this.schoolCloseTimer = null;
-    }
     this.schoolOpen.set(false);
   }
 
-  scheduleSchoolClose() {
-    if (this.schoolCloseTimer) clearTimeout(this.schoolCloseTimer);
-    this.schoolCloseTimer = setTimeout(() => {
-      this.schoolOpen.set(false);
-      this.schoolCloseTimer = null;
-    }, 1000);
+  onSchoolPartLeave(event: MouseEvent) {
+    const next = event.relatedTarget;
+    if (next instanceof Element && next.closest('[data-school-menu]')) return;
+    this.closeSchool();
   }
 
   beforeSchool = [

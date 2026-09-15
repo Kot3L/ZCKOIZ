@@ -1,5 +1,6 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
 import { Document } from '../../../core/models/database.types';
@@ -51,9 +52,32 @@ import { Document } from '../../../core/models/database.types';
               <label class="block text-sm font-semibold mb-1">Plik PDF lub ZIP</label>
               <div class="flex gap-2">
                 <input [(ngModel)]="form.file_url" name="file_url" class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg" placeholder="URL pliku" />
-                <button type="button" (click)="fileInput.click()" class="comic-btn text-sm bg-surface text-ink">Upload PDF</button>
+                <button type="button" (click)="fileInput.click()" class="comic-btn text-sm bg-surface text-ink">Upload</button>
                 <input #fileInput type="file" accept="application/pdf,.zip,application/zip" class="hidden" (change)="uploadFile($event)" />
               </div>
+              @if (pendingPdf() || form.file_url) {
+                <div class="mt-4 border-2 border-ink rounded-lg p-3 bg-cream-dark">
+                  <div class="flex items-center justify-between gap-3 mb-3">
+                    <div class="min-w-0">
+                      <p class="font-semibold text-sm truncate">{{ currentFileName() }}</p>
+                      @if (pendingPdf()) {
+                        <p class="text-xs text-gray-500">{{ formatFileSize(pendingPdf()!.data) }}</p>
+                      }
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      <span class="badge-petrol">{{ isPdf(currentFileName()) ? 'PDF' : 'ZIP' }}</span>
+                      <button type="button" (click)="removeSelectedFile(fileInput)" class="comic-icon-btn !w-7 !h-7 !min-w-0 !p-0 text-red-600 !border-red-600 !shadow-[2px_2px_0_#991b1b]" aria-label="Usuń wybrany plik" title="Usuń plik">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M18 6L6 18"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  @if (isPdf(currentFileName()) && pdfPreviewSrc()) {
+                    <iframe [src]="pdfPreviewSrc()" title="Podgląd PDF" class="w-full h-64 bg-white border border-ink rounded"></iframe>
+                  } @else {
+                    <p class="text-sm text-gray-600">{{ isPdf(currentFileName()) ? 'Podgląd dostępny po wczytaniu pliku.' : 'Plik ZIP jest gotowy do zapisania.' }}</p>
+                  }
+                </div>
+              }
             </div>
             <div class="flex gap-3">
               <button type="submit" class="comic-btn-primary text-sm">Zapisz</button>
@@ -85,7 +109,7 @@ import { Document } from '../../../core/models/database.types';
             </tr>
           </thead>
           <tbody>
-            @for (item of items(); track item.id) {
+            @for (item of listItems(); track item.id) {
               <tr class="border-b border-ink/10 hover:bg-cream transition-colors">
                 <td class="px-4 py-3 font-medium">{{ item.title }}</td>
                 <td class="px-4 py-3"><span class="badge-petrol">{{ item.category }}</span></td>
@@ -117,7 +141,10 @@ export class DocumentsAdminComponent implements OnInit {
   form = { id: '', title: '', description: '', file_url: '', file_name: '', category: 'Rekrutacja' };
   pendingPdf = signal<{ data: string; name: string } | null>(null);
 
-  constructor(private fb: FirebaseService) {}
+  constructor(
+    private fb: FirebaseService,
+    private sanitizer: DomSanitizer,
+  ) {}
 
   async ngOnInit() {
     try {
@@ -131,6 +158,11 @@ export class DocumentsAdminComponent implements OnInit {
     this.items.set(await this.fb.listDocuments());
   }
 
+  listItems(): Document[] {
+    const editingId = this.editing() ? this.form.id : '';
+    return editingId ? this.items().filter((item) => item.id !== editingId) : this.items();
+  }
+
   toggleEditor(item: Document | null) {
     if (item) {
       this.form = { id: item.id, title: item.title, description: item.description ?? '', file_url: item.file_url, file_name: item.file_name ?? '', category: item.category };
@@ -139,6 +171,7 @@ export class DocumentsAdminComponent implements OnInit {
     }
     this.pendingPdf.set(null);
     this.editing.set(true);
+    if (item?.file_name && !item.file_url) this.loadExistingFile(item.id, item.file_name);
   }
 
   editItem(item: Document) {
@@ -199,6 +232,47 @@ export class DocumentsAdminComponent implements OnInit {
     };
     reader.onerror = () => this.setMessage('Nie udało się odczytać pliku.', 'error');
     reader.readAsDataURL(file);
+  }
+
+  isPdf(name: string): boolean {
+    return name.toLowerCase().endsWith('.pdf');
+  }
+
+  formatFileSize(dataUrl: string): string {
+    const base64 = dataUrl.split(',')[1] ?? '';
+    const bytes = Math.max(0, Math.round(base64.length * 0.75));
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  pdfPreviewSrc(): SafeResourceUrl | null {
+    const file = this.pendingPdf();
+    if (file && this.isPdf(file.name)) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(file.data);
+    }
+    if (this.form.file_url && this.isPdf(this.form.file_name || this.form.file_url)) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(this.form.file_url);
+    }
+    return null;
+  }
+
+  removeSelectedFile(input: HTMLInputElement): void {
+    input.value = '';
+    this.pendingPdf.set(null);
+    this.form.file_url = '';
+    this.form.file_name = '';
+  }
+
+  currentFileName(): string {
+    return this.pendingPdf()?.name || this.form.file_name || this.form.file_url.split('/').pop() || 'Dokument';
+  }
+
+  async loadExistingFile(id: string, name: string): Promise<void> {
+    const file = await this.fb.getDocumentPdf(id);
+    if (file && this.form.id === id) {
+      this.pendingPdf.set({ data: file.data, name: name || file.name });
+    }
   }
 
   setMessage(msg: string, type: 'success' | 'error') {

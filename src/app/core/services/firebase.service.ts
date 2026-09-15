@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, signal, computed, effect, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { initializeApp, FirebaseApp, getApps, getApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
@@ -29,6 +29,7 @@ import {
 } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { environment } from '../../../environments/environment';
+import { CookieConsentService } from './cookie-consent.service';
 import {
   News,
   NewsPdf,
@@ -46,6 +47,8 @@ import {
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
   private platformId = inject(PLATFORM_ID);
+  private cookieConsent = inject(CookieConsentService);
+  private analyticsEnabled = false;
 
   app: FirebaseApp | null = null;
   isConfigured = false;
@@ -68,11 +71,17 @@ export class FirebaseService {
     this.isConfigured = environment.firebase.projectId !== 'YOUR_FIREBASE_PROJECT_ID';
     if (this.isConfigured) {
       this.app = getApps().length ? getApp() : initializeApp(environment.firebase);
-      if (isPlatformBrowser(this.platformId) && environment.firebase.measurementId) {
-        getAnalytics(this.app);
-      }
+      effect(() => {
+        if (this.cookieConsent.consent() === 'accepted') this.enableAnalytics();
+      });
       this.initAuth();
     }
+  }
+
+  private enableAnalytics(): void {
+    if (this.analyticsEnabled || !isPlatformBrowser(this.platformId) || !environment.firebase.measurementId) return;
+    getAnalytics(this.app!);
+    this.analyticsEnabled = true;
   }
 
   // =====================================================================
