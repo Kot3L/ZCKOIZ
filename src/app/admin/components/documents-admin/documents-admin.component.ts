@@ -4,6 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
 import { Document } from '../../../core/models/database.types';
+import { dataUrlToBlobUrl } from '../../../shared/utils/pdf.utils';
 
 @Component({
   selector: 'app-documents-admin',
@@ -115,7 +116,7 @@ import { Document } from '../../../core/models/database.types';
                 <td class="px-4 py-3"><span class="badge-petrol">{{ item.category }}</span></td>
                 <td class="px-4 py-3">
                   <div class="flex justify-end gap-2">
-                    <a [href]="item.file_url" target="_blank" class="comic-btn text-xs !py-1.5 !px-3 bg-surface text-ink">Otwórz</a>
+                    <button type="button" (click)="openDocument(item)" class="comic-btn text-xs !py-1.5 !px-3 bg-surface text-ink">Otwórz</button>
                     <button (click)="editItem(item)" class="comic-btn text-xs !py-1.5 !px-3 bg-surface text-ink">Edytuj</button>
                     <button (click)="deleteItem(item)" class="comic-btn text-xs !py-1.5 !px-3 bg-red-50 text-red-600 !shadow-[2px_2px_0_#991b1b] !border-red-600">Usuń</button>
                   </div>
@@ -207,6 +208,23 @@ export class DocumentsAdminComponent implements OnInit {
       await this.load();
     } catch (e: any) {
       this.setMessage('Błąd: ' + (e.message ?? e), 'error');
+    }
+  }
+
+  async openDocument(item: Document): Promise<void> {
+    try {
+      if (item.file_url) {
+        window.open(item.file_url, '_blank', 'noopener');
+        return;
+      }
+
+      const popup = window.open('', '_blank');
+      if (!popup) throw new Error('Przeglądarka zablokowała nowe okno. Zezwól na wyskakujące okna dla tej strony.');
+      const storedFile = await this.fb.getDocumentPdf(item.id);
+      if (!storedFile?.data) throw new Error('Nie znaleziono pliku dokumentu.');
+      popup.location.href = dataUrlToBlobUrl(storedFile.data);
+    } catch (e: any) {
+      this.setMessage('Nie udało się otworzyć pliku: ' + (e.message ?? e), 'error');
     }
   }
 
