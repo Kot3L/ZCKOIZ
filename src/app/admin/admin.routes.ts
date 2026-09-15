@@ -42,11 +42,6 @@ export const adminRoutes: Routes = [
         canActivate: [authGuard],
         loadComponent: () => import('./components/staff-admin/staff-admin.component').then(m => m.StaffAdminComponent),
       },
-      {
-        path: 'ustawienia',
-        canActivate: [authGuard],
-        loadComponent: () => import('./components/settings-admin/settings-admin.component').then(m => m.SettingsAdminComponent),
-      },
     ],
   },
 ];

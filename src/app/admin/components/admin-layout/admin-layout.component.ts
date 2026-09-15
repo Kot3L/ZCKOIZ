@@ -120,7 +120,6 @@ export class AdminLayoutComponent implements OnInit {
       { path: base + '/dokumenty', exact: false, label: 'Dokumenty' },
       { path: base + '/szkola', exact: false, label: 'Szkoła' },
       { path: base + '/kadra', exact: false, label: 'Kadra' },
-      { path: base + '/ustawienia', exact: false, label: 'Ustawienia' },
     ];
   };
 
