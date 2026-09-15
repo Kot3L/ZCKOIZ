@@ -555,6 +555,68 @@ html.font-largest {
     padding-right: 1rem;
   }
 
+  /* ===== Admin workspace ===== */
+  .admin-content {
+    background-color: var(--color-cream);
+  }
+
+  .admin-content > router-outlet + * {
+    max-width: 96rem;
+    margin: 0 auto;
+  }
+
+  .admin-content h1 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .admin-content h2 {
+    line-height: 1.25;
+  }
+
+  .admin-content input:not([type='checkbox']):not([type='file']),
+  .admin-content select,
+  .admin-content textarea {
+    background-color: var(--color-surface);
+    border: 2px solid var(--color-ink);
+    border-radius: 8px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .admin-content input:not([type='checkbox']):not([type='file']):focus,
+  .admin-content select:focus,
+  .admin-content textarea:focus {
+    outline: none;
+    border-color: var(--color-petrol);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-petrol) 18%, transparent);
+  }
+
+  .admin-content button.comic-btn,
+  .admin-content button.comic-btn-primary,
+  .admin-content button.comic-btn-secondary {
+    min-height: 2.5rem;
+  }
+
+  .admin-content table {
+    border-collapse: collapse;
+  }
+
+  .admin-content th {
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+
+  .admin-content td,
+  .admin-content th {
+    vertical-align: middle;
+  }
+
+  .admin-content .bg-red-50,
+  .admin-content .bg-green-50 {
+    border-radius: 8px;
+  }
+
   @media (min-width: 640px) {
     .container-main {
       padding-left: 1.5rem;

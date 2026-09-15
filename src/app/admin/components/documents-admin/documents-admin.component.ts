@@ -53,7 +53,7 @@ import { dataUrlToBlobUrl } from '../../../shared/utils/pdf.utils';
               <label class="block text-sm font-semibold mb-1">Plik PDF lub ZIP</label>
               <div class="flex gap-2">
                 <input [(ngModel)]="form.file_url" name="file_url" class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg" placeholder="URL pliku" />
-                <button type="button" (click)="fileInput.click()" class="comic-btn text-sm bg-surface text-ink">Upload</button>
+                <button type="button" (click)="fileInput.click()" class="comic-btn text-sm bg-surface text-ink">Prześlij</button>
                 <input #fileInput type="file" accept="application/pdf,.zip,application/zip" class="hidden" (change)="uploadFile($event)" />
               </div>
               @if (pendingPdf() || form.file_url) {

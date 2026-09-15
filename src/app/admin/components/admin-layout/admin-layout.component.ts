@@ -87,7 +87,7 @@ import { AdminStateService } from '../../../core/services/admin-state.service';
           </nav>
         }
 
-        <main class="flex-1 p-4 lg:p-8">
+        <main class="admin-content flex-1 p-4 lg:p-8">
           <router-outlet />
         </main>
       </div>
