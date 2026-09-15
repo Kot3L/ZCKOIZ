@@ -286,12 +286,57 @@ export class FirebaseService {
   deleteAlbum = (id: string) => this.remove('gallery_albums', id);
 
   listGalleryImages = (albumId: string) =>
-    this.listWhere<GalleryImage>('gallery_images', 'album_id', albumId).then((xs) =>
-      xs.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)),
+    this.listWhere<GalleryImage>('gallery_images', 'album_id', albumId).then(async (xs) =>
+      (await this.resolveGalleryImages(xs)).sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)),
     );
-  listAllImages = () => this.list<GalleryImage>('gallery_images');
+  listAllImages = () => this.list<GalleryImage>('gallery_images').then((xs) => this.resolveGalleryImages(xs));
   saveImage = (data: Partial<GalleryImage>, id?: string) => this.save('gallery_images', data as any, id);
   deleteImage = (id: string) => this.remove('gallery_images', id);
+
+  private async resolveGalleryImages(images: GalleryImage[]): Promise<GalleryImage[]> {
+    return Promise.all(images.map(async (image) => {
+      if (!image.image_url.startsWith('firestore:')) return image;
+      const data = await this.getGalleryImageData(image.id);
+      return data ? { ...image, image_url: data } : image;
+    }));
+  }
+
+  async saveGalleryImageData(imageId: string, dataUrl: string): Promise<void> {
+    const comma = dataUrl.indexOf(',');
+    const prefix = comma >= 0 ? dataUrl.slice(0, comma + 1) : 'data:image/jpeg;base64,';
+    const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+    const chunks: string[] = [];
+    for (let i = 0; i < base64.length; i += FirebaseService.PDF_CHUNK_SIZE) {
+      chunks.push(base64.slice(i, i + FirebaseService.PDF_CHUNK_SIZE));
+    }
+
+    const coll = `gallery_image_data/${imageId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    for (let i = 0; i < chunks.length; i++) {
+      await this.save(coll, { index: i, data: chunks[i] } as any, String(i));
+    }
+    await this.save('gallery_image_data', { prefix, chunks: chunks.length } as any, imageId);
+  }
+
+  async getGalleryImageData(imageId: string): Promise<string | null> {
+    const meta = await this.get<{ prefix: string } & { chunks?: number }>('gallery_image_data', imageId);
+    if (!meta) return null;
+    const parts = await this.list<{ index: number; data: string }>(`gallery_image_data/${imageId}/chunks`, 'index');
+    return meta.prefix + parts.sort((a, b) => (a.index ?? 0) - (b.index ?? 0)).map((part) => part.data).join('');
+  }
+
+  async deleteGalleryImageData(imageId: string): Promise<void> {
+    const coll = `gallery_image_data/${imageId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    try {
+      await this.remove('gallery_image_data', imageId);
+    } catch {
+    }
+  }
 
   // =====================================================================
   // DOCUMENTS
@@ -302,6 +347,7 @@ export class FirebaseService {
 
   async saveDocumentPdf(documentId: string, dataUrl: string, name: string): Promise<void> {
     const comma = dataUrl.indexOf(',');
+    const prefix = comma >= 0 ? dataUrl.slice(0, comma + 1) : 'data:application/pdf;base64,';
     const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
     const chunks: string[] = [];
     for (let i = 0; i < base64.length; i += FirebaseService.PDF_CHUNK_SIZE) {
@@ -315,18 +361,18 @@ export class FirebaseService {
     for (let i = 0; i < chunks.length; i++) {
       await this.save(coll, { index: i, data: chunks[i] } as any, String(i));
     }
-    await this.save('document_pdfs', { name, chunks: chunks.length } as any, documentId);
+    await this.save('document_pdfs', { name, prefix, chunks: chunks.length } as any, documentId);
   }
 
   async getDocumentPdf(documentId: string): Promise<DocumentPdf | null> {
-    const meta = await this.get<DocumentPdf & { chunks?: number }>('document_pdfs', documentId);
+    const meta = await this.get<DocumentPdf & { chunks?: number; prefix?: string }>('document_pdfs', documentId);
     if (!meta) return null;
     const parts = await this.list<{ index: number; data: string }>(`document_pdfs/${documentId}/chunks`, 'index');
     const data = parts
       .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
       .map((part) => part.data)
       .join('');
-    return { id: documentId, data: 'data:application/pdf;base64,' + data, name: meta.name };
+    return { id: documentId, data: (meta.prefix ?? 'data:application/pdf;base64,') + data, name: meta.name };
   }
 
   async deleteDocumentPdf(documentId: string): Promise<void> {

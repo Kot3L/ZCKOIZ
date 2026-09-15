@@ -68,6 +68,7 @@ export interface Document {
   category: string;
   description: string | null;
   file_size: number | null;
+  file_name?: string | null;
   created_at: string;
 }
 

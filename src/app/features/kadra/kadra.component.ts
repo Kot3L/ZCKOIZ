@@ -47,15 +47,12 @@ import { Staff } from '../../core/models/database.types';
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @for (member of management(); track member.id) {
                   <div class="comic-card text-center">
-                    @if (member.photo_url) {
-                      <div class="w-28 h-28 mx-auto mb-4 overflow-hidden rounded-full border-3 border-ink">
-                        <img [src]="member.photo_url" [alt]="member.full_name" class="w-full h-full object-cover" />
-                      </div>
-                    } @else {
-                      <div class="w-28 h-28 mx-auto mb-4 rounded-full border-3 border-ink bg-petrol flex items-center justify-center text-white font-heading text-4xl">
-                        {{ member.full_name.charAt(0) }}
-                      </div>
-                    }
+                    <div class="relative w-28 h-28 mx-auto mb-4 overflow-hidden rounded-full border-3 border-ink bg-petrol flex items-center justify-center text-white font-heading text-4xl">
+                      {{ initial(member.full_name) }}
+                      @if (member.photo_url && !failedPhotos().has(member.id)) {
+                        <img [src]="member.photo_url" [alt]="member.full_name" (error)="onPhotoError(member.id)" class="absolute inset-0 w-full h-full object-cover" />
+                      }
+                    </div>
                     <h3 class="font-heading text-lg text-ink mb-1">{{ member.full_name }}</h3>
                     <span class="badge-orange mb-3">{{ member.position }}</span>
                     @if (member.email) {
@@ -73,15 +70,12 @@ import { Staff } from '../../core/models/database.types';
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @for (teacher of teachers(); track teacher.id) {
                   <div class="comic-card text-center">
-                    @if (teacher.photo_url) {
-                      <div class="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full border-3 border-ink">
-                        <img [src]="teacher.photo_url" [alt]="teacher.full_name" class="w-full h-full object-cover" />
-                      </div>
-                    } @else {
-                      <div class="w-24 h-24 mx-auto mb-4 rounded-full border-3 border-ink bg-petrol flex items-center justify-center text-white font-heading text-3xl">
-                        {{ teacher.full_name.charAt(0) }}
-                      </div>
-                    }
+                    <div class="relative w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full border-3 border-ink bg-petrol flex items-center justify-center text-white font-heading text-3xl">
+                      {{ initial(teacher.full_name) }}
+                      @if (teacher.photo_url && !failedPhotos().has(teacher.id)) {
+                        <img [src]="teacher.photo_url" [alt]="teacher.full_name" (error)="onPhotoError(teacher.id)" class="absolute inset-0 w-full h-full object-cover" />
+                      }
+                    </div>
                     <h3 class="font-heading text-lg text-ink mb-1">{{ teacher.full_name }}</h3>
                     <p class="text-sm text-gray-600 mb-2">{{ teacher.position }}</p>
                     @if (teacher.department) {
@@ -100,9 +94,18 @@ import { Staff } from '../../core/models/database.types';
 export class KadraComponent implements OnInit {
   management = signal<Staff[]>([]);
   teachers = signal<Staff[]>([]);
+  failedPhotos = signal<Set<string>>(new Set());
   loading = signal(true);
 
   constructor(private fb: FirebaseService) {}
+
+  onPhotoError(id: string) {
+    this.failedPhotos.update((photos) => new Set(photos).add(id));
+  }
+
+  initial(name: string): string {
+    return name.trim().charAt(0).toUpperCase();
+  }
 
   async ngOnInit() {
     try {

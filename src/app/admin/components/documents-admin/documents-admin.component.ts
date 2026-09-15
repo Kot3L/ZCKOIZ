@@ -48,11 +48,11 @@ import { Document } from '../../../core/models/database.types';
               <input [(ngModel)]="form.description" name="description" class="w-full px-4 py-2.5 border-2 border-ink rounded-lg" />
             </div>
             <div>
-              <label class="block text-sm font-semibold mb-1">Plik PDF</label>
+              <label class="block text-sm font-semibold mb-1">Plik PDF lub ZIP</label>
               <div class="flex gap-2">
                 <input [(ngModel)]="form.file_url" name="file_url" class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg" placeholder="URL pliku" />
                 <button type="button" (click)="fileInput.click()" class="comic-btn text-sm bg-surface text-ink">Upload PDF</button>
-                <input #fileInput type="file" accept="application/pdf" class="hidden" (change)="uploadFile($event)" />
+                <input #fileInput type="file" accept="application/pdf,.zip,application/zip" class="hidden" (change)="uploadFile($event)" />
               </div>
             </div>
             <div class="flex gap-3">
@@ -114,7 +114,7 @@ export class DocumentsAdminComponent implements OnInit {
   messageType = signal<'success' | 'error'>('success');
   loading = signal(true);
 
-  form = { id: '', title: '', description: '', file_url: '', category: 'Rekrutacja' };
+  form = { id: '', title: '', description: '', file_url: '', file_name: '', category: 'Rekrutacja' };
   pendingPdf = signal<{ data: string; name: string } | null>(null);
 
   constructor(private fb: FirebaseService) {}
@@ -133,9 +133,9 @@ export class DocumentsAdminComponent implements OnInit {
 
   toggleEditor(item: Document | null) {
     if (item) {
-      this.form = { id: item.id, title: item.title, description: item.description ?? '', file_url: item.file_url, category: item.category };
+      this.form = { id: item.id, title: item.title, description: item.description ?? '', file_url: item.file_url, file_name: item.file_name ?? '', category: item.category };
     } else {
-      this.form = { id: '', title: '', description: '', file_url: '', category: 'Rekrutacja' };
+      this.form = { id: '', title: '', description: '', file_url: '', file_name: '', category: 'Rekrutacja' };
     }
     this.pendingPdf.set(null);
     this.editing.set(true);
@@ -147,9 +147,9 @@ export class DocumentsAdminComponent implements OnInit {
 
   async saveItem(event: Event) {
     event.preventDefault();
-    const payload = { title: this.form.title, description: this.form.description || null, file_url: this.form.file_url, category: this.form.category };
+    const payload = { title: this.form.title, description: this.form.description || null, file_url: this.form.file_url, file_name: this.form.file_name || null, category: this.form.category };
     if (!this.form.file_url && !this.pendingPdf()) {
-      this.setMessage('Dodaj plik PDF przed zapisaniem dokumentu.', 'error');
+      this.setMessage('Dodaj plik PDF lub ZIP przed zapisaniem dokumentu.', 'error');
       return;
     }
     try {
@@ -181,6 +181,10 @@ export class DocumentsAdminComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
+    if (file.type !== 'application/pdf' && file.type !== 'application/zip' && !file.name.toLowerCase().endsWith('.zip')) {
+      this.setMessage('Dozwolone są tylko pliki PDF i ZIP.', 'error');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       const data = typeof reader.result === 'string' ? reader.result : null;
@@ -189,10 +193,11 @@ export class DocumentsAdminComponent implements OnInit {
         return;
       }
       this.form.file_url = '';
+      this.form.file_name = file.name;
       this.pendingPdf.set({ data, name: file.name });
-      this.setMessage('PDF dodany. Zapisz dokument, aby go opublikować.', 'success');
+      this.setMessage('Plik dodany. Zapisz dokument, aby go opublikować.', 'success');
     };
-    reader.onerror = () => this.setMessage('Nie udało się odczytać pliku PDF.', 'error');
+    reader.onerror = () => this.setMessage('Nie udało się odczytać pliku.', 'error');
     reader.readAsDataURL(file);
   }
 

@@ -42,11 +42,11 @@ import { dataUrlToBlobUrl, revokeBlobUrl } from '../../shared/utils/pdf.utils';
                   <a
                     [href]="doc.file_url"
                     rel="noopener"
-                    [attr.download]="downloadName(doc.title)"
+                    [attr.download]="downloadName(doc.title, doc.file_name ?? doc.file_url)"
                     (click)="downloadDocument($event, doc)"
                     class="comic-card flex items-center gap-4 !p-4 hover:bg-surface">
                     <div class="w-12 h-12 shrink-0 bg-petrol border-2 border-ink rounded-lg flex items-center justify-center text-white font-heading font-bold text-lg">
-                      PDF
+                      {{ fileTypeLabel(doc) }}
                     </div>
                     <div class="flex-1 min-w-0">
                       <h3 class="font-heading text-lg text-ink line-clamp-1">{{ doc.title }}</h3>
@@ -85,9 +85,18 @@ export class DokumentyComponent implements OnInit, OnDestroy {
   documentsByCategory = (category: string) =>
     this.documents().filter(d => d.category === category);
 
-  downloadName(title: string): string {
+  fileTypeLabel(document: Document): string {
+    return this.fileExtension(document.file_name ?? document.file_url) === 'ZIP' ? 'ZIP' : 'PDF';
+  }
+
+  private fileExtension(value: string): string {
+    const match = value.toLowerCase().match(/\.([a-z0-9]+)(?:\?|$)/);
+    return match?.[1]?.toUpperCase() ?? 'PDF';
+  }
+
+  downloadName(title: string, source: string): string {
     const normalized = title.trim().replace(/[^a-z0-9ąćęłńóśźż\s_-]/gi, '').replace(/\s+/g, '-');
-    return `${normalized || 'dokument'}.pdf`;
+    return `${normalized || 'dokument'}.${this.fileExtension(source).toLowerCase()}`;
   }
 
   async downloadDocument(event: MouseEvent, document: Document) {
@@ -100,7 +109,7 @@ export class DokumentyComponent implements OnInit, OnDestroy {
       const blobUrl = URL.createObjectURL(await response.blob());
       const link = window.document.createElement('a');
       link.href = blobUrl;
-      link.download = this.downloadName(document.title);
+      link.download = this.downloadName(document.title, document.file_name ?? document.file_url);
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
     } catch {

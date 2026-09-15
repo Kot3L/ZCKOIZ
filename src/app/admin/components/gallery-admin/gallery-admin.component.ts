@@ -90,6 +90,11 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
               <input #urlInput type="url" placeholder="Wklej URL zdjęcia (np. .jpg / .png)" class="flex-1 px-3 py-2 text-sm border-2 border-ink rounded-lg" />
               <button (click)="addImageByUrl(album.id, urlInput)" class="comic-btn text-sm bg-surface text-ink">Dodaj</button>
             </div>
+            <div class="flex items-center gap-2 mt-2">
+              <input #imageFileInput type="file" accept="image/*" class="hidden" (change)="addImageFromFile(album.id, $event)" />
+              <button type="button" (click)="imageFileInput.click()" class="comic-btn text-sm bg-surface text-ink">Dodaj z dysku</button>
+              <span class="text-xs text-gray-500">JPG, PNG, WEBP</span>
+            </div>
           </div>
         } @empty {
           <div class="col-span-full text-center py-16 comic-card">
@@ -175,6 +180,7 @@ export class GalleryAdminComponent implements OnInit {
     try {
       for (const img of this.imagesByAlbum(album.id)) {
         await this.fb.deleteImage(img.id);
+        await this.fb.deleteGalleryImageData(img.id);
       }
       await this.fb.deleteAlbum(album.id);
       this.setMessage('Usunięto.', 'success');
@@ -201,9 +207,42 @@ export class GalleryAdminComponent implements OnInit {
     }
   }
 
+  async addImageFromFile(albumId: string, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+
+    try {
+      const dataUrl = await this.readFile(file);
+      const id = await this.fb.saveImage({
+        album_id: albumId,
+        image_url: '',
+        display_order: this.imagesByAlbum(albumId).length,
+      });
+      if (!id) throw new Error('Nie udało się utworzyć zdjęcia.');
+      await this.fb.saveGalleryImageData(id, dataUrl);
+      await this.fb.saveImage({ image_url: `firestore:${id}` }, id);
+      this.setMessage('Zdjęcie dodane.', 'success');
+      await this.loadImages();
+    } catch (e: any) {
+      this.setMessage('Błąd: ' + (e?.message ?? e), 'error');
+    }
+  }
+
+  private readFile(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Nie udało się odczytać zdjęcia.'));
+      reader.onerror = () => reject(new Error('Nie udało się odczytać zdjęcia.'));
+      reader.readAsDataURL(file);
+    });
+  }
+
   async deleteImage(img: GalleryImage) {
     try {
       await this.fb.deleteImage(img.id);
+      await this.fb.deleteGalleryImageData(img.id);
       this.setMessage('Usunięto.', 'success');
       await this.loadImages();
     } catch (e: any) {

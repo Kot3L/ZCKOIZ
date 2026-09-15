@@ -22,7 +22,7 @@ import { RouterLink } from '@angular/router';
               </div>
             </div>
             <p class="text-gray-400 text-sm leading-relaxed">
-              Zabrzańskiego Centrum Kształcenia Ogólnego i Zawodowego
+              Zabrzańskie Centrum Kształcenia Ogólnego i Zawodowego
             </p>
           </div>
 
