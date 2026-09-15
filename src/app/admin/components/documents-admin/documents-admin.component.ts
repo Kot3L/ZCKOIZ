@@ -57,7 +57,7 @@ import { Document } from '../../../core/models/database.types';
             </div>
             <div class="flex gap-3">
               <button type="submit" class="comic-btn-primary text-sm">Zapisz</button>
-              <button type="button" (click)="toggleEditor(null)" class="comic-btn text-sm bg-surface text-ink">Anuluj</button>
+              <button type="button" (click)="editing.set(false)" class="comic-btn text-sm bg-surface text-ink">Anuluj</button>
             </div>
           </form>
         </div>
@@ -115,6 +115,7 @@ export class DocumentsAdminComponent implements OnInit {
   loading = signal(true);
 
   form = { id: '', title: '', description: '', file_url: '', category: 'Rekrutacja' };
+  pendingPdf = signal<{ data: string; name: string } | null>(null);
 
   constructor(private fb: FirebaseService) {}
 
@@ -136,6 +137,7 @@ export class DocumentsAdminComponent implements OnInit {
     } else {
       this.form = { id: '', title: '', description: '', file_url: '', category: 'Rekrutacja' };
     }
+    this.pendingPdf.set(null);
     this.editing.set(true);
   }
 
@@ -146,8 +148,15 @@ export class DocumentsAdminComponent implements OnInit {
   async saveItem(event: Event) {
     event.preventDefault();
     const payload = { title: this.form.title, description: this.form.description || null, file_url: this.form.file_url, category: this.form.category };
+    if (!this.form.file_url && !this.pendingPdf()) {
+      this.setMessage('Dodaj plik PDF przed zapisaniem dokumentu.', 'error');
+      return;
+    }
     try {
-      await this.fb.saveDocument(payload as Document, this.form.id || undefined);
+      const id = await this.fb.saveDocument(payload as Document, this.form.id || undefined);
+      if (!id) throw new Error('Nie udało się zapisać dokumentu.');
+      const pdf = this.pendingPdf();
+      if (pdf) await this.fb.saveDocumentPdf(id, pdf.data, pdf.name);
       this.setMessage('Zapisano.', 'success');
       this.editing.set(false);
       await this.load();
@@ -160,6 +169,7 @@ export class DocumentsAdminComponent implements OnInit {
     if (!confirm(`Usunąć dokument "${item.title}"?`)) return;
     try {
       await this.fb.deleteDocument(item.id);
+      await this.fb.deleteDocumentPdf(item.id);
       this.setMessage('Usunięto.', 'success');
       await this.load();
     } catch (e: any) {
@@ -171,12 +181,19 @@ export class DocumentsAdminComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    const path = `documents/${Date.now()}.pdf`;
-    try {
-      this.form.file_url = await this.fb.uploadFile(path, file);
-    } catch (e: any) {
-      this.setMessage('Upload failed: ' + (e.message ?? e), 'error');
-    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const data = typeof reader.result === 'string' ? reader.result : null;
+      if (!data) {
+        this.setMessage('Nie udało się odczytać pliku PDF.', 'error');
+        return;
+      }
+      this.form.file_url = '';
+      this.pendingPdf.set({ data, name: file.name });
+      this.setMessage('PDF dodany. Zapisz dokument, aby go opublikować.', 'success');
+    };
+    reader.onerror = () => this.setMessage('Nie udało się odczytać pliku PDF.', 'error');
+    reader.readAsDataURL(file);
   }
 
   setMessage(msg: string, type: 'success' | 'error') {

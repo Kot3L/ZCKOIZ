@@ -63,7 +63,7 @@ import { Program } from '../../../core/models/database.types';
             </div>
             <div class="flex gap-3">
               <button type="submit" class="comic-btn-primary text-sm">Zapisz</button>
-              <button type="button" (click)="toggleEditor(null)" class="comic-btn text-sm bg-surface text-ink">Anuluj</button>
+              <button type="button" (click)="editing.set(false)" class="comic-btn text-sm bg-surface text-ink">Anuluj</button>
             </div>
           </form>
         </div>

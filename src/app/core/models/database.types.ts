@@ -71,6 +71,12 @@ export interface Document {
   created_at: string;
 }
 
+export interface DocumentPdf {
+  id: string;
+  data: string;
+  name: string;
+}
+
 export interface Staff {
   id: string;
   full_name: string;

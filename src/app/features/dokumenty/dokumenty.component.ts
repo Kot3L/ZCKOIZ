@@ -1,8 +1,9 @@
-import { Component, signal, OnInit } from '@angular/core';
+import { Component, signal, OnDestroy, OnInit } from '@angular/core';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
 import { Document } from '../../core/models/database.types';
+import { dataUrlToBlobUrl, revokeBlobUrl } from '../../shared/utils/pdf.utils';
 
 @Component({
   selector: 'app-dokumenty',
@@ -40,8 +41,9 @@ import { Document } from '../../core/models/database.types';
                 @for (doc of documentsByCategory(category); track doc.id) {
                   <a
                     [href]="doc.file_url"
-                    target="_blank"
                     rel="noopener"
+                    [attr.download]="downloadName(doc.title)"
+                    (click)="downloadDocument($event, doc)"
                     class="comic-card flex items-center gap-4 !p-4 hover:bg-surface">
                     <div class="w-12 h-12 shrink-0 bg-petrol border-2 border-ink rounded-lg flex items-center justify-center text-white font-heading font-bold text-lg">
                       PDF
@@ -69,9 +71,10 @@ import { Document } from '../../core/models/database.types';
     </section>
   `,
 })
-export class DokumentyComponent implements OnInit {
+export class DokumentyComponent implements OnInit, OnDestroy {
   documents = signal<Document[]>([]);
   loading = signal(true);
+  private blobUrls: string[] = [];
 
   categories = () => {
     const unique = new Set<string>();
@@ -82,14 +85,57 @@ export class DokumentyComponent implements OnInit {
   documentsByCategory = (category: string) =>
     this.documents().filter(d => d.category === category);
 
+  downloadName(title: string): string {
+    const normalized = title.trim().replace(/[^a-z0-9ąćęłńóśźż\s_-]/gi, '').replace(/\s+/g, '-');
+    return `${normalized || 'dokument'}.pdf`;
+  }
+
+  async downloadDocument(event: MouseEvent, document: Document) {
+    event.preventDefault();
+
+    try {
+      const response = await fetch(document.file_url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const blobUrl = URL.createObjectURL(await response.blob());
+      const link = window.document.createElement('a');
+      link.href = blobUrl;
+      link.download = this.downloadName(document.title);
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    } catch {
+      window.open(document.file_url, '_blank', 'noopener');
+    }
+  }
+
   constructor(private fb: FirebaseService) {}
 
   async ngOnInit() {
     try {
       const data = await this.fb.listDocuments();
-      this.documents.set(data);
+      const resolved = await Promise.all(
+        data.map(async (document) => ({
+          ...document,
+          file_url: document.file_url
+            ? await this.fb.resolveDocumentUrl(document.file_url)
+            : await this.loadStoredPdf(document.id),
+        })),
+      );
+      this.documents.set(resolved);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private async loadStoredPdf(documentId: string): Promise<string> {
+    const pdf = await this.fb.getDocumentPdf(documentId);
+    if (!pdf) return '';
+    const blobUrl = dataUrlToBlobUrl(pdf.data);
+    this.blobUrls.push(blobUrl);
+    return blobUrl;
+  }
+
+  ngOnDestroy() {
+    this.blobUrls.forEach((url) => revokeBlobUrl(url));
   }
 }

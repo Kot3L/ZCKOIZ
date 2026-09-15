@@ -36,6 +36,7 @@ import {
   GalleryAlbum,
   GalleryImage,
   Document,
+  DocumentPdf,
   Staff,
   SiteSettings,
   SchoolPageRecord,
@@ -299,6 +300,43 @@ export class FirebaseService {
   saveDocument = (data: Partial<Document>, id?: string) => this.save('documents', data as any, id);
   deleteDocument = (id: string) => this.remove('documents', id);
 
+  async saveDocumentPdf(documentId: string, dataUrl: string, name: string): Promise<void> {
+    const comma = dataUrl.indexOf(',');
+    const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+    const chunks: string[] = [];
+    for (let i = 0; i < base64.length; i += FirebaseService.PDF_CHUNK_SIZE) {
+      chunks.push(base64.slice(i, i + FirebaseService.PDF_CHUNK_SIZE));
+    }
+
+    const coll = `document_pdfs/${documentId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    for (let i = 0; i < chunks.length; i++) {
+      await this.save(coll, { index: i, data: chunks[i] } as any, String(i));
+    }
+    await this.save('document_pdfs', { name, chunks: chunks.length } as any, documentId);
+  }
+
+  async getDocumentPdf(documentId: string): Promise<DocumentPdf | null> {
+    const meta = await this.get<DocumentPdf & { chunks?: number }>('document_pdfs', documentId);
+    if (!meta) return null;
+    const parts = await this.list<{ index: number; data: string }>(`document_pdfs/${documentId}/chunks`, 'index');
+    const data = parts
+      .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+      .map((part) => part.data)
+      .join('');
+    return { id: documentId, data: 'data:application/pdf;base64,' + data, name: meta.name };
+  }
+
+  async deleteDocumentPdf(documentId: string): Promise<void> {
+    const coll = `document_pdfs/${documentId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    await this.remove('document_pdfs', documentId);
+  }
+
   // =====================================================================
   // STAFF
   // =====================================================================
@@ -359,6 +397,19 @@ export class FirebaseService {
       30000,
       'Przekroczono limit czasu pobierania adresu obrazka z Firebase Storage.',
     );
+  }
+
+  async resolveDocumentUrl(fileUrl: string): Promise<string> {
+    const normalized = fileUrl.trim();
+    if (!normalized || /^(https?:|data:|blob:)/i.test(normalized)) return normalized;
+
+    const path = normalized.replace(/^\/+/, '');
+    const storagePath = path.startsWith('documents/') ? path : `documents/${path}`;
+    try {
+      return await getDownloadURL(ref(this.ready.storage, storagePath));
+    } catch {
+      return fileUrl;
+    }
   }
 
   async deleteFile(url: string): Promise<void> {
