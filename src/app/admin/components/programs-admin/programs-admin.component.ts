@@ -93,7 +93,7 @@ import { Program } from '../../../core/models/database.types';
             </tr>
           </thead>
           <tbody>
-            @for (item of items(); track item.id) {
+            @for (item of listItems(); track item.id) {
               <tr class="border-b border-ink/10 hover:bg-cream transition-colors">
                 <td class="px-4 py-3 font-medium">{{ item.title }}</td>
                 <td class="px-4 py-3">
@@ -150,6 +150,11 @@ export class ProgramsAdminComponent implements OnInit {
 
   async load() {
     this.items.set(await this.fb.listPrograms());
+  }
+
+  listItems(): Program[] {
+    const editingId = this.editing() ? this.form.id : '';
+    return editingId ? this.items().filter((item) => item.id !== editingId) : this.items();
   }
 
   toggleEditor(item: Program | null) {
