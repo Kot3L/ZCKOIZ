@@ -560,6 +560,24 @@ html.font-largest {
     background-color: var(--color-cream);
   }
 
+  .admin-dashboard,
+  .admin-dashboard .font-heading {
+    font-family: var(--font-body);
+    letter-spacing: 0;
+  }
+
+  .admin-dashboard h1,
+  .admin-dashboard h2 {
+    font-family: var(--font-body);
+    letter-spacing: 0;
+  }
+
+  .admin-dashboard h1,
+  .admin-dashboard h2,
+  .admin-dashboard .font-heading {
+    text-transform: none;
+  }
+
   .admin-content > router-outlet + * {
     max-width: 96rem;
     margin: 0 auto;
