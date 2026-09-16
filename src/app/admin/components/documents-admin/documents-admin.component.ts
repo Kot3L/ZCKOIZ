@@ -118,7 +118,7 @@ import { dataUrlToBlobUrl } from '../../../shared/utils/pdf.utils';
                   <div class="flex justify-end gap-2">
                     <button type="button" (click)="openDocument(item)" class="comic-btn text-xs !py-1.5 !px-3 bg-surface text-ink">Otwórz</button>
                     <button (click)="editItem(item)" class="comic-btn text-xs !py-1.5 !px-3 bg-surface text-ink">Edytuj</button>
-                    <button (click)="deleteItem(item)" class="comic-btn text-xs !py-1.5 !px-3 bg-red-50 text-red-600 !shadow-[2px_2px_0_#991b1b] !border-red-600">Usuń</button>
+                    <button (click)="deleteItem(item)" class="comic-btn-danger text-xs !py-1.5 !px-3">Usuń</button>
                   </div>
                 </td>
               </tr>

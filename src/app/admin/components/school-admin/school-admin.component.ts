@@ -91,7 +91,7 @@ interface MenuFormGroup {
                   (ngModelChange)="onMenuChanged()"
                   class="flex-1 px-3 py-2 border-2 border-ink rounded-lg font-semibold" />
                 <span class="text-gray-400 text-xs whitespace-nowrap shrink-0">Pozycje: {{ group.items.length }}</span>
-                <button (click)="removeGroup(gi)" class="comic-btn text-xs !py-1.5 !px-3 bg-red-50 text-red-600 !shadow-[2px_2px_0_#991b1b] !border-red-600 shrink-0">Usuń grupę</button>              </div>
+                <button (click)="removeGroup(gi)" class="comic-btn-danger text-xs !py-1.5 !px-3 shrink-0">Usuń grupę</button>              </div>
 
               <div class="space-y-2">
                 @for (item of group.items; track item._id) {
@@ -202,7 +202,7 @@ interface MenuFormGroup {
                       <input [(ngModel)]="section.heading" [name]="'sec_head_' + si" placeholder="Nagłówek sekcji"
                         class="flex-1 px-3 py-2 border-2 border-ink rounded-lg font-semibold" />
                       <button type="button" (click)="removeSection(si)"
-                        class="comic-btn text-xs !py-1.5 !px-3 bg-red-50 text-red-600 !shadow-[2px_2px_0_#991b1b] !border-red-600">Usuń sekcję</button>
+                        class="comic-btn-danger text-xs !py-1.5 !px-3">Usuń sekcję</button>
                     </div>
 
                     <div>

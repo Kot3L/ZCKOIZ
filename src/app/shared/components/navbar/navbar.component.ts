@@ -14,14 +14,14 @@ import { DEFAULT_SCHOOL_MENU } from '../../../features/szkola/school-content';
     <nav class="bg-surface border-b-3 border-ink sticky top-0 z-50">
       <div class="container-main">
         <div class="flex items-center justify-between h-16 md:h-20">
-          <a routerLink="/" class="flex items-center gap-3 group">
+          <a routerLink="/" class="flex items-center gap-3 group shrink-0">
             <img
               src="/wlepka100szary.png"
               alt="ZCKOiZ Zabrze"
               class="w-14 h-14 md:w-16 md:h-16 object-contain rounded-xl border-2 border-[#1A1A1A] bg-white shadow-[2px_2px_0_#1A1A1A] group-hover:shadow-[1px_1px_0_#1A1A1A] group-hover:translate-x-[1px] group-hover:translate-y-[1px] transition-all dark:border-0 dark:shadow-none dark:group-hover:shadow-none"
             />
-            <div class="hidden sm:block">
-              <span class="font-heading text-lg md:text-xl text-ink font-bold leading-tight block">ZCKOiZ</span>
+            <div class="hidden xl:block">
+              <span class="font-heading text-lg md:text-xl text-ink font-bold leading-tight block whitespace-nowrap">ZCKOiZ</span>
               <span class="text-xs text-ink-light font-medium">Zabrze</span>
             </div>
           </a>
@@ -32,7 +32,7 @@ import { DEFAULT_SCHOOL_MENU } from '../../../features/szkola/school-content';
                 [routerLink]="item.path"
                 routerLinkActive="text-orange-primary bg-orange-50"
                 [routerLinkActiveOptions]="{ exact: item.exact }"
-                class="px-3 py-2 rounded-lg text-sm font-heading font-semibold uppercase tracking-wide hover:bg-cream-dark hover:text-orange-primary transition-colors">
+                class="px-2 xl:px-3 py-2 rounded-lg text-sm font-heading font-semibold uppercase tracking-wide hover:bg-cream-dark hover:text-orange-primary transition-colors whitespace-nowrap shrink-0">
                 {{ item.label }}
               </a>
             }
@@ -43,7 +43,7 @@ import { DEFAULT_SCHOOL_MENU } from '../../../features/szkola/school-content';
               (mouseenter)="openSchool()">
               <button
                 (mouseleave)="onSchoolPartLeave($event)"
-                class="px-3 py-2 rounded-lg text-sm font-heading font-semibold uppercase tracking-wide hover:bg-cream-dark hover:text-orange-primary transition-colors flex items-center gap-1">
+                class="px-2 xl:px-3 py-2 rounded-lg text-sm font-heading font-semibold uppercase tracking-wide hover:bg-cream-dark hover:text-orange-primary transition-colors flex items-center gap-1 whitespace-nowrap shrink-0">
                 Szkoła
                 <svg class="w-3 h-3 mt-0.5 transition-transform" [class.rotate-180]="schoolOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
               </button>
@@ -83,15 +83,15 @@ import { DEFAULT_SCHOOL_MENU } from '../../../features/szkola/school-content';
                 [routerLink]="item.path"
                 routerLinkActive="text-orange-primary bg-orange-50"
                 [routerLinkActiveOptions]="{ exact: item.exact }"
-                class="px-3 py-2 rounded-lg text-sm font-heading font-semibold uppercase tracking-wide hover:bg-cream-dark hover:text-orange-primary transition-colors">
+                class="px-2 xl:px-3 py-2 rounded-lg text-sm font-heading font-semibold uppercase tracking-wide hover:bg-cream-dark hover:text-orange-primary transition-colors whitespace-nowrap shrink-0">
                 {{ item.label }}
               </a>
             }
           </div>
 
           <div class="flex items-center gap-2 shrink-0">
-            <a routerLink="/rekrutacja" class="comic-btn-primary text-sm py-2 px-4 hidden lg:inline-flex">
-              Rekrutacja
+            <a routerLink="/organizacja-roku" class="comic-btn-primary text-sm py-2 px-3 xl:px-4 hidden lg:inline-flex whitespace-nowrap">
+              Organizacja roku
             </a>
 
             <button

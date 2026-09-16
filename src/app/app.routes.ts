@@ -124,6 +124,16 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'organizacja-roku',
+    loadComponent: () => import('./features/organizacja/organizacja-roku.component').then(m => m.OrganizacjaRokuComponent),
+    data: {
+      seo: {
+        title: 'Organizacja roku',
+        description: 'Ważne daty, dni wolne oraz organizacja roku szkolnego w ZCKOiZ Zabrze.',
+      },
+    },
+  },
+  {
     path: ':secret',
     canActivate: [adminSecretGuard],
     loadChildren: () => import('./admin/admin.routes').then(m => m.adminRoutes),

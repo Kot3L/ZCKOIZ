@@ -109,6 +109,17 @@ export interface HeroSlide {
   is_active: boolean;
 }
 
+export interface OrgDateEntry {
+  date: string;
+  label: string;
+  detail: string;
+}
+
+export interface Organization {
+  wazne_daty: OrgDateEntry[];
+  dni_wolne: OrgDateEntry[];
+}
+
 export interface SchoolPageLink {
   label: string;
   url: string;

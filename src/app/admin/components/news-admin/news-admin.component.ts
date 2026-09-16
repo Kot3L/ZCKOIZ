@@ -138,7 +138,7 @@ import { dataUrlToBlobUrl, revokeBlobUrl, fileNameFromUrl } from '../../../share
                 </select>
                 @if (form.album_id) {
                   <button type="button" (click)="form.album_id = null"
-                    class="comic-btn text-xs !py-2 !px-3 bg-red-50 text-red-600 !shadow-[2px_2px_0_#991b1b] !border-red-600 shrink-0">Usuń album</button>
+                    class="comic-btn-danger text-xs !py-2 !px-3 shrink-0">Usuń album</button>
                 }
               </div>
               <p class="text-xs text-gray-500 mt-1">Wybrany album zostanie wyświetlony w aktualności jako karuzela zdjęć.</p>
@@ -192,7 +192,7 @@ import { dataUrlToBlobUrl, revokeBlobUrl, fileNameFromUrl } from '../../../share
                 <td class="px-4 py-3">
                   <div class="flex justify-end gap-2">
                     <button (click)="toggleEditor(item)" class="comic-btn text-xs !py-1.5 !px-3 bg-surface text-ink">Edytuj</button>
-                    <button (click)="deleteItem(item)" class="comic-btn text-xs !py-1.5 !px-3 bg-red-50 text-red-600 !shadow-[2px_2px_0_#991b1b] !border-red-600">Usuń</button>
+                    <button (click)="deleteItem(item)" class="comic-btn-danger text-xs !py-1.5 !px-3">Usuń</button>
                   </div>
                 </td>
               </tr>

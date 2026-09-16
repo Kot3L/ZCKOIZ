@@ -63,7 +63,7 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
                   <span class="text-sm text-ink font-medium">Pokaż w galerii</span>
                 </label>
               </div>
-              <button (click)="deleteAlbum(album)" class="comic-btn text-xs !py-1.5 !px-3 bg-red-50 text-red-600 !shadow-[2px_2px_0_#991b1b] !border-red-600">Usuń</button>
+              <button (click)="deleteAlbum(album)" class="comic-btn-danger text-xs !py-1.5 !px-3">Usuń</button>
             </div>
 
             <div class="flex flex-wrap gap-2 mb-4">
