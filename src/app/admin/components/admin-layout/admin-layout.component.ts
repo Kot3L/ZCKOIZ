@@ -37,7 +37,7 @@ import { AdminStateService } from '../../../core/services/admin-state.service';
         </nav>
 
         <div class="p-4 border-t border-gray-800">
-          <a routerLink="/" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium">
+          <a href="/" target="_blank" rel="noopener" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium">
             Powrót na stronę
           </a>
           <button
