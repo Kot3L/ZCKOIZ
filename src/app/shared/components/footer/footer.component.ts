@@ -22,7 +22,7 @@ import { RouterLink } from '@angular/router';
               </div>
             </div>
             <p class="text-gray-400 text-sm leading-relaxed">
-              Zabrzańskie Centrum Kształcenia Ogólnego i Zawodowego
+              Zabrzańskie Centrum Kształcenia <br> Ogólnego i Zawodowego <br> w Zabrzu
             </p>
           </div>
 
@@ -74,7 +74,7 @@ import { RouterLink } from '@angular/router';
             <ul class="space-y-2 text-sm text-gray-400">
               <li>Poniedziałek - Piątek</li>
               <li class="text-white font-semibold">7:00 - 16:00</li>
-              <li class="mt-3 text-gray-500">Sekretariat czynny w godzinach</li>
+              <li class="mt-3 text-gray-500">Sekretariat czynny <br> w godzinach</li>
               <li class="text-white font-semibold">7:30 - 15:30</li>
             </ul>
           </div>

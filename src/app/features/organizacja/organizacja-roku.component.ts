@@ -166,9 +166,9 @@ const DEFAULT_ORGANIZACJA: Organization = {
           </div>
 
           <div class="comic-card mt-8 bg-blue-primary !p-8 md:!p-10 text-center">
-            <h2 class="text-2xl md:text-3xl font-heading text-white mb-3">Masz pytania dotyczące organizacji roku?</h2>
+            <h2 class="text-2xl md:text-3xl font-heading text-white mb-3">Czy masz jakieś inne pytania?</h2>
             <p class="text-blue-100 mb-6 max-w-2xl mx-auto">
-              Sekretariat pomoże Ci wyjaśnić najważniejsze kwestie związane z kalendarzem i organizacją zajęć.
+              W sekretariacie otrzymasz większość odpowiedzi na twoje pytania.
             </p>
             <a routerLink="/kontakt" class="comic-btn-secondary text-sm">
               Skontaktuj się z nami
