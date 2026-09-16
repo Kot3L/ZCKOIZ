@@ -15,7 +15,6 @@ const SETTING_KEY = 'organizacja';
     <div class="space-y-6">
       <div>
         <h1 class="text-3xl text-ink mb-1">Organizacja roku</h1>
-        <p class="text-sm text-gray-500">Edycja ważnych dat oraz dni wolnych od zajęć lekcyjnych.</p>
       </div>
 
       @if (message()) {
