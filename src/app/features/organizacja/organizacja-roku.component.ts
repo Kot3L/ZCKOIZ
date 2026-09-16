@@ -1,4 +1,5 @@
 import { Component, signal, OnInit } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../core/services/firebase.service';
@@ -49,7 +50,7 @@ const DEFAULT_ORGANIZACJA: Organization = {
 @Component({
   selector: 'app-organizacja-roku',
   standalone: true,
-  imports: [PageHeaderComponent, SkeletonComponent],
+  imports: [PageHeaderComponent, SkeletonComponent, RouterLink],
   template: `
     <app-page-header
       title="Organizacja roku"
