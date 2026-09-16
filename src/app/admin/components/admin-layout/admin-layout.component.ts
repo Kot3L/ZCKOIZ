@@ -8,7 +8,7 @@ import { AdminStateService } from '../../../core/services/admin-state.service';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="min-h-screen bg-cream flex">
+    <div class="admin-panel min-h-screen bg-cream flex">
       <aside class="hidden lg:flex w-64 bg-dark text-white flex-col shrink-0">
         <div class="p-6 border-b border-gray-800">
           <div class="flex items-center gap-3">

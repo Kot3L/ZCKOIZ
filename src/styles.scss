@@ -254,6 +254,11 @@ html.font-largest {
     transform: translate(3px, 3px) rotate(0deg);
   }
 
+  .admin-panel {
+    --font-heading: "Fredoka", "Trebuchet MS", sans-serif;
+    --font-body: "Fredoka", "Trebuchet MS", sans-serif;
+  }
+
   .comic-btn-danger {
     display: inline-flex;
     align-items: center;
