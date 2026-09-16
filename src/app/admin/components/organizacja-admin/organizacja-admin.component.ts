@@ -1,6 +1,7 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
+import { AutoResizeDirective } from '../../../shared/directives/auto-resize.directive';
 import { FirebaseService } from '../../../core/services/firebase.service';
 import { OrgDateEntry, Organization } from '../../../core/models/database.types';
 
@@ -9,7 +10,7 @@ const SETTING_KEY = 'organizacja';
 @Component({
   selector: 'app-organizacja-admin',
   standalone: true,
-  imports: [FormsModule, SkeletonComponent],
+  imports: [FormsModule, SkeletonComponent, AutoResizeDirective],
   template: `
     <div class="space-y-6">
       <div>
@@ -49,7 +50,7 @@ const SETTING_KEY = 'organizacja';
                 </div>
                 <div>
                   <label class="block text-sm font-semibold mb-1">Opis</label>
-                  <textarea [(ngModel)]="item.detail" name="wd_detail_{{ $index }}" rows="2" class="w-full px-4 py-2.5 border-2 border-ink rounded-lg"></textarea>
+                  <textarea [(ngModel)]="item.detail" name="wd_detail_{{ $index }}" rows="2" autoResize class="w-full px-4 py-2.5 border-2 border-ink rounded-lg"></textarea>
                 </div>
               </div>
             }
@@ -78,7 +79,7 @@ const SETTING_KEY = 'organizacja';
                 <div class="flex items-start gap-3">
                   <div class="flex-1">
                     <label class="block text-sm font-semibold mb-1">Opis</label>
-                    <textarea [(ngModel)]="item.detail" name="dw_detail_{{ $index }}" rows="2" class="w-full px-4 py-2.5 border-2 border-ink rounded-lg"></textarea>
+                    <textarea [(ngModel)]="item.detail" name="dw_detail_{{ $index }}" rows="2" autoResize class="w-full px-4 py-2.5 border-2 border-ink rounded-lg"></textarea>
                   </div>
                   <div class="mt-6">
                     <button type="button" (click)="removeDniWolne($index)"
@@ -98,7 +99,6 @@ const SETTING_KEY = 'organizacja';
 
         <div class="flex items-center gap-3 pt-2">
           <button (click)="save()" class="comic-btn-primary text-sm">Zapisz zmiany</button>
-          <button (click)="load()" class="comic-btn text-sm bg-surface text-ink">Anuluj</button>
         </div>
       </div>
       }
