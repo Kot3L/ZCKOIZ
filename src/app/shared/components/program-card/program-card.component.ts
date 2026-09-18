@@ -19,14 +19,6 @@ import { Program } from '../../../core/models/database.types';
   `,
   template: `
     <a [routerLink]="['/oferta', program().slug]" class="comic-card block group overflow-hidden">
-      @if (program().cover_image_url) {
-        <div class="overflow-hidden -mx-6 -mt-6 mb-4 border-b-2 border-ink">
-          <img
-            [src]="program().cover_image_url"
-            [alt]="program().title"
-            class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" />
-        </div>
-      }
       <div class="flex items-center gap-2 mb-3">
         <span [class]="program().school_type === 'technikum' ? 'badge-petrol' : 'badge-orange'">
           {{ program().school_type === 'technikum' ? 'Technikum' : 'Branżowa I st.' }}

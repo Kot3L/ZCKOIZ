@@ -55,10 +55,10 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
         <div class="relative z-10">
           @for (slide of heroSlides(); track slide.id; let i = $index) {
             @if (i === currentSlide()) {
-              <div class="min-h-[70vh] md:min-h-[80vh] flex items-center">
+              <div class="min-h-[64vh] sm:min-h-[70vh] md:min-h-[80vh] flex items-center">
                 <div class="container-main py-16 md:py-24">
                   <div class="max-w-2xl animate-fade-in">
-                    <h1 class="text-4xl sm:text-5xl md:text-6xl text-white mb-4 leading-tight font-bold">
+                    <h1 class="text-3xl sm:text-5xl md:text-6xl text-white mb-4 leading-tight font-bold break-words">
                       {{ keepPolishWordsTogether(slide.title) }}
                     </h1>
                     <p class="text-xl text-gray-300 mb-8">{{ keepPolishWordsTogether(slide.subtitle) }}</p>
@@ -87,18 +87,18 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
           </div>
         }
       } @else {
-        <div class="min-h-[70vh] md:min-h-[80vh] flex items-center">
+        <div class="min-h-[64vh] sm:min-h-[70vh] md:min-h-[80vh] flex items-center">
           <div class="container-main py-16 md:py-24 relative z-10">
             <div class="max-w-4xl">
-              <div class="flex items-center gap-4 mb-4">
-              <h1 class="text-3xl sm:text-4xl md:text-5xl text-white leading-tight font-bold relative z-10">
+              <div class="flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-4 mb-4">
+              <h1 class="max-w-full text-3xl sm:text-4xl md:text-5xl text-white leading-tight font-bold relative z-10 break-words">
                 Zabrzańskie Centrum Kształcenia Ogólnego i&nbsp;Zawodowego<br>
                 <span class="text-yellow-accent home-hero-accent font-bold">w&nbsp;Zabrzu</span>
               </h1>
               <img
                 src="/logobig.png"
                 alt="logo ZCKOiZ Zabrze"
-                class="w-52 h-52 sm:w-64 sm:h-64 md:w-80 md:h-80 object-contain shrink-0 -ml-10 sm:-ml-14 md:-ml-20 relative z-0 animate-float bg-transparent"
+                class="w-32 h-32 sm:w-44 sm:h-44 md:w-80 md:h-80 object-contain shrink-0 self-center md:self-auto md:-ml-20 relative z-0 animate-float bg-transparent"
               />
               </div>
               <p class="text-xl text-gray-300 mt-8 mb-8">
