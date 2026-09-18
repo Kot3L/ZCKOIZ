@@ -41,6 +41,11 @@ import { dataUrlToBlobUrl } from '../../../shared/utils/pdf.utils';
                   <option>Regulaminy</option>
                   <option>Szkolenia</option>
                   <option>Współpraca</option>
+                  <option>Dla uczniów</option>
+                  <option>Dla rodziców</option>
+                  <option>Organizacja roku</option>
+                  <option>Bezpieczeństwo</option>
+                  <option>Pomoc psychologiczna</option>
                   <option>Inne</option>
                 </select>
               </div>
