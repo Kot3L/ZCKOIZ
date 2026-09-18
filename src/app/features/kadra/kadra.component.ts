@@ -110,10 +110,18 @@ export class KadraComponent implements OnInit {
   async ngOnInit() {
     try {
       const all = await this.fb.listStaff();
-      this.management.set(all.filter(s => s.is_management));
-      this.teachers.set(all.filter(s => !s.is_management));
+      const sorted = [...all].sort((a, b) =>
+        this.surname(a.full_name).localeCompare(this.surname(b.full_name), 'pl', { sensitivity: 'base' })
+          || a.full_name.localeCompare(b.full_name, 'pl', { sensitivity: 'base' }),
+      );
+      this.management.set(sorted.filter(s => s.is_management));
+      this.teachers.set(sorted.filter(s => !s.is_management));
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private surname(fullName: string): string {
+    return fullName.trim().split(/\s+/)[0] ?? fullName;
   }
 }

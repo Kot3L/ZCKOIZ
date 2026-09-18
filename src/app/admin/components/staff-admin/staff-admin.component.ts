@@ -98,7 +98,7 @@ import { Staff } from '../../../core/models/database.types';
             </tr>
           </thead>
           <tbody>
-            @for (item of items(); track item.id) {
+            @for (item of sortedItems(); track item.id) {
               <tr class="border-b border-ink/10 hover:bg-cream transition-colors">
                 <td class="px-4 py-3 font-medium">{{ item.full_name }}</td>
                 <td class="px-4 py-3 text-gray-600">{{ item.position }}</td>
@@ -146,6 +146,17 @@ export class StaffAdminComponent implements OnInit {
 
   async load() {
     this.items.set(await this.fb.listStaff());
+  }
+
+  sortedItems(): Staff[] {
+    return [...this.items()].sort((a, b) =>
+      this.surname(a.full_name).localeCompare(this.surname(b.full_name), 'pl', { sensitivity: 'base' })
+        || a.full_name.localeCompare(b.full_name, 'pl', { sensitivity: 'base' }),
+    );
+  }
+
+  private surname(fullName: string): string {
+    return fullName.trim().split(/\s+/)[0] ?? fullName;
   }
 
   toggleEditor(item: Staff | null) {
