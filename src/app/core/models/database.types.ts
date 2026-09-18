@@ -98,6 +98,15 @@ export interface SiteSettings {
   updated_at: string;
 }
 
+export interface AuditLog {
+  id: string;
+  action: 'create' | 'update' | 'delete';
+  collection: string;
+  label: string;
+  user_email: string;
+  created_at: string;
+}
+
 export interface HeroSlide {
   id: string;
   title: string;

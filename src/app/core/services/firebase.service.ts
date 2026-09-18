@@ -40,6 +40,7 @@ import {
   DocumentPdf,
   Staff,
   SiteSettings,
+  AuditLog,
   SchoolPageRecord,
   SchoolMenu,
 } from '../models/database.types';
@@ -149,21 +150,53 @@ export class FirebaseService {
 
   private async save(coll: string, data: Record<string, unknown>, id?: string): Promise<string | null> {
     const d = { ...data, updated_at: Timestamp.now().toDate().toISOString() };
+    const action = id ? 'update' : 'create';
     if (id) {
       await setDoc(doc(this.ready.db, coll, id), { ...d, id } as any, { merge: true });
+      await this.logAudit(action, coll, id, data);
       return id;
     } else {
       const ref = await addDoc(collection(this.ready.db, coll), {
         ...d,
         created_at: Timestamp.now().toDate().toISOString(),
       } as any);
+      await this.logAudit(action, coll, ref.id, data);
       return ref.id;
     }
   }
 
   private async remove(coll: string, id: string): Promise<void> {
     await deleteDoc(doc(this.ready.db, coll, id));
+    await this.logAudit('delete', coll, id);
   }
+
+  private async logAudit(
+    action: AuditLog['action'],
+    coll: string,
+    id: string,
+    data: Record<string, unknown> = {},
+  ): Promise<void> {
+    const trackedCollections = new Set([
+      'news', 'programs', 'documents', 'gallery_albums', 'gallery_images',
+      'staff', 'school_pages', 'school_menu', 'settings', 'hero_slides',
+    ]);
+    if (!trackedCollections.has(coll)) return;
+
+    const label = String(data['title'] ?? data['full_name'] ?? data['key'] ?? data['slug'] ?? id);
+    try {
+      await addDoc(collection(this.ready.db, 'audit_logs'), {
+        action,
+        collection: coll,
+        label,
+        user_email: this.user()?.email ?? 'administrator',
+        created_at: Timestamp.now().toDate().toISOString(),
+      });
+    } catch (error) {
+      console.warn('Nie udało się zapisać historii działania.', error);
+    }
+  }
+
+  listAuditLogs = () => this.list<AuditLog>('audit_logs', 'created_at', false);
 
   // =====================================================================
   // NEWS
