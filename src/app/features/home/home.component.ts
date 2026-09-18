@@ -93,7 +93,7 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
               <div class="flex items-center gap-4 mb-4">
               <h1 class="text-3xl sm:text-4xl md:text-5xl text-white leading-tight font-bold relative z-10">
                 Zabrzańskie Centrum Kształcenia Ogólnego i&nbsp;Zawodowego<br>
-                <span class="text-yellow-accent font-bold">w&nbsp;Zabrzu</span>
+                <span class="text-yellow-accent home-hero-accent font-bold">w&nbsp;Zabrzu</span>
               </h1>
               <img
                 src="/logobig.png"
