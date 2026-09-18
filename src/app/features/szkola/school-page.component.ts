@@ -33,7 +33,41 @@ import { SCHOOL_PAGES, DEFAULT_SCHOOL_MENU, SchoolPage } from './school-content'
       <section class="py-12 md:py-16">
         <div class="container-main grid gap-10 lg:grid-cols-[minmax(210px,260px)_minmax(0,1fr)] lg:items-start">
           @if (schoolNavGroups().length > 0) {
-            <aside class="border-l-4 border-petrol pl-4 lg:sticky lg:top-28" aria-label="Nawigacja Szkoła">
+            <details class="lg:hidden border-2 border-ink rounded-lg bg-surface shadow-[3px_3px_0_var(--color-ink)]">
+              <summary class="flex items-center justify-between gap-4 px-4 py-3 cursor-pointer list-none font-heading font-bold text-ink">
+                <span class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-petrol shrink-0"></span>
+                  Nawigacja szkoły
+                </span>
+                <span class="text-xs text-ink-light font-normal">Rozwiń</span>
+              </summary>
+              <nav class="border-t-2 border-ink/10 px-4 py-4 space-y-4" aria-label="Nawigacja Szkoła">
+                @for (group of schoolNavGroups(); track group.heading) {
+                  <div>
+                    <h2 class="text-[11px] font-heading font-bold uppercase tracking-wider text-petrol mb-1.5">{{ group.heading }}</h2>
+                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
+                      @for (item of group.items; track item.url) {
+                        <li>
+                          @if (item.external) {
+                            <a [href]="item.url" target="_blank" rel="noopener"
+                              class="block py-1.5 text-sm text-ink-light hover:text-orange-primary transition-colors">
+                              {{ item.label }}
+                            </a>
+                          } @else {
+                            <a [routerLink]="item.url"
+                              class="block py-1.5 text-sm text-ink-light hover:text-orange-primary transition-colors">
+                              {{ item.label }}
+                            </a>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </nav>
+            </details>
+
+            <aside class="hidden lg:block border-l-4 border-petrol pl-4 lg:sticky lg:top-28" aria-label="Nawigacja Szkoła">
               <p class="text-xs font-heading font-bold uppercase tracking-widest text-petrol mb-3">Szkoła</p>
               <nav class="space-y-5">
                 @for (group of schoolNavGroups(); track group.heading) {
