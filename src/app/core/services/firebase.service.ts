@@ -47,6 +47,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class FirebaseService {
+  private static readonly STORAGE_TIMEOUT_MS = 120000;
   private platformId = inject(PLATFORM_ID);
   private cookieConsent = inject(CookieConsentService);
   private analyticsEnabled = false;
@@ -477,12 +478,12 @@ export class FirebaseService {
     const contentType = (file as File).type || 'application/octet-stream';
     await this.withTimeout(
       uploadBytes(storageRef, file, { contentType }),
-      30000,
-      'Przekroczono limit czasu przesyłania do Firebase Storage. Sprawdź, czy Storage jest włączony i czy reguły pozwalają na zapis.',
+      FirebaseService.STORAGE_TIMEOUT_MS,
+      'Przekroczono limit czasu przesyłania do Firebase Storage. Sprawdź, czy Storage jest włączony dla projektu Firebase i czy reguły pozwalają na zapis.',
     );
     return this.withTimeout(
       getDownloadURL(storageRef),
-      30000,
+      FirebaseService.STORAGE_TIMEOUT_MS,
       'Przekroczono limit czasu pobierania adresu obrazka z Firebase Storage.',
     );
   }

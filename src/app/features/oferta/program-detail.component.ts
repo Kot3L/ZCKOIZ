@@ -53,6 +53,11 @@ import { Program } from '../../core/models/database.types';
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
+              @if (program()!.cover_image_url) {
+                <div class="overflow-hidden rounded-lg border-2 border-ink shadow-[3px_3px_0_var(--color-ink)] bg-cream-dark">
+                  <img [src]="program()!.cover_image_url" [alt]="'Zdjęcie kierunku ' + program()!.title" class="w-full max-h-80 object-cover" />
+                </div>
+              }
               <div class="comic-card">
                 <h2 class="font-heading text-2xl text-orange-primary mb-4">Opis kierunku</h2>
                 <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ program()!.description }}</p>
@@ -70,11 +75,6 @@ import { Program } from '../../core/models/database.types';
             </div>
 
             <div class="space-y-6">
-              @if (program()!.cover_image_url) {
-                <div class="comic-border overflow-hidden">
-                  <img [src]="program()!.cover_image_url" [alt]="program()!.title" class="w-full h-48 object-cover" />
-                </div>
-              }
               <div class="comic-card bg-orange-50">
                 <h3 class="font-heading text-lg text-orange-primary mb-3">Zapisz się!</h3>
                 <p class="text-gray-600 text-sm mb-4">Skontaktuj się z sekretariatem, aby uzyskać więcej informacji o rekrutacji.</p>

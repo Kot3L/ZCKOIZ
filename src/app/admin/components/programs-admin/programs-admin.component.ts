@@ -30,6 +30,31 @@ import { Program } from '../../../core/models/database.types';
               <label class="block text-sm font-semibold mb-1">Nazwa kierunku</label>
               <input [(ngModel)]="form.title" name="title" required class="w-full px-4 py-2.5 border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" />
             </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1">Zdjęcie kierunku</label>
+              <div class="flex gap-2">
+                <input [(ngModel)]="form.cover_image_url" name="cover_image_url" class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg" placeholder="https://..." />
+                <button type="button" (click)="imageInput.click()" [disabled]="uploadingImage()"
+                  class="comic-btn text-sm bg-surface text-ink disabled:opacity-50 disabled:cursor-not-allowed">
+                  {{ uploadingImage() ? 'Wgrywanie...' : 'Wgraj zdjęcie' }}
+                </button>
+                <input #imageInput type="file" accept="image/*" class="hidden" (change)="uploadImage($event)" />
+              </div>
+              @if (uploadingImage()) {
+                <div class="mt-3 flex items-center gap-2 text-sm text-petrol" aria-live="polite" aria-busy="true">
+                  <span class="w-4 h-4 rounded-full border-2 border-petrol border-t-transparent animate-spin"></span>
+                  Wgrywanie zdjęcia, proszę czekać...
+                </div>
+              }
+              @if (form.cover_image_url) {
+                <div class="mt-3 relative inline-block group">
+                  <img [src]="form.cover_image_url" [alt]="form.title || 'Podgląd zdjęcia'" class="w-56 h-32 object-cover rounded-lg border-2 border-ink" />
+                  @if (!uploadingImage()) {
+                    <button type="button" (click)="form.cover_image_url = ''" class="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full text-xs font-bold border border-ink" aria-label="Usuń zdjęcie">×</button>
+                  }
+                </div>
+              }
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-sm font-semibold mb-1">Typ szkoły</label>
@@ -62,7 +87,7 @@ import { Program } from '../../../core/models/database.types';
               <textarea [(ngModel)]="form.career_prospects" name="career_prospects" rows="3" class="w-full px-4 py-2.5 border-2 border-ink rounded-lg"></textarea>
             </div>
             <div class="flex gap-3">
-              <button type="submit" class="comic-btn-primary text-sm">Zapisz</button>
+              <button type="submit" [disabled]="uploadingImage()" class="comic-btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed">Zapisz</button>
               <button type="button" (click)="editing.set(false)" class="comic-btn text-sm bg-surface text-ink">Anuluj</button>
             </div>
           </form>
@@ -126,6 +151,7 @@ export class ProgramsAdminComponent implements OnInit {
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
   loading = signal(true);
+  uploadingImage = signal(false);
 
   form = {
     id: '',
@@ -133,6 +159,7 @@ export class ProgramsAdminComponent implements OnInit {
     description: '',
     what_you_learn: '',
     career_prospects: '',
+    cover_image_url: '',
     school_type: 'technikum',
     display_order: 0,
     is_active: true,
@@ -165,6 +192,7 @@ export class ProgramsAdminComponent implements OnInit {
         description: item.description,
         what_you_learn: item.what_you_learn,
         career_prospects: item.career_prospects,
+        cover_image_url: item.cover_image_url ?? '',
         school_type: item.school_type,
         display_order: item.display_order,
         is_active: item.is_active,
@@ -176,6 +204,7 @@ export class ProgramsAdminComponent implements OnInit {
         description: '',
         what_you_learn: '',
         career_prospects: '',
+        cover_image_url: '',
         school_type: 'technikum',
         display_order: this.items().length + 1,
         is_active: true,
@@ -201,6 +230,7 @@ export class ProgramsAdminComponent implements OnInit {
       description: this.form.description,
       what_you_learn: this.form.what_you_learn,
       career_prospects: this.form.career_prospects,
+      cover_image_url: this.form.cover_image_url || null,
       school_type: this.form.school_type,
       display_order: this.form.display_order,
       is_active: this.form.is_active,
@@ -232,6 +262,63 @@ export class ProgramsAdminComponent implements OnInit {
     }
     this.setMessage('Usunięto.', 'success');
     await this.load();
+  }
+
+  async uploadImage(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      this.setMessage('Wybierz plik graficzny.', 'error');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      this.setMessage('Zdjęcie jest za duże. Maksymalny rozmiar pliku to 10 MB.', 'error');
+      return;
+    }
+    this.uploadingImage.set(true);
+    try {
+      this.form.cover_image_url = await this.prepareImage(file);
+      this.setMessage('Zdjęcie przygotowane. Zapisz kierunek, aby je opublikować.', 'success');
+    } catch (e: any) {
+      this.setMessage('Nie udało się przygotować zdjęcia: ' + (e.message ?? e), 'error');
+    } finally {
+      this.uploadingImage.set(false);
+    }
+  }
+
+  private prepareImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Nie udało się odczytać pliku.'));
+      reader.onload = () => {
+        const image = new Image();
+        image.onerror = () => reject(new Error('Nie udało się odczytać obrazu.'));
+        image.onload = () => {
+          const maxDimension = 1400;
+          const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+          canvas.getContext('2d')?.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+          let quality = 0.82;
+          let dataUrl = canvas.toDataURL('image/jpeg', quality);
+          while (dataUrl.length > 900_000 && quality > 0.5) {
+            quality -= 0.08;
+            dataUrl = canvas.toDataURL('image/jpeg', quality);
+          }
+          if (dataUrl.length > 950_000) {
+            reject(new Error('Zdjęcie jest zbyt duże po kompresji. Wybierz mniejsze zdjęcie.'));
+            return;
+          }
+          resolve(dataUrl);
+        };
+        image.src = String(reader.result);
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   setMessage(msg: string, type: 'success' | 'error') {
