@@ -274,7 +274,6 @@ export class NavbarComponent implements OnInit {
   beforeSchool = [
     { label: 'Oferta', path: '/oferta', exact: false },
     { label: 'Aktualności', path: '/aktualnosci', exact: false },
-    { label: 'Galeria', path: '/galeria', exact: false },
     { label: 'Dokumenty', path: '/dokumenty', exact: false },
   ];
 
