@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FirebaseService } from '../../../core/services/firebase.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   template: `
     <div class="min-h-screen bg-dark halftone-bg flex items-center justify-center p-4">
       <div class="relative z-10 w-full max-w-md">
