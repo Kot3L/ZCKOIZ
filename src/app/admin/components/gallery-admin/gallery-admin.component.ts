@@ -91,8 +91,8 @@ import { GalleryAlbum, GalleryImage } from '../../../core/models/database.types'
               <button (click)="addImageByUrl(album.id, urlInput)" class="comic-btn text-sm bg-surface text-ink">Dodaj</button>
             </div>
             <div class="flex items-center gap-2 mt-2">
-              <input #imageFileInput type="file" accept="image/*" class="hidden" (change)="addImageFromFile(album.id, $event)" />
-              <button type="button" (click)="imageFileInput.click()" class="comic-btn text-sm bg-surface text-ink">Dodaj z dysku</button>
+              <input #imageFileInput type="file" accept="image/*" multiple class="hidden" (change)="addImageFromFile(album.id, $event)" />
+              <button type="button" (click)="imageFileInput.click()" class="comic-btn text-sm bg-surface text-ink">Dodaj zdjęcia z dysku</button>
               <span class="text-xs text-gray-500">JPG, PNG, WEBP</span>
             </div>
           </div>
@@ -209,24 +209,38 @@ export class GalleryAdminComponent implements OnInit {
 
   async addImageFromFile(albumId: string, event: Event) {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+    const files = Array.from(input.files ?? []);
     input.value = '';
-    if (!file) return;
+    if (files.length === 0) return;
 
-    try {
-      const dataUrl = await this.readFile(file);
-      const id = await this.fb.saveImage({
-        album_id: albumId,
-        image_url: '',
-        display_order: this.imagesByAlbum(albumId).length,
-      });
-      if (!id) throw new Error('Nie udało się utworzyć zdjęcia.');
-      await this.fb.saveGalleryImageData(id, dataUrl);
-      await this.fb.saveImage({ image_url: `firestore:${id}` }, id);
-      this.setMessage('Zdjęcie dodane.', 'success');
+    const startOrder = this.imagesByAlbum(albumId).length;
+    let added = 0;
+    let failed = 0;
+    for (const [index, file] of files.entries()) {
+      try {
+        const dataUrl = await this.readFile(file);
+        const id = await this.fb.saveImage({
+          album_id: albumId,
+          image_url: '',
+          display_order: startOrder + index,
+        });
+        if (!id) throw new Error('Nie udało się utworzyć zdjęcia.');
+        await this.fb.saveGalleryImageData(id, dataUrl);
+        await this.fb.saveImage({ image_url: `firestore:${id}` }, id);
+        added++;
+      } catch {
+        failed++;
+      }
+    }
+
+    if (added > 0) {
+      this.setMessage(
+        failed > 0 ? `Dodano ${added} zdjęć. Nie udało się dodać: ${failed}.` : `Dodano ${added} zdjęć.`,
+        failed > 0 ? 'error' : 'success',
+      );
       await this.loadImages();
-    } catch (e: any) {
-      this.setMessage('Błąd: ' + (e?.message ?? e), 'error');
+    } else {
+      this.setMessage('Nie udało się dodać wybranych zdjęć.', 'error');
     }
   }
 
