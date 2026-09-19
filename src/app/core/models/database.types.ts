@@ -129,6 +129,18 @@ export interface Organization {
   dni_wolne: OrgDateEntry[];
 }
 
+export interface RecruitmentStep {
+  title: string;
+  detail: string;
+}
+
+export interface Recruitment {
+  timeline: OrgDateEntry[];
+  steps: RecruitmentStep[];
+  required_docs: string[];
+  extra_points: string[];
+}
+
 export interface SchoolPageLink {
   label: string;
   url: string;

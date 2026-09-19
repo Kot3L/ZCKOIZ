@@ -24,6 +24,16 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'edukacja-mundurowa',
+    loadComponent: () => import('./features/edukacja-mundurowa/edukacja-mundurowa.component').then(m => m.EdukacjaMundurowaComponent),
+    data: {
+      seo: {
+        title: 'Edukacja mundurowa',
+        description: 'Edukacja mundurowa w ZCKOiZ Zabrze - dyscyplina, sprawność, bezpieczeństwo i praca zespołowa.',
+      },
+    },
+  },
+  {
     path: 'oferta/:slug',
     loadComponent: () => import('./features/oferta/program-detail.component').then(m => m.ProgramDetailComponent),
     data: {
@@ -72,6 +82,11 @@ export const routes: Routes = [
         description: 'Album zdj\u0119\u0107 z ZCKOiZ Zabrze.',
       },
     },
+  },
+  {
+    path: 'szkola/edukacja-mundurowa',
+    redirectTo: '/edukacja-mundurowa',
+    pathMatch: 'full',
   },
   {
     path: 'szkola/:slug',

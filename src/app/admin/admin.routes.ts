@@ -47,6 +47,11 @@ export const adminRoutes: Routes = [
         canActivate: [authGuard],
         loadComponent: () => import('./components/organizacja-admin/organizacja-admin.component').then(m => m.OrganizacjaAdminComponent),
       },
+      {
+        path: 'rekrutacja',
+        canActivate: [authGuard],
+        loadComponent: () => import('./components/rekrutacja-admin/rekrutacja-admin.component').then(m => m.RekrutacjaAdminComponent),
+      },
     ],
   },
 ];

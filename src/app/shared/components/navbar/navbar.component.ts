@@ -278,7 +278,7 @@ export class NavbarComponent implements OnInit {
   ];
 
   afterSchool = [
-    { label: 'Kadra', path: '/kadra', exact: false },
+    { label: 'Edukacja mundurowa', path: '/edukacja-mundurowa', exact: false },
     { label: 'Rekrutacja', path: '/rekrutacja', exact: false },
     { label: 'Kontakt', path: '/kontakt', exact: false },
   ];

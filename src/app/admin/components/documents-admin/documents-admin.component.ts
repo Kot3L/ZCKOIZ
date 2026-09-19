@@ -44,6 +44,9 @@ import { dataUrlToBlobUrl } from '../../../shared/utils/pdf.utils';
                   <option>Dla uczniów</option>
                   <option>Dla rodziców</option>
                   <option>Organizacja roku</option>
+                  <option>Terminy konferencji i spotkań z rodzicami</option>
+                  <option>Organizacja roku szkolnego</option>
+                  <option>Praktyki w roku szkolnym 2026/2027</option>
                   <option>Bezpieczeństwo</option>
                   <option>Pomoc psychologiczna</option>
                   <option>Inne</option>

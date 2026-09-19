@@ -103,7 +103,7 @@ import { SCHOOL_PAGES, DEFAULT_SCHOOL_MENU, SchoolPage } from './school-content'
                 @if (section.body) {
                   <div class="space-y-3">
                     @for (paragraph of section.body; track paragraph) {
-                      <p class="text-gray-700 leading-relaxed">{{ paragraph }}</p>
+                      <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ paragraph }}</p>
                     }
                   </div>
                 }
