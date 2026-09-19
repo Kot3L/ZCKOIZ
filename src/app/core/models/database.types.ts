@@ -152,6 +152,7 @@ export interface SchoolPageLink {
 export interface SchoolPageSection {
   heading: string;
   body?: string[];
+  images?: string[];
   links?: SchoolPageLink[];
 }
 

@@ -222,6 +222,36 @@ interface MenuFormGroup {
                     </div>
 
                     <div>
+                      <p class="text-xs font-semibold text-gray-600 mb-1">Zdjęcia pod tekstem (URL)</p>
+                      <div class="space-y-3">
+                        @for (image of section.images; track $index) {
+                          @let ii = $index;
+                          <div class="flex gap-3 items-center">
+                            <div class="relative group shrink-0">
+                              @if (section.images![ii].trim()) {
+                                <img [src]="section.images![ii]" class="w-20 h-16 object-cover rounded border-2 border-ink" alt="Podgląd" />
+                                @if (uploadingImage()?.sectionIndex === si && uploadingImage()?.imageIndex === ii) {
+                                  <div class="absolute inset-0 bg-black/60 rounded flex items-center justify-center text-white text-[10px] font-semibold">Przesyłanie…</div>
+                                }
+                              } @else {
+                                <div class="w-20 h-16 rounded border-2 border-dashed border-ink/40 flex items-center justify-center text-gray-400 text-2xl">+</div>
+                              }
+                            </div>
+                            <input [(ngModel)]="section.images![ii]" [name]="'image_' + si + '_' + ii"
+                              class="flex-1 px-3 py-2 text-sm border-2 border-ink rounded-lg focus:outline-none focus:border-petrol" placeholder="https://..." />
+                            <button type="button" (click)="removeImage(si, ii)" title="Usuń zdjęcie"
+                              [disabled]="uploadingImage()?.sectionIndex === si && uploadingImage()?.imageIndex === ii"
+                              class="w-7 h-7 shrink-0 bg-red-600 text-white rounded-full text-sm font-bold border border-ink disabled:opacity-50">×</button>
+                          </div>
+                        }
+                      </div>
+                      <button type="button" (click)="addImage(si)" class="comic-btn text-xs bg-surface text-ink mt-2">+ Dodaj zdjęcie</button>
+                      <input #schoolImageFile type="file" accept="image/*" class="hidden" (change)="uploadSectionImage(si, $event)" />
+                      <button type="button" (click)="schoolImageFile.click()" class="comic-btn text-xs bg-surface text-ink mt-2 ml-2">Dodaj z dysku</button>
+                      <span class="text-xs text-gray-500 ml-2">JPG, PNG, WEBP, maks. 10 MB</span>
+                    </div>
+
+                    <div>
                       <p class="text-xs font-semibold text-gray-600 mb-1">Linki</p>
                       <div class="space-y-2">
                         @for (link of section.links; track $index) {
@@ -276,6 +306,7 @@ export class SchoolAdminComponent implements OnInit {
   };
 
   pageEditorOpen = signal(false);
+  uploadingImage = signal<{ sectionIndex: number; imageIndex: number } | null>(null);
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
 
@@ -335,6 +366,7 @@ export class SchoolAdminComponent implements OnInit {
       sections: p.sections.map((s) => ({
         heading: s.heading,
         body: s.body && s.body.length ? [...s.body] : [],
+          images: s.images && s.images.length ? [...s.images] : [],
         links: s.links && s.links.length ? s.links.map((l) => this.toLink(l)) : [],
       })),
     }));
@@ -498,6 +530,7 @@ export class SchoolAdminComponent implements OnInit {
       sections: (p.sections ?? []).map((s) => ({
         heading: s.heading,
         body: s.body && s.body.length ? [...s.body] : [],
+        images: s.images && s.images.length ? [...s.images] : [],
         links: s.links && s.links.length ? s.links.map((l) => this.toLink(l)) : [],
       })),
     };
@@ -518,7 +551,7 @@ export class SchoolAdminComponent implements OnInit {
   }
 
   addSection() {
-    this.pageForm.sections.push({ heading: '', body: [], links: [] });
+    this.pageForm.sections.push({ heading: '', body: [], images: [], links: [] });
   }
 
   removeSection(index: number) {
@@ -535,6 +568,64 @@ export class SchoolAdminComponent implements OnInit {
   removeParagraph(sectionIndex: number, paragraphIndex: number) {
     const section = this.pageForm.sections[sectionIndex];
     if (section && section.body) section.body.splice(paragraphIndex, 1);
+  }
+
+  addImage(sectionIndex: number) {
+    const section = this.pageForm.sections[sectionIndex];
+    if (!section) return;
+    if (!section.images) section.images = [];
+    section.images.push('');
+  }
+
+  removeImage(sectionIndex: number, imageIndex: number) {
+    const section = this.pageForm.sections[sectionIndex];
+    if (section?.images) section.images.splice(imageIndex, 1);
+  }
+
+  async uploadSectionImage(sectionIndex: number, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      this.setMessage('Wybierz plik graficzny.', 'error');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      this.setMessage('Zdjęcie jest za duże. Maksymalny rozmiar pliku to 10 MB.', 'error');
+      return;
+    }
+    const section = this.pageForm.sections[sectionIndex];
+    if (!section) return;
+    if (!section.images) section.images = [];
+    const imageIndex = section.images.length;
+    try {
+      const previewUrl = await this.readFile(file);
+      section.images.push(previewUrl);
+      this.uploadingImage.set({ sectionIndex, imageIndex });
+      const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+      const pageSlug = this.pageForm.slug || 'nowa-podstrona';
+      const url = await this.fb.uploadFile(`school-pages/${pageSlug}/${Date.now()}-${safeName}`, file);
+      section.images[imageIndex] = url;
+      this.setMessage('Zdjęcie dodane. Zapisz podstronę, aby je opublikować.', 'success');
+    } catch (e: any) {
+      if (section.images.length > imageIndex) section.images.splice(imageIndex, 1);
+      this.setMessage('Nie udało się przesłać zdjęcia: ' + (e.message ?? e), 'error');
+    } finally {
+      this.uploadingImage.set(null);
+    }
+  }
+
+  private readFile(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Nie udało się odczytać pliku.'));
+      reader.onload = () => {
+        if (typeof reader.result === 'string') resolve(reader.result);
+        else reject(new Error('Nie udało się odczytać podglądu zdjęcia.'));
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   addLink(sectionIndex: number) {
@@ -569,6 +660,7 @@ export class SchoolAdminComponent implements OnInit {
         .map((s) => ({
           heading: s.heading,
           body: (s.body ?? []).filter((b) => b.trim()),
+          images: (s.images ?? []).filter((image) => image.trim()),
           links: (s.links ?? []).filter((l) => l.label.trim() && l.url.trim()).map((l) => this.toLink(l)),
         })),
     };

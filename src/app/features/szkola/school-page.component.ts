@@ -107,6 +107,15 @@ import { SCHOOL_PAGES, DEFAULT_SCHOOL_MENU, SchoolPage } from './school-content'
                     }
                   </div>
                 }
+                @if (section.images && section.images.length > 0) {
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    @for (image of section.images; track image) {
+                      <figure class="overflow-hidden rounded-xl border-2 border-ink shadow-[3px_3px_0_var(--color-ink)]">
+                        <img [src]="image" [alt]="section.heading" class="w-full max-h-[26rem] object-cover" loading="lazy" />
+                      </figure>
+                    }
+                  </div>
+                }
                 @if (section.links && section.links.length > 0) {
                   <div class="mt-4 space-y-2">
                     @for (link of section.links; track link.url) {
@@ -230,6 +239,7 @@ export class SchoolPageComponent {
       sections: (r.sections ?? []).map((s) => ({
         heading: s.heading,
         body: s.body && s.body.length ? s.body : undefined,
+        images: s.images && s.images.length ? s.images : undefined,
         links: s.links && s.links.length ? s.links : undefined,
       })),
     };

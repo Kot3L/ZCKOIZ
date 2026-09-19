@@ -7,6 +7,7 @@ export interface SchoolLink {
 export interface SchoolSection {
   heading: string;
   body?: string[];
+  images?: string[];
   links?: SchoolLink[];
 }
 
