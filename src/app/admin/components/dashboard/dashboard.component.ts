@@ -11,12 +11,23 @@ import { AuditLog } from '../../../core/models/database.types';
   standalone: true,
   imports: [RouterLink, DatePipe, SkeletonComponent],
   template: `
-    <div class="admin-dashboard space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+    <div class="admin-dashboard space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <p class="text-xs font-heading uppercase tracking-widest text-petrol mb-1">Panel administracyjny</p>
-          <h1 class="text-3xl text-ink">Dashboard</h1>
+          <h1 class="text-2xl text-ink">Dashboard</h1>
         </div>
+        @if (user()) {
+          <div class="flex items-center gap-3 bg-surface border-2 border-ink/10 rounded-xl px-4 py-2 shadow-[2px_2px_0_rgba(0,0,0,0.06)] self-start sm:self-auto">
+            <div class="text-right">
+              <p class="text-sm font-semibold">{{ user()?.email }}</p>
+              <p class="text-xs text-gray-500">zalogowany jako Administrator</p>
+            </div>
+            <div class="w-10 h-10 rounded-full border-2 border-ink bg-petrol text-white flex items-center justify-center font-heading font-bold">
+              {{ (user()?.email ?? '').charAt(0).toUpperCase() }}
+            </div>
+          </div>
+        }
       </div>
 
       @if (loading()) {
@@ -31,39 +42,39 @@ import { AuditLog } from '../../../core/models/database.types';
       } @else {
       <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         @for (stat of dashboardStats(); track stat.label) {
-          <div class="comic-card !p-4">
+          <div class="comic-card !p-3">
             <p class="text-xs font-heading uppercase tracking-wide text-gray-500 truncate">{{ stat.label }}</p>
-            <p class="font-heading text-3xl text-petrol leading-none mt-2">{{ stat.value }}</p>
+            <p class="font-heading text-2xl text-petrol leading-none mt-1">{{ stat.value }}</p>
           </div>
         }
       </div>
       }
 
-      <div class="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-4">
-        <div class="comic-card !p-5">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="font-heading text-xl text-orange-primary">Szybkie akcje</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="comic-card !p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="font-heading text-lg text-orange-primary">Szybkie akcje</h2>
             <span class="text-xs text-gray-500">Najczęściej używane</span>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <a [routerLink]="base() + '/aktualnosci'" class="comic-btn-secondary justify-between !py-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
+            <a [routerLink]="base() + '/aktualnosci'" class="comic-btn-secondary justify-between !py-2">
               <span>Dodaj aktualność</span><span aria-hidden="true">→</span>
             </a>
-            <a [routerLink]="base() + '/kierunki'" class="comic-btn-primary justify-between !py-3">
+            <a [routerLink]="base() + '/kierunki'" class="comic-btn-primary justify-between !py-2">
               <span>Zarządzaj kierunkami</span><span aria-hidden="true">→</span>
             </a>
-            <a [routerLink]="base() + '/galeria'" class="comic-btn justify-between !py-3 bg-surface text-ink">
+            <a [routerLink]="base() + '/galeria'" class="comic-btn justify-between !py-2 bg-surface text-ink">
               <span>Dodaj zdjęcia</span><span aria-hidden="true">→</span>
             </a>
-            <a [routerLink]="base() + '/dokumenty'" class="comic-btn justify-between !py-3 bg-surface text-ink">
+            <a [routerLink]="base() + '/dokumenty'" class="comic-btn justify-between !py-2 bg-surface text-ink">
               <span>Dodaj dokument</span><span aria-hidden="true">→</span>
             </a>
           </div>
         </div>
 
-        <div class="comic-card !p-5">
+        <div class="comic-card !p-4">
           <div class="flex items-center justify-between mb-2">
-            <h2 class="font-heading text-xl text-petrol">Ostatnie aktualności</h2>
+            <h2 class="font-heading text-lg text-petrol">Ostatnie aktualności</h2>
             <a [routerLink]="base() + '/aktualnosci'" class="text-xs font-semibold text-petrol hover:underline">Wszystkie</a>
           </div>
           @if (loading()) {
@@ -78,9 +89,9 @@ import { AuditLog } from '../../../core/models/database.types';
           } @else if (recentNews().length > 0) {
             <ul class="divide-y divide-ink/10">
               @for (item of recentNews(); track item.id) {
-                <li class="py-2.5 flex items-center justify-between gap-4">
+                <li class="py-2 flex items-center justify-between gap-4">
                   <p class="font-semibold text-ink text-sm truncate">{{ item.title }}</p>
-                  <p class="text-xs text-gray-500">
+                  <p class="text-xs text-gray-500 shrink-0">
                     {{ item.status === 'published' ? 'Opublikowano' : 'Szkic' }} · {{ (item.published_at || item.created_at) | date:'dd.MM.yyyy' }}
                   </p>
                 </li>
@@ -90,69 +101,69 @@ import { AuditLog } from '../../../core/models/database.types';
             <p class="text-gray-500 text-sm">Brak aktualności</p>
           }
         </div>
-      </div>
 
-      <div class="comic-card !p-5">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="font-heading text-xl text-petrol">Historia działań</h2>
-          <span class="text-xs text-gray-500">Ostatnie operacje</span>
-        </div>
-        @if (auditLogs().length > 0) {
-          <ul class="divide-y divide-ink/10">
-            @for (log of visibleAuditLogs(); track log.id) {
-              <li class="py-2.5 flex items-center justify-between gap-4 text-sm">
-                <div class="min-w-0">
-                  <span [class]="actionClass(log.action)">{{ actionLabel(log.action) }}</span>
-                  <span class="text-ink ml-2">{{ collectionLabel(log.collection) }}: {{ log.label }}</span>
-                </div>
-                <time class="text-xs text-gray-500 shrink-0" [dateTime]="log.created_at">{{ log.created_at | date:'dd.MM.yyyy, HH:mm' }}</time>
-              </li>
+        <div class="comic-card !p-4">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-heading text-lg text-petrol">Historia działań</h2>
+            <span class="text-xs text-gray-500">Ostatnie operacje</span>
+          </div>
+          @if (auditLogs().length > 0) {
+            <ul class="divide-y divide-ink/10">
+              @for (log of visibleAuditLogs(); track log.id) {
+                <li class="py-2 flex items-center justify-between gap-4 text-sm">
+                  <div class="min-w-0">
+                    <span [class]="actionClass(log.action)">{{ actionLabel(log.action) }}</span>
+                    <span class="text-ink ml-2">{{ collectionLabel(log.collection) }}: {{ log.label }}</span>
+                  </div>
+                  <time class="text-xs text-gray-500 shrink-0" [dateTime]="log.created_at">{{ log.created_at | date:'dd.MM.yyyy, HH:mm' }}</time>
+                </li>
+              }
+            </ul>
+            @if (auditLogs().length > 3) {
+              <button type="button" (click)="showAllAuditLogs.set(!showAllAuditLogs())"
+                class="comic-btn text-xs bg-surface text-ink mt-3">
+                {{ showAllAuditLogs() ? 'Pokaż tylko najnowsze' : 'Pokaż całą historię' }}
+              </button>
             }
-          </ul>
-          @if (auditLogs().length > 5) {
-            <button type="button" (click)="showAllAuditLogs.set(!showAllAuditLogs())"
-              class="comic-btn text-xs bg-surface text-ink mt-4">
-              {{ showAllAuditLogs() ? 'Pokaż tylko 5 najnowszych' : 'Pokaż całą historię' }}
-            </button>
+          } @else {
+            <p class="text-gray-500 text-sm">Brak zapisanych działań.</p>
           }
-        } @else {
-          <p class="text-gray-500 text-sm">Brak zapisanych działań.</p>
-        }
+        </div>
       </div>
 
       @if (!loading()) {
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="comic-card !p-5">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="font-heading text-xl text-petrol">Stan strony</h2>
+          <div class="comic-card !p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-heading text-lg text-petrol">Stan strony</h2>
               <span class="text-xs text-gray-500">Aktualne dane</span>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div class="rounded-lg border-2 border-ink/15 bg-cream-dark p-3">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div class="rounded-lg border-2 border-ink/15 bg-cream-dark p-2">
                 <p class="text-xs text-gray-500">Aktywne kierunki</p>
-                <p class="font-heading text-2xl text-ink mt-1">{{ activePrograms() }}</p>
+                <p class="font-heading text-xl text-ink mt-0.5">{{ activePrograms() }}</p>
               </div>
-              <div class="rounded-lg border-2 border-ink/15 bg-cream-dark p-3">
+              <div class="rounded-lg border-2 border-ink/15 bg-cream-dark p-2">
                 <p class="text-xs text-gray-500">Widoczne albumy</p>
-                <p class="font-heading text-2xl text-ink mt-1">{{ visibleAlbums() }}</p>
+                <p class="font-heading text-xl text-ink mt-0.5">{{ visibleAlbums() }}</p>
               </div>
-              <div class="rounded-lg border-2 border-ink/15 bg-cream-dark p-3">
+              <div class="rounded-lg border-2 border-ink/15 bg-cream-dark p-2">
                 <p class="text-xs text-gray-500">Dokumenty</p>
-                <p class="font-heading text-2xl text-ink mt-1">{{ stats().documents }}</p>
+                <p class="font-heading text-xl text-ink mt-0.5">{{ stats().documents }}</p>
               </div>
-              <div class="rounded-lg border-2 border-ink/15 bg-cream-dark p-3">
+              <div class="rounded-lg border-2 border-ink/15 bg-cream-dark p-2">
                 <p class="text-xs text-gray-500">Zdjęcia</p>
-                <p class="font-heading text-2xl text-ink mt-1">{{ stats().images }}</p>
+                <p class="font-heading text-xl text-ink mt-0.5">{{ stats().images }}</p>
               </div>
             </div>
           </div>
 
-          <div class="comic-card !p-5">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="font-heading text-xl text-orange-primary">Wymaga uwagi</h2>
+          <div class="comic-card !p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-heading text-lg text-orange-primary">Wymaga uwagi</h2>
               <span class="text-xs text-gray-500">Szybki przegląd</span>
             </div>
-            <div class="space-y-2 text-sm">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <a [routerLink]="base() + '/aktualnosci'" class="flex items-center justify-between gap-4 rounded-lg border-2 border-ink/10 px-3 py-2 hover:bg-cream-dark transition-colors">
                 <span>Szkice aktualności</span>
                 <span class="font-heading text-lg text-orange-primary">{{ draftNews() }}</span>
@@ -188,6 +199,8 @@ export class DashboardComponent implements OnInit {
 
   base = () =>
     '/' + (this.adminState.secret() || this.route.snapshot.paramMap.get('secret') || '');
+
+  user = () => this.fb.user();
 
   dashboardStats = () => [
     { label: 'Aktualności', value: this.stats().news },
@@ -250,7 +263,7 @@ export class DashboardComponent implements OnInit {
   }
 
   visibleAuditLogs(): AuditLog[] {
-    return this.showAllAuditLogs() ? this.auditLogs() : this.auditLogs().slice(0, 5);
+    return this.showAllAuditLogs() ? this.auditLogs() : this.auditLogs().slice(0, 3);
   }
 
   actionLabel(action: AuditLog['action']): string {

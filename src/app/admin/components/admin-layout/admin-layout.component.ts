@@ -8,8 +8,8 @@ import { AdminStateService } from '../../../core/services/admin-state.service';
   standalone: true,
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
-    <div class="admin-panel min-h-screen bg-cream flex">
-      <aside class="hidden lg:flex w-64 bg-dark text-white flex-col shrink-0">
+    <div class="admin-panel min-h-screen bg-cream">
+      <aside class="hidden lg:flex w-64 bg-dark text-white flex-col shrink-0 fixed inset-y-0 left-0">
         <div class="p-6 border-b border-gray-800">
           <div class="flex items-center gap-3">
             <img
@@ -48,29 +48,9 @@ import { AdminStateService } from '../../../core/services/admin-state.service';
         </div>
       </aside>
 
-      <div class="flex-1 flex flex-col min-w-0">
-        <header class="bg-surface border-b border-ink/10 px-4 lg:px-8 py-4 flex items-center justify-between lg:justify-end">
-          @if (user()) {
-            <div class="flex items-center gap-3 lg:hidden">
-              <button (click)="mobileNav.set(!mobileNav())" class="p-2 border-2 border-ink rounded-lg" aria-label="Menu">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-              </button>
-              <span class="font-heading font-bold">Panel admina</span>
-            </div>
-            <div class="flex items-center gap-3">
-              <div class="text-right hidden sm:block">
-                <p class="text-sm font-semibold">{{ user()?.email }}</p>
-                <p class="text-xs text-gray-500">zalogowany jako Administrator</p>
-              </div>
-              <div class="w-10 h-10 rounded-full border-2 border-ink bg-petrol text-white flex items-center justify-center font-heading font-bold">
-                {{ (user()?.email ?? '').charAt(0).toUpperCase() }}
-              </div>
-            </div>
-          }
-        </header>
-
+      <div class="min-h-screen flex flex-col lg:pl-64">
         @if (mobileNav()) {
-          <nav class="lg:hidden bg-surface border-b border-ink/10 p-4 space-y-1">
+          <nav class="lg:hidden bg-surface border-b border-ink/10 p-4 space-y-1 -mt-0">
             @for (item of navItems(); track item.path) {
               <a
                 [routerLink]="item.path"
@@ -87,7 +67,14 @@ import { AdminStateService } from '../../../core/services/admin-state.service';
           </nav>
         }
 
-        <main class="admin-content flex-1 p-4 lg:p-8">
+        <main class="admin-content flex-1 p-4 lg:p-8 relative">
+          @if (user()) {
+            <div class="flex justify-end lg:hidden mb-4">
+              <button (click)="mobileNav.set(!mobileNav())" class="p-2 border-2 border-ink rounded-lg" aria-label="Menu">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              </button>
+            </div>
+          }
           <router-outlet />
         </main>
       </div>

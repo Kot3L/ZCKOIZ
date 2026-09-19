@@ -176,7 +176,7 @@ export class FirebaseService {
     }
   }
 
-  listRecentAuditLogs = (max = 25) => this.listLimited<AuditLog>('audit_logs', 'created_at', false, max);
+  listRecentAuditLogs = (max = 20) => this.listLimited<AuditLog>('audit_logs', 'created_at', false, max);
   listRecentNews = (max = 10) =>
     this.listLimited<News>('news', 'created_at', false, max).then((xs) => xs.map((n) => this.cleanNewsPdf(n)));
 
