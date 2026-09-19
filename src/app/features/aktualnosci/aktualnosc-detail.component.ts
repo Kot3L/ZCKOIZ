@@ -42,8 +42,8 @@ import { dataUrlToBlobUrl, fileNameFromUrl } from '../../shared/utils/pdf.utils'
           </header>
 
           @if (item()!.cover_image_url) {
-            <figure class="mb-10">
-              <img [src]="item()!.cover_image_url" [alt]="item()!.title" class="w-full max-h-[26rem] object-cover rounded-xl" />
+            <figure class="mb-10 max-h-[32rem] overflow-hidden rounded-xl bg-cream-dark flex justify-center">
+              <img [src]="item()!.cover_image_url" [alt]="item()!.title" class="w-full h-auto max-h-[32rem] object-contain" />
             </figure>
           }
 
@@ -54,8 +54,8 @@ import { dataUrlToBlobUrl, fileNameFromUrl } from '../../shared/utils/pdf.utils'
           @if (item()!.content_images?.length) {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
               @for (imgUrl of item()!.content_images; track imgUrl) {
-                <figure class="overflow-hidden rounded-xl">
-                  <img [src]="imgUrl" [alt]="item()!.title" class="w-full max-h-[26rem] object-cover" loading="lazy" />
+                <figure class="overflow-hidden rounded-xl bg-cream-dark flex justify-center">
+                  <img [src]="imgUrl" [alt]="item()!.title" class="w-full max-h-[26rem] object-contain" loading="lazy" />
                 </figure>
               }
             </div>
@@ -103,7 +103,7 @@ import { dataUrlToBlobUrl, fileNameFromUrl } from '../../shared/utils/pdf.utils'
               <h2 class="font-heading text-2xl text-ink mb-6">Galeria zdjęć</h2>
               <div class="relative overflow-hidden rounded-xl bg-cream-dark">
                 <div class="relative h-72 md:h-[28rem]">
-                  <img [src]="galleryImages()[currentImage()].image_url" [alt]="item()!.title" class="w-full h-full object-cover" />
+                  <img [src]="galleryImages()[currentImage()].image_url" [alt]="item()!.title" class="w-full h-full object-contain bg-cream-dark" />
                   @if (galleryImages().length > 1) {
                     <button (click)="prevImage()" aria-label="Poprzednie zdjęcie"
                       class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/85 text-ink rounded-full flex items-center justify-center shadow hover:bg-white transition-colors">
@@ -125,7 +125,7 @@ import { dataUrlToBlobUrl, fileNameFromUrl } from '../../shared/utils/pdf.utils'
                     <button (click)="currentImage.set(i)"
                       [class]="i === currentImage() ? 'ring-2 ring-petrol opacity-100' : 'opacity-60 hover:opacity-100'"
                       class="w-16 h-14 rounded-lg overflow-hidden transition-all">
-                      <img [src]="img.image_url" class="w-full h-full object-cover" alt="Miniatura" />
+                      <img [src]="img.image_url" class="w-full h-full object-contain bg-cream-dark" alt="Miniatura" />
                     </button>
                   }
                 </div>

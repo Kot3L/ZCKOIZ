@@ -110,8 +110,8 @@ import { SCHOOL_PAGES, DEFAULT_SCHOOL_MENU, SchoolPage } from './school-content'
                 @if (section.images && section.images.length > 0) {
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                     @for (image of section.images; track image) {
-                      <figure class="overflow-hidden rounded-xl border-2 border-ink shadow-[3px_3px_0_var(--color-ink)]">
-                        <img [src]="image" [alt]="section.heading" class="w-full max-h-[26rem] object-cover" loading="lazy" />
+                      <figure class="overflow-hidden rounded-xl border-2 border-ink shadow-[3px_3px_0_var(--color-ink)] bg-cream-dark flex justify-center">
+                        <img [src]="image" [alt]="section.heading" class="w-full max-h-[26rem] object-contain" loading="lazy" />
                       </figure>
                     }
                   </div>

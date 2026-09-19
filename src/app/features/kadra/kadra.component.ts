@@ -50,7 +50,7 @@ import { Staff } from '../../core/models/database.types';
                     <div class="relative w-28 h-28 mx-auto mb-4 overflow-hidden rounded-full border-3 border-ink bg-petrol flex items-center justify-center text-white font-heading text-4xl">
                       {{ initial(member.full_name) }}
                       @if (member.photo_url && !failedPhotos().has(member.id)) {
-                        <img [src]="member.photo_url" [alt]="member.full_name" (error)="onPhotoError(member.id)" class="absolute inset-0 w-full h-full object-cover" />
+                        <img [src]="member.photo_url" [alt]="member.full_name" (error)="onPhotoError(member.id)" class="absolute inset-0 w-full h-full object-contain" />
                       }
                     </div>
                     <h3 class="font-heading text-lg text-ink mb-1">{{ member.full_name }}</h3>
@@ -73,7 +73,7 @@ import { Staff } from '../../core/models/database.types';
                     <div class="relative w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full border-3 border-ink bg-petrol flex items-center justify-center text-white font-heading text-3xl">
                       {{ initial(teacher.full_name) }}
                       @if (teacher.photo_url && !failedPhotos().has(teacher.id)) {
-                        <img [src]="teacher.photo_url" [alt]="teacher.full_name" (error)="onPhotoError(teacher.id)" class="absolute inset-0 w-full h-full object-cover" />
+                        <img [src]="teacher.photo_url" [alt]="teacher.full_name" (error)="onPhotoError(teacher.id)" class="absolute inset-0 w-full h-full object-contain" />
                       }
                     </div>
                     <h3 class="font-heading text-lg text-ink mb-1">{{ teacher.full_name }}</h3>

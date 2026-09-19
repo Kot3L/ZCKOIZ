@@ -44,7 +44,7 @@ import { GalleryAlbum, GalleryImage } from '../../core/models/database.types';
                   [src]="img.image_url"
                   [alt]="img.caption || album()!.title"
                   loading="lazy"
-                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  class="w-full h-full object-contain bg-cream-dark group-hover:scale-105 transition-transform duration-300"
                 />
               </button>
             } @empty {

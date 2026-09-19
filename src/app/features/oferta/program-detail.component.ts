@@ -53,11 +53,6 @@ import { Program } from '../../core/models/database.types';
 
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
-              @if (program()!.cover_image_url) {
-                <div class="overflow-hidden rounded-lg border-2 border-ink shadow-[3px_3px_0_var(--color-ink)] bg-cream-dark">
-                  <img [src]="program()!.cover_image_url" [alt]="'Zdjęcie kierunku ' + program()!.title" class="w-full max-h-80 object-cover" />
-                </div>
-              }
               <div class="comic-card">
                 <h2 class="font-heading text-2xl text-orange-primary mb-4">Opis kierunku</h2>
                 <p class="text-gray-700 leading-relaxed whitespace-pre-line">{{ program()!.description }}</p>
@@ -82,6 +77,11 @@ import { Program } from '../../core/models/database.types';
                   Kontakt
                 </a>
               </div>
+              @if (program()!.cover_image_url) {
+                <div class="overflow-hidden rounded-lg border-2 border-ink shadow-[3px_3px_0_var(--color-ink)] bg-cream-dark aspect-[4/3]">
+                  <img [src]="program()!.cover_image_url" [alt]="'Zdjęcie kierunku ' + program()!.title" class="w-full h-full object-contain" />
+                </div>
+              }
             </div>
           </div>
         </div>

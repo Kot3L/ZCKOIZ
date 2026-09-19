@@ -14,7 +14,7 @@ import { News } from '../../../core/models/database.types';
           <img
             [src]="news().cover_image_url"
             [alt]="news().title"
-            class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+            class="w-full h-48 object-contain bg-cream-dark group-hover:scale-105 transition-transform duration-300" />
         </div>
       }
       <div class="flex items-center gap-2 mb-2">
