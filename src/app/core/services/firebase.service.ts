@@ -26,6 +26,7 @@ import {
   startAfter,
   Timestamp,
   DocumentSnapshot,
+  getCountFromServer,
 } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { environment } from '../../../environments/environment';
@@ -132,6 +133,52 @@ export class FirebaseService {
       return [];
     }
   }
+
+  private async countWhere(coll: string, field: string, value: unknown): Promise<number> {
+    try {
+      const q = query(collection(this.ready.db, coll), where(field, '==', value));
+      const snap = await getCountFromServer(q);
+      return snap.data().count;
+    } catch (error) {
+      console.warn(`Nie udało się zliczyć kolekcji ${coll}.`, error);
+      return 0;
+    }
+  }
+
+  private async countCollection(coll: string): Promise<number> {
+    try {
+      const snap = await getCountFromServer(collection(this.ready.db, coll));
+      return snap.data().count;
+    } catch (error) {
+      console.warn(`Nie udało się zliczyć kolekcji ${coll}.`, error);
+      return 0;
+    }
+  }
+
+  countNewsTotal = () => this.countCollection('news');
+  countNewsPublished = () => this.countWhere('news', 'status', 'published');
+  countProgramsTotal = () => this.countCollection('programs');
+  countProgramsActive = (active = true) => this.countWhere('programs', 'is_active', active);
+  countAlbumsTotal = () => this.countCollection('gallery_albums');
+  countDocumentsTotal = () => this.countCollection('documents');
+  countStaffTotal = () => this.countCollection('staff');
+  countImagesByAlbum = (albumId: string) => this.countWhere('gallery_images', 'album_id', albumId);
+  countImagesTotal = () => this.countCollection('gallery_images');
+
+  private async listLimited<T>(coll: string, order: string, asc: boolean, max: number): Promise<T[]> {
+    try {
+      const q = query(collection(this.ready.db, coll), orderBy(order, asc ? 'asc' : 'desc'), limit(max));
+      const xs = await getDocs(q);
+      return xs.docs.map((d) => this.mapDoc<T>(d));
+    } catch (error) {
+      console.warn(`Nie udało się odczytać kolekcji ${coll}.`, error);
+      return [];
+    }
+  }
+
+  listRecentAuditLogs = (max = 25) => this.listLimited<AuditLog>('audit_logs', 'created_at', false, max);
+  listRecentNews = (max = 10) =>
+    this.listLimited<News>('news', 'created_at', false, max).then((xs) => xs.map((n) => this.cleanNewsPdf(n)));
 
   private async get<T>(coll: string, id: string): Promise<T | null> {
     try {

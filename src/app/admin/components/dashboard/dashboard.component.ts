@@ -177,10 +177,7 @@ export class DashboardComponent implements OnInit {
   recentNews = signal<any[]>([]);
   auditLogs = signal<AuditLog[]>([]);
   showAllAuditLogs = signal(false);
-  allNews = signal<any[]>([]);
-  programs = signal<any[]>([]);
   albums = signal<any[]>([]);
-  images = signal<any[]>([]);
   loading = signal(true);
 
   constructor(
@@ -201,37 +198,51 @@ export class DashboardComponent implements OnInit {
     { label: 'Kadra', value: this.stats().staff },
   ];
 
-  activePrograms = () => this.programs().filter((program) => program.is_active).length;
-  inactivePrograms = () => this.programs().filter((program) => !program.is_active).length;
+  activePrograms = () => this.programsActive;
+  inactivePrograms = () => this.programsInactive;
   visibleAlbums = () => this.albums().filter((album) => album.is_visible !== false).length;
-  emptyAlbums = () => this.albums().filter((album) => !this.images().some((image) => image.album_id === album.id)).length;
-  draftNews = () => this.allNews().filter((news) => news.status !== 'published').length;
+  emptyAlbums = () => this.emptyAlbumCount;
+  draftNews = () => this.draftNewsCount;
+
+  private programsActive = 0;
+  private programsInactive = 0;
+  private emptyAlbumCount = 0;
+  private draftNewsCount = 0;
 
   async ngOnInit() {
     try {
-      const [news, programs, albums, images, docs, staff, auditLogs] = await Promise.all([
-        this.fb.listNews(),
-        this.fb.listPrograms(),
+      const [newsTotal, newsPublished, programsTotal, programsActive, albums, albumsTotal, images, documents, staff, auditLogs] = await Promise.all([
+        this.fb.countNewsTotal(),
+        this.fb.countNewsPublished(),
+        this.fb.countProgramsTotal(),
+        this.fb.countProgramsActive(),
         this.fb.listAlbums(),
-        this.fb.listAllImages(),
-        this.fb.listDocuments(),
-        this.fb.listStaff(),
-        this.fb.listAuditLogs(),
+        this.fb.countAlbumsTotal(),
+        this.fb.countImagesTotal(),
+        this.fb.countDocumentsTotal(),
+        this.fb.countStaffTotal(),
+        this.fb.listRecentAuditLogs(),
       ]);
 
+      this.programsActive = programsActive;
+      this.programsInactive = Math.max(0, programsTotal - programsActive);
+      this.draftNewsCount = Math.max(0, newsTotal - newsPublished);
+      this.emptyAlbumCount = 0;
+      for (const album of albums) {
+        const count = await this.fb.countImagesByAlbum(album.id);
+        if (count === 0) this.emptyAlbumCount++;
+      }
+
       this.stats.set({
-        news: news.length,
-        programs: programs.length,
-        albums: albums.length,
-        images: images.length,
-        documents: docs.length,
-        staff: staff.length,
+        news: newsTotal,
+        programs: programsTotal,
+        albums: albumsTotal,
+        images,
+        documents,
+        staff,
       });
-      this.programs.set(programs);
       this.albums.set(albums);
-      this.images.set(images);
-      this.allNews.set(news);
-      this.recentNews.set(news.slice(0, 5));
+      this.recentNews.set(await this.fb.listRecentNews(5));
       this.auditLogs.set(auditLogs);
     } finally {
       this.loading.set(false);
