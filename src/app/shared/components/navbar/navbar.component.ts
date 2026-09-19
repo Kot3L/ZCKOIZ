@@ -52,27 +52,29 @@ import { DEFAULT_SCHOOL_MENU } from '../../../features/szkola/school-content';
                 [class.panel-open]="schoolOpen()"
                 (mouseenter)="openSchool()"
                 (mouseleave)="onSchoolPartLeave($event)">
-                <div class="grid grid-cols-2 gap-x-8 gap-y-6">
-                  @for (group of schoolMenu(); track group.heading) {
-                    <div>
-                      <h4 class="text-xs font-heading font-bold uppercase tracking-widest text-petrol mb-3 whitespace-nowrap">{{ group.heading }}</h4>
-                      <ul class="space-y-1">
-                        @for (item of group.items; track item.url) {
-                          <li>
-                            @if (item.external) {
-                              <a [href]="item.url" target="_blank" rel="noopener" (click)="closeSchool()"
-                                class="block px-2 py-1.5 rounded-md text-sm text-ink hover:bg-cream-dark hover:text-orange-primary transition-colors whitespace-nowrap">
-                                {{ item.label }}
-                              </a>
-                            } @else {
-                              <a [routerLink]="item.url" class="block px-2 py-1.5 rounded-md text-sm text-ink hover:bg-cream-dark hover:text-orange-primary transition-colors whitespace-nowrap">
-                                {{ item.label }}
-                              </a>
-                            }
-                          </li>
-                        }
-                      </ul>
-                    </div>
+                <div class="grid gap-x-3 gap-y-3">
+                  @if (schoolMenuLoaded()) {
+                    @for (group of schoolMenu(); track group.heading) {
+                      <div>
+                        <h4 class="text-xs font-heading font-bold uppercase tracking-widest text-petrol mb-3 whitespace-nowrap">{{ group.heading }}</h4>
+                        <ul class="space-y-1">
+                          @for (item of group.items; track item.url) {
+                            <li>
+                              @if (item.external) {
+                                <a [href]="item.url" target="_blank" rel="noopener" (click)="closeSchool()"
+                                  class="block px-2 py-1.5 rounded-md text-sm text-ink hover:bg-cream-dark hover:text-orange-primary transition-colors whitespace-nowrap">
+                                  {{ item.label }}
+                                </a>
+                              } @else {
+                                <a [routerLink]="item.url" class="block px-2 py-1.5 rounded-md text-sm text-ink hover:bg-cream-dark hover:text-orange-primary transition-colors whitespace-nowrap">
+                                  {{ item.label }}
+                                </a>
+                              }
+                            </li>
+                          }
+                        </ul>
+                      </div>
+                    }
                   }
                 </div>
               </div>
@@ -186,15 +188,17 @@ import { DEFAULT_SCHOOL_MENU } from '../../../features/szkola/school-content';
             </button>
             @if (schoolMobileOpen()) {
               <div class="pl-4 space-y-1 border-l-2 border-ink/10 ml-2">
-                @for (group of schoolMenu(); track group.heading) {
-                  <p class="text-xs font-heading font-bold uppercase tracking-widest text-petrol pt-2 pb-1">{{ group.heading }}</p>
-                  @for (item of group.items; track item.url) {
-                    @if (item.external) {
-                      <a [href]="item.url" target="_blank" rel="noopener" (click)="mobileOpen.set(false)"
-                        class="block px-4 py-2 rounded-lg text-sm hover:bg-cream-dark transition-colors">{{ item.label }}</a>
-                    } @else {
-                      <a [routerLink]="item.url"
-                        class="block px-4 py-2 rounded-lg text-sm hover:bg-cream-dark transition-colors">{{ item.label }}</a>
+                @if (schoolMenuLoaded()) {
+                  @for (group of schoolMenu(); track group.heading) {
+                    <p class="text-xs font-heading font-bold uppercase tracking-widest text-petrol pt-2 pb-1">{{ group.heading }}</p>
+                    @for (item of group.items; track item.url) {
+                      @if (item.external) {
+                        <a [href]="item.url" target="_blank" rel="noopener" (click)="mobileOpen.set(false)"
+                          class="block px-4 py-2 rounded-lg text-sm hover:bg-cream-dark transition-colors">{{ item.label }}</a>
+                      } @else {
+                        <a [routerLink]="item.url"
+                          class="block px-4 py-2 rounded-lg text-sm hover:bg-cream-dark transition-colors">{{ item.label }}</a>
+                      }
                     }
                   }
                 }
@@ -231,6 +235,7 @@ export class NavbarComponent implements OnInit {
   private fb = inject(FirebaseService);
 
   schoolMenu = signal<SchoolMenuGroup[]>(DEFAULT_SCHOOL_MENU);
+  schoolMenuLoaded = signal(false);
 
   constructor() {
     this.router.events.subscribe((event) => {
@@ -254,6 +259,8 @@ export class NavbarComponent implements OnInit {
       }
     } catch {
       this.schoolMenu.set(DEFAULT_SCHOOL_MENU);
+    } finally {
+      this.schoolMenuLoaded.set(true);
     }
   }
 

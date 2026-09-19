@@ -421,7 +421,8 @@ html.font-largest {
     border-radius: 0 0 16px 18px / 0 0 18px 16px;
     box-shadow: 5px 5px 0 var(--color-ink);
     padding: 1.5rem;
-    min-width: 520px;
+    width: max-content;
+    max-width: calc(100vw - 2rem);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
