@@ -127,6 +127,8 @@ export interface OrgDateEntry {
 export interface Organization {
   wazne_daty: OrgDateEntry[];
   dni_wolne: OrgDateEntry[];
+  rozklad_materialu: string[];
+  samorzad: string[];
 }
 
 export interface RecruitmentStep {

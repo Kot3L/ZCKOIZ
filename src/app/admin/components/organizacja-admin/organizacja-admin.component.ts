@@ -59,7 +59,6 @@ const SETTING_KEY = 'organizacja';
         <section>
           <div class="flex items-center justify-between mb-1">
             <h2 class="font-heading text-xl text-orange-primary">Dni wolne</h2>
-            <button type="button" (click)="addDniWolne()" class="comic-btn-primary text-xs py-1.5 px-3">Dodaj dzień</button>
           </div>
           <p class="text-sm text-gray-500 mb-4">Numerowana lista artykułów z datami.</p>
           <div class="space-y-4">
@@ -96,8 +95,39 @@ const SETTING_KEY = 'organizacja';
           </div>
         </section>
 
+        <section>
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="font-heading text-xl text-orange-primary">Rozkład materiału</h2>
+            <button type="button" (click)="addRozkladMaterialu()" class="comic-btn-primary text-xs py-1.5 px-3">Dodaj punkt</button>
+          </div>
+          <div class="space-y-3">
+            @for (item of rozkladMaterialu(); track $index) {
+              <div class="flex items-center gap-3">
+                <textarea [(ngModel)]="rozkladMaterialu()[$index]" name="rm_{{ $index }}" rows="2" autoResize class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg"></textarea>
+                <button type="button" (click)="removeRozkladMaterialu($index)" class="comic-btn-danger text-sm !py-2 !px-3">Usuń</button>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section>
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="font-heading text-xl text-orange-primary">Samorząd uczniowski</h2>
+            <button type="button" (click)="addSamorzad()" class="comic-btn-primary text-xs py-1.5 px-3">Dodaj punkt</button>
+          </div>
+          <div class="space-y-3">
+            @for (item of samorzad(); track $index) {
+              <div class="flex items-center gap-3">
+                <textarea [(ngModel)]="samorzad()[$index]" name="samorzad_{{ $index }}" rows="2" autoResize class="flex-1 px-4 py-2.5 border-2 border-ink rounded-lg"></textarea>
+                <button type="button" (click)="removeSamorzad($index)" class="comic-btn-danger text-sm !py-2 !px-3">Usuń</button>
+              </div>
+            }
+          </div>
+        </section>
+
         <div class="flex items-center gap-3 pt-2">
           <button (click)="save()" class="comic-btn-primary text-sm">Zapisz zmiany</button>
+          <button type="button" (click)="addDniWolne()" class="comic-btn-primary text-xs py-1.5 px-3">Dodaj dzień</button>
         </div>
       </div>
       }
@@ -107,6 +137,8 @@ const SETTING_KEY = 'organizacja';
 export class OrganizacjaAdminComponent implements OnInit {
   wazneDaty = signal<OrgDateEntry[]>([]);
   dniWolne = signal<OrgDateEntry[]>([]);
+  rozkladMaterialu = signal<string[]>([]);
+  samorzad = signal<string[]>([]);
   message = signal<string | null>(null);
   messageType = signal<'success' | 'error'>('success');
   loading = signal(true);
@@ -131,6 +163,8 @@ export class OrganizacjaAdminComponent implements OnInit {
       }
       this.wazneDaty.set(data?.wazne_daty?.length ? data.wazne_daty : this.defaultWazneDaty());
       this.dniWolne.set(data?.dni_wolne?.length ? data.dni_wolne : this.defaultDniWolne());
+      this.rozkladMaterialu.set(data?.rozklad_materialu?.length ? data.rozklad_materialu : this.defaultRozkladMaterialu());
+      this.samorzad.set(data?.samorzad?.length ? data.samorzad : this.defaultSamorzad());
     } catch (e: any) {
       this.setMessage('Błąd ładowania: ' + (e.message ?? e), 'error');
     } finally {
@@ -183,6 +217,22 @@ export class OrganizacjaAdminComponent implements OnInit {
     ];
   }
 
+  defaultRozkladMaterialu(): string[] {
+    return [
+      'Kalendarz roku szkolnego i organizacja zajęć lekcyjnych.',
+      'Zmiany organizacyjne i informacje o planie zajęć.',
+      'Terminy egzaminów, sprawdzianów i konsultacji.',
+    ];
+  }
+
+  defaultSamorzad(): string[] {
+    return [
+      'Samorząd Uczniowski reprezentuje uczniów wobec dyrekcji i grona pedagogicznego.',
+      'Opiekunowie Samorządu i spotkania z uczniami.',
+      'Działalność, inicjatywy i akcje szkolne.',
+    ];
+  }
+
   addDniWolne() {
     this.dniWolne.update((list) => [...list, { label: '', date: '', detail: '' }]);
   }
@@ -191,10 +241,17 @@ export class OrganizacjaAdminComponent implements OnInit {
     this.dniWolne.update((list) => list.filter((_, i) => i !== index));
   }
 
+  addRozkladMaterialu() { this.rozkladMaterialu.update((list) => [...list, '']); }
+  removeRozkladMaterialu(index: number) { this.rozkladMaterialu.update((list) => list.filter((_, i) => i !== index)); }
+  addSamorzad() { this.samorzad.update((list) => [...list, '']); }
+  removeSamorzad(index: number) { this.samorzad.update((list) => list.filter((_, i) => i !== index)); }
+
   async save() {
     const data: Organization = {
       wazne_daty: this.wazneDaty(),
       dni_wolne: this.dniWolne(),
+      rozklad_materialu: this.rozkladMaterialu(),
+      samorzad: this.samorzad(),
     };
     try {
       const existing = await this.fb.getSetting(SETTING_KEY);

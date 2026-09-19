@@ -45,6 +45,16 @@ const DEFAULT_ORGANIZACJA: Organization = {
       detail: 'Dni wolne od zajęć lekcyjnych ustalone rozporządzeniem i decyzją dyrektora szkoły.',
     },
   ],
+  rozklad_materialu: [
+    'Kalendarz roku szkolnego i organizacja zajęć lekcyjnych.',
+    'Zmiany organizacyjne i informacje o planie zajęć.',
+    'Terminy egzaminów, sprawdzianów i konsultacji.',
+  ],
+  samorzad: [
+    'Samorząd Uczniowski reprezentuje uczniów wobec dyrekcji i grona pedagogicznego.',
+    'Opiekunowie Samorządu i spotkania z uczniami.',
+    'Działalność, inicjatywy i akcje szkolne.',
+  ],
 };
 
 @Component({
@@ -118,24 +128,14 @@ const DEFAULT_ORGANIZACJA: Organization = {
             <div class="comic-card !p-6">
               <h2 class="font-heading text-xl text-orange-primary mb-4">Rozkład materiału</h2>
               <ul class="space-y-2 text-ink">
-                <li class="flex items-start gap-3">
-                  <svg class="w-5 h-5 mt-0.5 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>Kalendarz roku szkolnego i organizacja zajęć lekcyjnych.</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <svg class="w-5 h-5 mt-0.5 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>Zmiany organizacyjne i informacje o planie zajęć.</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <svg class="w-5 h-5 mt-0.5 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>Terminy egzaminów, sprawdzianów i konsultacji.</span>
-                </li>
+                @for (item of data().rozklad_materialu; track $index) {
+                  <li class="flex items-start gap-3">
+                    <svg class="w-5 h-5 mt-0.5 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>{{ item }}</span>
+                  </li>
+                }
               </ul>
             </div>
 
@@ -143,24 +143,14 @@ const DEFAULT_ORGANIZACJA: Organization = {
             <div class="comic-card !p-6">
               <h2 class="font-heading text-xl text-orange-primary mb-4">Samorząd uczniowski</h2>
               <ul class="space-y-2 text-ink">
-                <li class="flex items-start gap-3">
-                  <svg class="w-5 h-5 mt-0.5 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                  </svg>
-                  <span>Samorząd Uczniowski reprezentuje uczniów wobec dyrekcji i grona pedagogicznego.</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <svg class="w-5 h-5 mt-0.5 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>Opiekunowie Samorządu i spotkania z uczniami.</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <svg class="w-5 h-5 mt-0.5 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span>Działalność, inicjatywy i akcje szkolne.</span>
-                </li>
+                @for (item of data().samorzad; track $index) {
+                  <li class="flex items-start gap-3">
+                    <svg class="w-5 h-5 mt-0.5 text-petrol shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>{{ item }}</span>
+                  </li>
+                }
               </ul>
             </div>
           </div>
@@ -192,7 +182,12 @@ export class OrganizacjaRokuComponent implements OnInit {
         try {
           const parsed = JSON.parse(setting.value) as Organization;
           if (parsed && Array.isArray(parsed.wazne_daty) && Array.isArray(parsed.dni_wolne)) {
-            this.data.set(parsed);
+            this.data.set({
+              ...DEFAULT_ORGANIZACJA,
+              ...parsed,
+              rozklad_materialu: Array.isArray(parsed.rozklad_materialu) ? parsed.rozklad_materialu : DEFAULT_ORGANIZACJA.rozklad_materialu,
+              samorzad: Array.isArray(parsed.samorzad) ? parsed.samorzad : DEFAULT_ORGANIZACJA.samorzad,
+            });
           }
         } catch {
           this.data.set(DEFAULT_ORGANIZACJA);
