@@ -8,7 +8,7 @@ import { News } from '../../../core/models/database.types';
   standalone: true,
   imports: [RouterLink, DatePipe],
   template: `
-    <a [routerLink]="['/aktualnosci', news().slug]" class="comic-card block group overflow-hidden">
+    <a [routerLink]="[baseRoute(), news().slug]" class="comic-card block group overflow-hidden">
       @if (news().cover_image_url) {
         <div class="overflow-hidden -mx-6 -mt-6 mb-4 border-b-2 border-ink">
           <img
@@ -38,4 +38,5 @@ import { News } from '../../../core/models/database.types';
 })
 export class NewsCardComponent {
   news = input.required<News>();
+  baseRoute = input<string>('/aktualnosci');
 }

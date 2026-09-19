@@ -33,6 +33,7 @@ import { CookieConsentService } from './cookie-consent.service';
 import {
   News,
   NewsPdf,
+  EducationArticle,
   Program,
   GalleryAlbum,
   GalleryImage,
@@ -180,6 +181,7 @@ export class FirebaseService {
     const trackedCollections = new Set([
       'news', 'programs', 'documents', 'gallery_albums', 'gallery_images',
       'staff', 'school_pages', 'school_menu', 'settings', 'hero_slides',
+      'education_articles',
     ]);
     if (!trackedCollections.has(coll)) return;
 
@@ -306,6 +308,71 @@ export class FirebaseService {
       await this.remove(coll, existing.id);
     }
     await this.remove('news_pdfs', newsId);
+  }
+
+  // =====================================================================
+  // EDUCATION ARTICLES (edukacja mundurowa — jak aktualności)
+  // =====================================================================
+  listPublishedEducationArticles = () => this.list<EducationArticle>('education_articles', 'published_at', false).then((xs) =>
+    xs.filter((n) => n.status === 'published').map((n) => this.cleanEducationPdf(n)),
+  );
+
+  listEducationArticles = () => this.list<EducationArticle>('education_articles', 'created_at', false).then((xs) => xs.map((n) => this.cleanEducationPdf(n)));
+
+  /** Usuwa ewentualny base64 zapisany kiedyś w pdf_url (PDF trzymamy w osobnej kolekcji). */
+  private cleanEducationPdf(n: EducationArticle): EducationArticle {
+    if (n.pdf_url && n.pdf_url.startsWith('data:')) {
+      return { ...n, pdf_url: null };
+    }
+    return n;
+  }
+  getEducationArticle = (id: string) => this.get<EducationArticle>('education_articles', id).then((n) => (n ? this.cleanEducationPdf(n) : n));
+  getEducationArticleBySlug = (slug: string) =>
+    this.listWhere<EducationArticle>('education_articles', 'slug', slug).then((x) => (x[0] ? this.cleanEducationPdf(x[0]) : null));
+  saveEducationArticle = (data: Partial<EducationArticle>, id?: string) => this.save('education_articles', data as any, id);
+  deleteEducationArticle = (id: string) => this.remove('education_articles', id);
+  async deleteEducationArticleSafe(id: string) {
+    await this.remove('education_articles', id);
+    await this.deleteEducationPdf(id);
+  }
+
+  async saveEducationPdf(articleId: string, dataUrl: string, name: string): Promise<void> {
+    const comma = dataUrl.indexOf(',');
+    const prefix = comma >= 0 ? dataUrl.slice(0, comma + 1) : 'data:application/pdf;base64,';
+    const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+    const chunkSize = FirebaseService.PDF_CHUNK_SIZE;
+    const chunks: string[] = [];
+    for (let i = 0; i < base64.length; i += chunkSize) {
+      chunks.push(base64.slice(i, i + chunkSize));
+    }
+
+    const coll = `education_pdfs/${articleId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    for (let i = 0; i < chunks.length; i++) {
+      await this.save(coll, { index: i, data: chunks[i] } as any, String(i));
+    }
+    await this.save('education_pdfs', { name, prefix, chunks: chunks.length } as any, articleId);
+  }
+
+  async getEducationPdf(articleId: string): Promise<DocumentPdf | null> {
+    const meta = await this.get<DocumentPdf & { chunks?: number; prefix?: string }>('education_pdfs', articleId);
+    if (!meta) return null;
+    const parts = await this.list<{ index: number; data: string }>(`education_pdfs/${articleId}/chunks`, 'index');
+    const data = parts
+      .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+      .map((part) => part.data)
+      .join('');
+    return { id: articleId, data: (meta.prefix ?? 'data:application/pdf;base64,') + data, name: meta.name };
+  }
+
+  async deleteEducationPdf(articleId: string): Promise<void> {
+    const coll = `education_pdfs/${articleId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    await this.remove('education_pdfs', articleId);
   }
 
   // =====================================================================
