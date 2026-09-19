@@ -1,0 +1,16 @@
+# SPA fallback — wszystkie trasy do index.html
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+# Nie przepisuj istniejących plików (JS, CSS, obrazki) i katalogów
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Pozostałe ścieżki (podstrony, panel admina) → index.html
+RewriteRule ^ index.html [L]
+</IfModule>
+
+# Gdyby mod_rewrite był niedostępny, zwróć błąd 404 zamiast pustej strony
+FallbackResource index.html
