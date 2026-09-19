@@ -105,7 +105,7 @@ import { News, Program, HeroSlide } from '../../core/models/database.types';
                 Technikum i&nbsp;branżowa szkoła I&nbsp;stopnia. Wybierz swój kierunek i&nbsp;rozpocznij karierę!
               </p>
               <div class="flex flex-wrap gap-4 items-center">
-                <a routerLink="/oferta" class="comic-btn-primary text-lg">
+                    <a routerLink="/oferta" class="comic-btn-primary home-offer-btn text-lg">
                   Poznaj ofertę
                 </a>
                 <a routerLink="/kontakt" class="comic-btn bg-surface text-ink border-white text-lg hover:bg-cream-dark">

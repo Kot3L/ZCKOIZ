@@ -180,6 +180,12 @@
   color: #000000;
 }
 
+.hc-bw .home-offer-btn,
+.hc-black-yellow .home-offer-btn,
+.dark .home-offer-btn {
+  border-color: #FFFFFF;
+}
+
 /* ===== Font size scaling (class on <html>) ===== */
 html.font-larger {
   font-size: 18px;
