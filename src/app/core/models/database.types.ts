@@ -143,6 +143,16 @@ export interface Recruitment {
   extra_points: string[];
 }
 
+export interface EducationPage {
+  title: string;
+  content: string;
+  cover_image_url: string | null;
+  content_images: string[];
+  youtube_urls: string[];
+  pdf_url: string | null;
+  pdf_name: string | null;
+}
+
 export interface SchoolPageLink {
   label: string;
   url: string;

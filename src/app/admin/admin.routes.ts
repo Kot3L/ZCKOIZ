@@ -52,6 +52,11 @@ export const adminRoutes: Routes = [
         canActivate: [authGuard],
         loadComponent: () => import('./components/rekrutacja-admin/rekrutacja-admin.component').then(m => m.RekrutacjaAdminComponent),
       },
+      {
+        path: 'edukacja-mundurowa',
+        canActivate: [authGuard],
+        loadComponent: () => import('./components/edukacja-mundurowa-admin/edukacja-mundurowa-admin.component').then(m => m.EdukacjaMundurowaAdminComponent),
+      },
     ],
   },
 ];

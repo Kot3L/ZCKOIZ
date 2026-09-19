@@ -84,6 +84,9 @@ import { RouterLink } from '@angular/router';
           <p class="text-gray-500 text-xs">
             &copy; {{ currentYear }} ZCKOiZ Zabrze. Wszelkie prawa zastrzeżone.
           </p>
+          <p class="text-gray-500 text-xs">
+            &copy; {{ currentYear }} Kot3L
+          </p>
         </div>
       </div>
     </footer>
