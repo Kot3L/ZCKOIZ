@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal } from '@angular/core';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
@@ -16,6 +16,7 @@ import { CookieConsentService } from './core/services/cookie-consent.service';
 })
 export class App {
   isAdminRoute = signal(false);
+  showScrollTop = signal(false);
   cookieConsent = inject(CookieConsentService);
 
   constructor(
@@ -47,5 +48,14 @@ export class App {
         description: 'Zespół Centrów Kształcenia Zawodowego w Zabrzu - Technikum i Branżowa Szkoła I Stopnia.',
       });
     }
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    this.showScrollTop.set(window.scrollY > 300);
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
