@@ -32,7 +32,7 @@ export class FontService {
     this.apply(size);
   }
 
-  /** Cycle: normal -> larger -> largest -> normal */
+  
   next(): void {
     const order: FontSize[] = ['normal', 'larger', 'largest'];
     const idx = order.indexOf(this.size());
@@ -51,7 +51,7 @@ export class FontService {
     try {
       window.localStorage.setItem(FONT_KEY, size);
     } catch {
-      /* ignore */
+      
     }
   }
 }

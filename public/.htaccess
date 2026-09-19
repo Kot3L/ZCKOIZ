@@ -1,16 +1,12 @@
-# SPA fallback - all routes served by index.html
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
 
-# Do not rewrite existing files (JS, CSS, images) and directories
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# All other paths (subpages, admin panel) -> index.html
 RewriteRule ^ index.html [L]
 </IfModule>
 
-# If mod_rewrite is unavailable, fall back to index.html
 FallbackResource index.html

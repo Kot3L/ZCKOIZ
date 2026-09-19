@@ -35,7 +35,7 @@ export class CookieConsentService {
     try {
       window.localStorage.setItem(CONSENT_KEY, value);
     } catch {
-      /* Ignore storage restrictions. */
+      
     }
   }
 }

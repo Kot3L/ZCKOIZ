@@ -86,7 +86,7 @@ const DEFAULT_ORGANIZACJA: Organization = {
             }
           </div>
         } @else {
-          <!-- Ważne daty -->
+          
           @if (data().wazne_daty.length) {
             <div class="mb-12">
               <h2 class="section-heading">Ważne daty</h2>
@@ -102,7 +102,7 @@ const DEFAULT_ORGANIZACJA: Organization = {
             </div>
           }
 
-          <!-- Dni wolne -->
+          
           @if (data().dni_wolne.length) {
             <div class="mb-12">
               <h2 class="section-heading">Dni wolne</h2>
@@ -124,7 +124,7 @@ const DEFAULT_ORGANIZACJA: Organization = {
           }
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Rozkład materiału -->
+            
             <div class="comic-card !p-6">
               <h2 class="font-heading text-xl text-orange-primary mb-4">Rozkład materiału</h2>
               <ul class="space-y-2 text-ink">
@@ -139,7 +139,7 @@ const DEFAULT_ORGANIZACJA: Organization = {
               </ul>
             </div>
 
-            <!-- Samorząd uczniowski -->
+            
             <div class="comic-card !p-6">
               <h2 class="font-heading text-xl text-orange-primary mb-4">Samorząd uczniowski</h2>
               <ul class="space-y-2 text-ink">

@@ -1,54 +1,54 @@
 @import "tailwindcss" source("./app");
 
 @theme {
-  /* ===== Brand palette (logo: white / blue / orange / yellow) ===== */
+  
 
-  /* Blue — primary brand color */
+  
   --color-blue-primary: #1D5FA8;
   --color-blue-dark: #174A85;
   --color-blue-light: #2E7BC4;
 
-  /* Primary button fill: brand blue in light mode, brighter blue in dark mode */
+  
   --color-btn-primary: #1D5FA8;
   --color-btn-primary-dark: #174A85;
-  /* Petrol tokens kept as aliases of the blue brand color */
+  
   --color-petrol: #1D5FA8;
   --color-petrol-dark: #174A85;
   --color-petrol-light: #2E7BC4;
 
-  /* Orange — warm accent */
+  
   --color-orange-primary: #E85F2A;
   --color-orange-dark: #C24A1C;
   --color-orange-light: #F08050;
 
-  /* Yellow — highlight accent */
+  
   --color-yellow-accent: #F5C842;
   --color-yellow-light: #FBE07A;
 
-  /* Star fill: vivid saturated yellow in light mode, muted in dark mode */
+  
   --color-star: #FFD300;
 
-  /* Neutrals */
+  
   --color-cream: #FDF6EC;
   --color-cream-dark: #F5EBDA;
   --color-ink: #1A1A1A;
   --color-ink-light: #4A4A4A;
 
-  /* Semantic surfaces */
+  
   --color-surface: #FFFFFF;
   --color-dark: #1A1A1A;
   --color-surface-line: #1A1A1A;
 
-  /* Hero band: brand blue in light mode, near-black in dark mode */
+  
   --color-hero: #1D5FA8;
 
-  /* Quick links bar: yellow in light mode, near-black in dark mode */
+  
   --color-quicklinks: #F5C842;
 
-  /* Quick links tiles: brand blue in light mode, dark in dark mode */
+  
   --color-tile: #1D5FA8;
 
-  /* Fonts */
+  
   --font-heading: "Oswald", "Arial Narrow", sans-serif;
   --font-body: "Inter", "Segoe UI", sans-serif;
 }
@@ -58,11 +58,11 @@
   --font-body: "Inter", "Segoe UI", sans-serif;
 }
 
-/* ===== Dark mode (class="dark" on <html>) ===== */
+
 .dark {
   color-scheme: dark;
 
-  /* Swap the themed neutrals for dark surfaces */
+  
   --color-cream: #141416;
   --color-cream-dark: #1C1C22;
   --color-ink: #F2F2F4;
@@ -76,17 +76,17 @@
   --color-btn-primary: #3B82C4;
   --color-btn-primary-dark: #2E7BC4;
 
-  /* Slightly muted tints used in highlights */
+  
   --color-orange-50: #3A2A20;
   --color-orange-100: #F6D7C8;
   --color-blue-100: #CFE0F4;
   --color-blue-950: #0D2240;
 }
 
-/* ===== High contrast modes (class on <html>) ===== */
-/* These come after .dark so the palette is fully overridden when active. */
 
-/* Black & white */
+
+
+
 .hc-bw {
   color-scheme: light;
   --color-cream: #FFFFFF;
@@ -117,7 +117,7 @@
   color: #FFFFFF;
 }
 
-/* Black background, yellow text */
+
 .hc-black-yellow {
   color-scheme: dark;
   --color-cream: #000000;
@@ -144,7 +144,7 @@
   --color-blue-950: #000000;
 }
 
-/* Yellow background, black text */
+
 .hc-yellow-black {
   color-scheme: light;
   --color-cream: #FFD300;
@@ -171,7 +171,7 @@
   --color-blue-950: #000000;
 }
 
-/* Force the primary button text for readable contrast in each mode */
+
 .hc-bw .comic-btn-primary,
 .hc-yellow-black .comic-btn-primary {
   color: #FFFFFF;
@@ -186,7 +186,7 @@
   border-color: #FFFFFF;
 }
 
-/* ===== Font size scaling (class on <html>) ===== */
+
 html.font-larger {
   font-size: 18px;
 }
@@ -224,7 +224,7 @@ html.font-largest {
 }
 
 @layer components {
-  /* ===== Comic borders (soft, near-symmetric hand-drawn feel) ===== */
+  
   .comic-border {
     border: 3px solid var(--color-ink);
     border-radius: 20px 22px 20px 22px / 22px 20px 22px 20px;
@@ -237,7 +237,7 @@ html.font-largest {
     box-shadow: 3px 3px 0 var(--color-ink);
   }
 
-  /* ===== Comic buttons ===== */
+  
   .comic-btn {
     display: inline-flex;
     align-items: center;
@@ -356,7 +356,7 @@ html.font-largest {
     transform: translate(3px, 3px) rotate(0deg);
   }
 
-  /* Compact icon button that shares the comic-btn border style */
+  
   .comic-icon-btn {
     display: inline-flex;
     align-items: center;
@@ -388,7 +388,7 @@ html.font-largest {
     border-color: var(--color-orange-primary);
   }
 
-  /* ===== Cards ===== */
+  
   .comic-card {
     border: 3px solid var(--color-surface-line);
     box-shadow: 4px 4px 0 var(--color-surface-line);
@@ -399,7 +399,7 @@ html.font-largest {
     transition: transform 200ms ease, box-shadow 200ms ease;
   }
 
-  /* inner "second pass" sketch line — subtle hand-drawn double outline */
+  
   .comic-card::after {
     content: '';
     position: absolute;
@@ -410,7 +410,7 @@ html.font-largest {
     pointer-events: none;
   }
 
-  /* ===== Navbar dropdown (Szkoła) ===== */
+  
   .dropdown-panel {
     position: absolute;
     top: 100%;
@@ -449,7 +449,7 @@ html.font-largest {
     box-shadow: 6px 6px 0 var(--color-ink);
   }
 
-  /* ===== Section heading ===== */
+  
   .section-heading {
     font-size: 1.875rem;
     line-height: 2.25rem;
@@ -481,7 +481,7 @@ html.font-largest {
     border-radius: 2px;
   }
 
-  /* ===== Halftone background ===== */
+  
   .halftone-bg {
     position: relative;
   }
@@ -497,7 +497,7 @@ html.font-largest {
     z-index: 0;
   }
 
-  /* ===== Badges ===== */
+  
   .badge {
     display: inline-block;
     padding: 0.25rem 0.75rem;
@@ -566,7 +566,7 @@ html.font-largest {
     color: white;
   }
 
-  /* ===== Speech bubble (dymek) — used in hero ===== */
+  
   .speech-bubble {
     position: relative;
     display: inline-block;
@@ -591,7 +591,7 @@ html.font-largest {
     box-shadow: 4px 4px 0 -1px var(--color-surface);
   }
 
-  /* ===== Container ===== */
+  
   .container-main {
     margin-left: auto;
     margin-right: auto;
@@ -600,7 +600,7 @@ html.font-largest {
     padding-right: 1rem;
   }
 
-  /* ===== Admin workspace ===== */
+  
   .admin-content {
     background-color: var(--color-cream);
   }
@@ -695,15 +695,15 @@ html.font-largest {
     }
   }
 
-  /* ===== Comic background decorations ===== */
+  
 
-  /* Halftone dot pattern (stronger, for dark hero backgrounds) */
+  
   .comic-dots {
     background-image: radial-gradient(circle, rgba(255, 255, 255, 0.28) 1.5px, transparent 1.5px);
     background-size: 14px 14px;
   }
 
-  /* Diagonal hatching lines */
+  
   .comic-hatch {
     background-image: repeating-linear-gradient(
       45deg,
@@ -714,7 +714,7 @@ html.font-largest {
     );
   }
 
-  /* ===== Sketched stars (hand-drawn marker look) ===== */
+  
   .comic-star {
     position: absolute;
     width: 56px;
@@ -724,7 +724,7 @@ html.font-largest {
     clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
   }
 
-  /* rough double-stroke outline: a slightly rotated darker copy on top */
+  
   .comic-star::before,
   .comic-star::after {
     content: '';
@@ -739,7 +739,7 @@ html.font-largest {
     background: rgba(26, 26, 26, 0.25);
   }
 
-  /* white sketched star off-set copy to suggest a highlight / accent */
+  
   .comic-star-white {
     background: rgba(255, 255, 255, 0.85);
   }
@@ -748,7 +748,7 @@ html.font-largest {
     background: rgba(26, 26, 26, 0.3);
   }
 
-  /* ===== Sketched circles (rough double ring) ===== */
+  
   .comic-circle {
     position: absolute;
     border: 2.5px solid rgba(255, 255, 255, 0.4);
@@ -769,7 +769,7 @@ html.font-largest {
     border-radius: 50%;
   }
 
-  /* ===== Sketched wave (scallop band) ===== */
+  
   .comic-wave {
     position: absolute;
     height: 22px;
@@ -783,7 +783,7 @@ html.font-largest {
     background-repeat: repeat-x;
   }
 
-  /* ===== Sketched scribble (squiggly line) ===== */
+  
   .comic-scribble {
     position: absolute;
     height: 26px;
@@ -797,7 +797,7 @@ html.font-largest {
     background-repeat: repeat-x;
   }
 
-  /* ===== Little sketched monster (blob with eyes + mouth) ===== */
+  
   .comic-monster {
     position: absolute;
     width: 92px;
@@ -833,7 +833,7 @@ html.font-largest {
     transform: rotate(-15deg);
   }
 
-  /* Speed / action lines (diagonal) */
+  
   .comic-speed-lines {
     position: absolute;
     background: repeating-linear-gradient(
@@ -845,7 +845,7 @@ html.font-largest {
     );
   }
 
-  /* Slow spin for starburst decorations */
+  
   .animate-spin-slow {
     animation: comicSpin 22s linear infinite;
   }
@@ -858,7 +858,7 @@ html.font-largest {
     animation: comicBounce 2.6s ease-in-out infinite;
   }
 
-  /* ===== Loading skeletons ===== */
+  
   .sk-block {
     display: block;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);

@@ -44,6 +44,26 @@ export const routes: Routes = [
     },
   },
   {
+    path: 'programy_unijne',
+    loadComponent: () => import('./features/programy-unijne/programy-unijne-list.component').then(m => m.ProgramyUnijneListComponent),
+    data: {
+      seo: {
+        title: 'Programy unijne',
+        description: 'Projekty i programy współfinansowane ze środków Unii Europejskiej w ZCKOiZ Zabrze.',
+      },
+    },
+  },
+  {
+    path: 'programy_unijne/:slug',
+    loadComponent: () => import('./features/programy-unijne/programy-unijne.component').then(m => m.ProgramyUnijneComponent),
+    data: {
+      seo: {
+        title: 'Programy unijne',
+        description: 'Projekt lub program unijny realizowany w ZCKOiZ Zabrze.',
+      },
+    },
+  },
+  {
     path: 'oferta/:slug',
     loadComponent: () => import('./features/oferta/program-detail.component').then(m => m.ProgramDetailComponent),
     data: {

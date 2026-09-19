@@ -77,7 +77,7 @@ const DEFAULT_REKRUTACJA: Recruitment = {
             }
           </div>
         } @else {
-        <!-- Ważne terminy -->
+        
         <div class="mb-12">
           <h2 class="section-heading">Ważne terminy</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
@@ -91,7 +91,7 @@ const DEFAULT_REKRUTACJA: Recruitment = {
           </div>
         </div>
 
-        <!-- Jak przebiega rekrutacja -->
+        
         <div class="mb-12">
           <h2 class="section-heading">Jak przebiega rekrutacja?</h2>
           <div class="space-y-4 mt-8">
@@ -110,7 +110,7 @@ const DEFAULT_REKRUTACJA: Recruitment = {
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-          <!-- Wymagane dokumenty -->
+          
           <div class="comic-card !p-6">
             <h2 class="font-heading text-xl text-orange-primary mb-4">Wymagane dokumenty</h2>
             <ul class="space-y-2 text-ink">
@@ -125,7 +125,7 @@ const DEFAULT_REKRUTACJA: Recruitment = {
             </ul>
           </div>
 
-          <!-- Dodatkowe punkty -->
+          
           <div class="comic-card !p-6">
             <h2 class="font-heading text-xl text-petrol mb-4">Dodatkowe punkty w rekrutacji</h2>
             <ul class="space-y-3 text-ink">
@@ -139,7 +139,7 @@ const DEFAULT_REKRUTACJA: Recruitment = {
           </div>
         </div>
 
-        <!-- CTA -->
+        
         <div class="comic-card bg-blue-primary !p-8 md:!p-10 text-center">
           <h2 class="text-2xl md:text-3xl font-heading text-white mb-3">Masz pytania dotyczące rekrutacji?</h2>
           <p class="text-blue-100 mb-6 max-w-2xl mx-auto">

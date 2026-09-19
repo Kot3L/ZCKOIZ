@@ -16,7 +16,7 @@ export class ThemeService {
     this.init();
   }
 
-  /** Must be called once before Angular hydrates to avoid a flash; safe to call multiple times. */
+  
   init(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
@@ -58,7 +58,7 @@ export class ThemeService {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    // Clicking the active mode clears it back to normal.
+    
     this.apply(this.isDark(), this.contrast() === mode ? null : mode);
   }
 
@@ -81,7 +81,7 @@ export class ThemeService {
         window.localStorage.removeItem(CONTRAST_KEY);
       }
     } catch {
-      /* ignore */
+      
     }
   }
 }

@@ -74,7 +74,6 @@ interface MenuFormGroup {
         </div>
       } @else {
 
-      <!-- ===== Dropdown menu editor ===== -->
       @if (activeTab() === 'menu') {
       <div class="comic-card">
         <div class="flex items-center justify-between mb-4">
@@ -146,7 +145,6 @@ interface MenuFormGroup {
       </div>
       }
 
-      <!-- ===== Page content editor ===== -->
       @if (activeTab() === 'pages') {
       <div class="comic-card">
         <div class="flex items-center justify-between mb-4">

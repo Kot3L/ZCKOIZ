@@ -123,6 +123,7 @@ export class AdminLayoutComponent implements OnInit {
       { path: base + '/organizacja', exact: false, label: 'Organizacja roku' },
       { path: base + '/rekrutacja', exact: false, label: 'Rekrutacja' },
       { path: base + '/edukacja-mundurowa', exact: false, label: 'Edukacja mundurowa' },
+      { path: base + '/programy-unijne', exact: false, label: 'Programy unijne' },
     ];
   };
 

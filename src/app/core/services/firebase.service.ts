@@ -34,6 +34,7 @@ import {
   News,
   NewsPdf,
   EducationArticle,
+  EuProgramArticle,
   Program,
   GalleryAlbum,
   GalleryImage,
@@ -59,11 +60,9 @@ export class FirebaseService {
   readonly user = signal<User | null>(null);
 
   readonly isLoggedIn = computed(() => !!this.user());
-  // Jedyny użytkownik aplikacji jest administratorem.
   readonly isAdmin = this.isLoggedIn;
 
   private get ready() {
-    // Firestore/Storage/Auth lazy singletons
     return {
       db: getFirestore(this.app!),
       storage: getStorage(this.app!),
@@ -87,9 +86,6 @@ export class FirebaseService {
     this.analyticsEnabled = true;
   }
 
-  // =====================================================================
-  // AUTH
-  // =====================================================================
   private initAuth(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     const auth = getAuth(this.app!);
@@ -110,9 +106,6 @@ export class FirebaseService {
     this.user.set(null);
   }
 
-  // =====================================================================
-  // GENERIC FIRESTORE HELPERS
-  // =====================================================================
   private mapDoc<T>(d: { id: string; data(): unknown }): T {
     return { id: d.id, ...(d.data() as object) } as T;
   }
@@ -181,7 +174,7 @@ export class FirebaseService {
     const trackedCollections = new Set([
       'news', 'programs', 'documents', 'gallery_albums', 'gallery_images',
       'staff', 'school_pages', 'school_menu', 'settings', 'hero_slides',
-      'education_articles',
+      'education_articles', 'eu_programs',
     ]);
     if (!trackedCollections.has(coll)) return;
 
@@ -201,17 +194,10 @@ export class FirebaseService {
 
   listAuditLogs = () => this.list<AuditLog>('audit_logs', 'created_at', false);
 
-  // =====================================================================
-  // NEWS
-  // =====================================================================
   listPublishedNews = () => this.list<News>('news', 'published_at', false).then((xs) =>
     xs.filter((n) => n.status === 'published').map((n) => this.cleanNewsPdf(n)),
   );
 
-  /**
-   * Stronicowanie aktualności bez pobierania całej kolekcji — pobiera tylko stronę
-   * (kursorem jest dokument Firestore). Nie obciąża bazy przy dużej liczbie wpisów.
-   */
   async listPublishedNewsPage(
     pageSize: number,
     cursor?: DocumentSnapshot,
@@ -240,7 +226,6 @@ export class FirebaseService {
   }
   listNews = () => this.list<News>('news', 'created_at', false).then((xs) => xs.map((n) => this.cleanNewsPdf(n)));
 
-  /** Usuwa ewentualny base64 zapisany dawniej w pdf_url (przed przeniesieniem PDF do osobnej kolekcji). */
   private cleanNewsPdf(n: News): News {
     if (n.pdf_url && n.pdf_url.startsWith('data:')) {
       return { ...n, pdf_url: null };
@@ -257,11 +242,7 @@ export class FirebaseService {
     await this.deleteNewsPdf(id);
   }
 
-  // PDF dołączony do aktualności — trzymany osobno (kolekcja `news_pdfs`),
-  // żeby nie przekroczyć limitu 1 MiB dokumentu Firestore. Większe pliki
-  // dzielimy na fragmenty (`news_pdfs/{newsId}/chunks/*`).
-
-  private static readonly PDF_CHUNK_SIZE = 400 * 1024; // ok. 400 KB base64 na fragment (~300 KB pliku)
+  private static readonly PDF_CHUNK_SIZE = 400 * 1024;
 
   async saveNewsPdf(newsId: string, dataUrl: string, name: string): Promise<void> {
     const comma = dataUrl.indexOf(',');
@@ -285,7 +266,6 @@ export class FirebaseService {
   async getNewsPdf(newsId: string): Promise<NewsPdf | null> {
     const meta = await this.get<NewsPdf & { chunks?: number }>('news_pdfs', newsId);
     if (!meta) return null;
-    // Format starszy: cały base64 w polu `data` w jednym dokumencie.
     if ((meta as any).data) {
       return { id: newsId, data: (meta as any).data, name: meta.name };
     }
@@ -310,16 +290,12 @@ export class FirebaseService {
     await this.remove('news_pdfs', newsId);
   }
 
-  // =====================================================================
-  // EDUCATION ARTICLES (edukacja mundurowa — jak aktualności)
-  // =====================================================================
   listPublishedEducationArticles = () => this.list<EducationArticle>('education_articles', 'published_at', false).then((xs) =>
     xs.filter((n) => n.status === 'published').map((n) => this.cleanEducationPdf(n)),
   );
 
   listEducationArticles = () => this.list<EducationArticle>('education_articles', 'created_at', false).then((xs) => xs.map((n) => this.cleanEducationPdf(n)));
 
-  /** Usuwa ewentualny base64 zapisany kiedyś w pdf_url (PDF trzymamy w osobnej kolekcji). */
   private cleanEducationPdf(n: EducationArticle): EducationArticle {
     if (n.pdf_url && n.pdf_url.startsWith('data:')) {
       return { ...n, pdf_url: null };
@@ -375,9 +351,67 @@ export class FirebaseService {
     await this.remove('education_pdfs', articleId);
   }
 
-  // =====================================================================
-  // PROGRAMS
-  // =====================================================================
+  listPublishedEuPrograms = () => this.list<EuProgramArticle>('eu_programs', 'published_at', false).then((xs) =>
+    xs.filter((n) => n.status === 'published').map((n) => this.cleanEuProgramPdf(n)),
+  );
+
+  listEuPrograms = () => this.list<EuProgramArticle>('eu_programs', 'created_at', false).then((xs) => xs.map((n) => this.cleanEuProgramPdf(n)));
+
+  private cleanEuProgramPdf(n: EuProgramArticle): EuProgramArticle {
+    if (n.pdf_url && n.pdf_url.startsWith('data:')) {
+      return { ...n, pdf_url: null };
+    }
+    return n;
+  }
+  getEuProgram = (id: string) => this.get<EuProgramArticle>('eu_programs', id).then((n) => (n ? this.cleanEuProgramPdf(n) : n));
+  getEuProgramBySlug = (slug: string) =>
+    this.listWhere<EuProgramArticle>('eu_programs', 'slug', slug).then((x) => (x[0] ? this.cleanEuProgramPdf(x[0]) : null));
+  saveEuProgram = (data: Partial<EuProgramArticle>, id?: string) => this.save('eu_programs', data as any, id);
+  deleteEuProgram = (id: string) => this.remove('eu_programs', id);
+  async deleteEuProgramSafe(id: string) {
+    await this.remove('eu_programs', id);
+    await this.deleteEuProgramPdf(id);
+  }
+
+  async saveEuProgramPdf(articleId: string, dataUrl: string, name: string): Promise<void> {
+    const comma = dataUrl.indexOf(',');
+    const prefix = comma >= 0 ? dataUrl.slice(0, comma + 1) : 'data:application/pdf;base64,';
+    const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+    const chunkSize = FirebaseService.PDF_CHUNK_SIZE;
+    const chunks: string[] = [];
+    for (let i = 0; i < base64.length; i += chunkSize) {
+      chunks.push(base64.slice(i, i + chunkSize));
+    }
+
+    const coll = `eu_program_pdfs/${articleId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    for (let i = 0; i < chunks.length; i++) {
+      await this.save(coll, { index: i, data: chunks[i] } as any, String(i));
+    }
+    await this.save('eu_program_pdfs', { name, prefix, chunks: chunks.length } as any, articleId);
+  }
+
+  async getEuProgramPdf(articleId: string): Promise<DocumentPdf | null> {
+    const meta = await this.get<DocumentPdf & { chunks?: number; prefix?: string }>('eu_program_pdfs', articleId);
+    if (!meta) return null;
+    const parts = await this.list<{ index: number; data: string }>(`eu_program_pdfs/${articleId}/chunks`, 'index');
+    const data = parts
+      .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+      .map((part) => part.data)
+      .join('');
+    return { id: articleId, data: (meta.prefix ?? 'data:application/pdf;base64,') + data, name: meta.name };
+  }
+
+  async deleteEuProgramPdf(articleId: string): Promise<void> {
+    const coll = `eu_program_pdfs/${articleId}/chunks`;
+    for (const existing of await this.list<{ id: string }>(coll, 'index')) {
+      await this.remove(coll, existing.id);
+    }
+    await this.remove('eu_program_pdfs', articleId);
+  }
+
   listActivePrograms = () =>
     this.list<Program>('programs', 'display_order').then((xs) => xs.filter((p) => p.is_active));
   listPrograms = () => this.list<Program>('programs', 'display_order');
@@ -386,9 +420,6 @@ export class FirebaseService {
   saveProgram = (data: Partial<Program>, id?: string) => this.save('programs', data as any, id);
   deleteProgram = (id: string) => this.remove('programs', id);
 
-  // =====================================================================
-  // GALLERY
-  // =====================================================================
   listAlbums = () => this.list<GalleryAlbum>('gallery_albums', 'display_order');
   getAlbum = (id: string) => this.get<GalleryAlbum>('gallery_albums', id);
   getAlbumBySlug = (slug: string) => this.listWhere<GalleryAlbum>('gallery_albums', 'slug', slug).then((x) => x[0] ?? null);
@@ -448,9 +479,6 @@ export class FirebaseService {
     }
   }
 
-  // =====================================================================
-  // DOCUMENTS
-  // =====================================================================
   listDocuments = () => this.list<Document>('documents', 'created_at', false);
   saveDocument = (data: Partial<Document>, id?: string) => this.save('documents', data as any, id);
   deleteDocument = (id: string) => this.remove('documents', id);
@@ -493,23 +521,14 @@ export class FirebaseService {
     await this.remove('document_pdfs', documentId);
   }
 
-  // =====================================================================
-  // STAFF
-  // =====================================================================
   listStaff = () => this.list<Staff>('staff', 'display_order');
   saveStaff = (data: Partial<Staff>, id?: string) => this.save('staff', data as any, id);
   deleteStaff = (id: string) => this.remove('staff', id);
 
-  // =====================================================================
-  // SITE SETTINGS
-  // =====================================================================
   listSettings = () => this.list<SiteSettings>('site_settings');
   getSetting = (key: string) => this.listWhere<SiteSettings>('site_settings', 'key', key).then((x) => x[0] ?? null);
   saveSetting = (data: Partial<SiteSettings>, id?: string) => this.save('site_settings', data as any, id);
 
-  // =====================================================================
-  // SCHOOL PAGES (podstrony "Szkoła")
-  // =====================================================================
   listSchoolPages = () => this.list<SchoolPageRecord>('school_pages');
   getSchoolPage = (slug: string) =>
     this.get<SchoolPageRecord>('school_pages', slug).then((p) => {
@@ -525,9 +544,6 @@ export class FirebaseService {
   }
   deleteSchoolPage = (slug: string) => this.remove('school_pages', slug);
 
-  // =====================================================================
-  // SCHOOL MENU (dropdown "Szkoła")
-  // =====================================================================
   getSchoolMenu = () => this.get<SchoolMenu>('school_menu', 'main');
   async saveSchoolMenu(data: Partial<SchoolMenu>): Promise<void> {
     const d = {
@@ -537,9 +553,6 @@ export class FirebaseService {
     await setDoc(doc(this.ready.db, 'school_menu', 'main'), d, { merge: true });
   }
 
-  // =====================================================================
-  // STORAGE UPLOAD
-  // =====================================================================
   async uploadFile(path: string, file: Blob): Promise<string> {
     const storageRef = ref(this.ready.storage, path);
     const contentType = (file as File).type || 'application/octet-stream';
@@ -573,7 +586,6 @@ export class FirebaseService {
       const storageRef = ref(this.ready.storage, url);
       await deleteObject(storageRef);
     } catch {
-      /* ignore */
     }
   }
 

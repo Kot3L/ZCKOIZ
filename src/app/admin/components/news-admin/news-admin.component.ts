@@ -151,7 +151,7 @@ import { dataUrlToBlobUrl, revokeBlobUrl, fileNameFromUrl } from '../../../share
         </div>
       }
 
-      <!-- News List -->
+      
       @if (loading()) {
         <div class="bg-surface comic-border overflow-hidden" aria-busy="true">
           <div class="p-5 space-y-4">
@@ -398,8 +398,6 @@ export class NewsAdminComponent implements OnInit {
         newsId = (await this.fb.saveNews(payload)) ?? '';
       }
 
-      // PDF uplaodowany z urządzenia trzymamy w osobnej kolekcji,
-      // żeby nie przekraczać limitu 1 MiB dokumentu `news`.
       const pdfUploaded = this.pdfDataUrl();
       if (pdfUploaded) {
         await this.fb.saveNewsPdf(newsId, pdfUploaded, this.form.pdf_name || 'plik.pdf');

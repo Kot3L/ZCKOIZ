@@ -4,18 +4,18 @@ import { DatePipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 import { FirebaseService } from '../../../core/services/firebase.service';
-import { EducationArticle, GalleryAlbum } from '../../../core/models/database.types';
+import { EuProgramArticle, GalleryAlbum } from '../../../core/models/database.types';
 import { dataUrlToBlobUrl, revokeBlobUrl, fileNameFromUrl } from '../../../shared/utils/pdf.utils';
 
 @Component({
-  selector: 'app-edukacja-mundurowa-admin',
+  selector: 'app-programy-unijne-admin',
   standalone: true,
   imports: [FormsModule, DatePipe, SkeletonComponent],
   template: `
     <div class="space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl text-ink mb-1">Edukacja mundurowa</h1>
+          <h1 class="text-3xl text-ink mb-1">Programy unijne</h1>
         </div>
         <button (click)="toggleEditor(null)" class="comic-btn-primary text-sm">
           + Dodaj artykuł
@@ -206,8 +206,8 @@ import { dataUrlToBlobUrl, revokeBlobUrl, fileNameFromUrl } from '../../../share
     </div>
   `,
 })
-export class EdukacjaMundurowaAdminComponent implements OnInit {
-  items = signal<EducationArticle[]>([]);
+export class ProgramyUnijneAdminComponent implements OnInit {
+  items = signal<EuProgramArticle[]>([]);
   albums = signal<GalleryAlbum[]>([]);
   editing = signal(false);
   message = signal<string | null>(null);
@@ -243,14 +243,14 @@ export class EdukacjaMundurowaAdminComponent implements OnInit {
   }
 
   async load() {
-    this.items.set(await this.fb.listEducationArticles());
+    this.items.set(await this.fb.listEuPrograms());
   }
 
   async loadAlbums() {
     this.albums.set(await this.fb.listAlbums());
   }
 
-  toggleEditor(item: EducationArticle | null) {
+  toggleEditor(item: EuProgramArticle | null) {
     revokeBlobUrl(this.pdfBlobUrl());
     this.pdfBlobUrl.set(null);
     this.pdfDataUrl.set(null);
@@ -278,7 +278,7 @@ export class EdukacjaMundurowaAdminComponent implements OnInit {
   }
 
   async loadPdfData(articleId: string) {
-    const pdf = await this.fb.getEducationPdf(articleId);
+    const pdf = await this.fb.getEuProgramPdf(articleId);
     if (pdf?.data) {
       this.pdfDataUrl.set(pdf.data);
       this.pdfBlobUrl.set(dataUrlToBlobUrl(pdf.data));
@@ -393,17 +393,17 @@ export class EdukacjaMundurowaAdminComponent implements OnInit {
     try {
       let articleId = this.form.id;
       if (articleId) {
-        await this.fb.saveEducationArticle(payload, articleId);
+        await this.fb.saveEuProgram(payload, articleId);
       } else {
-        articleId = (await this.fb.saveEducationArticle(payload)) ?? '';
+        articleId = (await this.fb.saveEuProgram(payload)) ?? '';
       }
 
       const pdfUploaded = this.pdfDataUrl();
       if (pdfUploaded) {
-        await this.fb.saveEducationPdf(articleId, pdfUploaded, this.form.pdf_name || 'plik.pdf');
+        await this.fb.saveEuProgramPdf(articleId, pdfUploaded, this.form.pdf_name || 'plik.pdf');
       }
       if (!pdfUploaded && articleId && (this.form.pdf_url || !this.form.pdf_name)) {
-        await this.fb.deleteEducationPdf(articleId);
+        await this.fb.deleteEuProgramPdf(articleId);
       }
     } catch (e) {
       error = e;
@@ -418,10 +418,10 @@ export class EdukacjaMundurowaAdminComponent implements OnInit {
     }
   }
 
-  async deleteItem(item: EducationArticle) {
+  async deleteItem(item: EuProgramArticle) {
     if (!confirm(`Czy na pewno usunąć artykuł "${item.title}"?`)) return;
     try {
-      await this.fb.deleteEducationArticleSafe(item.id);
+      await this.fb.deleteEuProgramSafe(item.id);
     } catch (e: any) {
       this.setMessage('Błąd usuwania: ' + e.message, 'error');
       return;
